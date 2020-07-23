@@ -1,5 +1,28 @@
-## use this script to find and count additional features ##
+## this code should:
+- take the monthly files (in JSON or txt-format) as input
+- for each comment/line, find the additional features (with the help of pre-defined function for each feature)
+- save the count for each feature per line into a new txt-file that can be combined with the output of the Biber-tagger
 
-## function for feature 1 ##
+## function for feature 1: hashtags
 
-## function for feature 2 ##
+## function for feature 2: URLS (maybe subdivide in u/..., r/..., and www...)
+
+## function for feature 3: capitalisation 
+
+## function for feature 4: imperatives
+
+## function for feature 5: comparatives
+
+## function for feature 6: superlatives
+
+## function for feature 7: emoticons
+
+## function for feature 8: question marks
+
+## function for feature 9: exclamation marks
+
+## function for feature 10: strategic lengthening
+
+## function for feature 11: alternating uppercase-lowercase
+
+## function for feature 12: community-specific acronyms/lexical items (such as 'op')
