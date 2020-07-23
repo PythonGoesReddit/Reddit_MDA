@@ -1,1 +1,5 @@
 
+## this code should:
+## - take monthly sets of Reddit comments in JSON format as input
+## - go through each line and select the actual text only (disregard all the metadate)
+## - save all the text to a separate (monthly) txt-file which can then be used as input for the Biber-tagger
