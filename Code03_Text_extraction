@@ -3,3 +3,9 @@
 ## - take monthly sets of Reddit comments in JSON format as input
 ## - go through each line and select the actual text only (disregard all the metadata)
 ## - save all the text (one comment per line) to a separate (monthly) txt-file which can then be used as input for the Biber-tagger
+
+import json
+
+
+
+
