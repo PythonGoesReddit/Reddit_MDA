@@ -10,7 +10,20 @@
 import json
 import os
 
-for file in 
+path = >>>specify file path here<<<
+
+for filename in os.listdir(path):
+  jsonfile = open(filename,"r")
+  textfile = open(os.path.join(path, filename + "_text"), "w")
+  for line in jsonfile.readlines():
+    comment = json.loads(line)
+    textfile.write(comment["body"])
+  jsonfile.close()
+  textfile.close()
+
+
+
+
 
 
 
