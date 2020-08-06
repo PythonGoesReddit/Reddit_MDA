@@ -23,8 +23,8 @@ for filename in os.listdir(path):
     ...
 # print the counts for each comment into a new file
     print(str(linenumber), + ";" + str(feature1_counter) + ";" + str(feature2_counter) + ...)
-    textfile.close
-resultsfile.close
+    textfile.close()
+resultsfile.close()
 
 
 
