@@ -14,7 +14,7 @@ path = >>>specify file path here<<<
 
 for filename in os.listdir(path):
   jsonfile = open(os.path.join(path, filename), "r", errors="surrogateescape")
-  textfile = open(os.path.join(path, filename + "_text"), "w", errors="replace")
+  textfile = open(os.path.join(path, filename + "_text.txt"), "w", errors="replace")
   for line in jsonfile:
     try:
         comment = json.loads(line.strip())
