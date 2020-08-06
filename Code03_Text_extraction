@@ -4,7 +4,15 @@
 ## - go through each line and select the actual text only (disregard all the metadata)
 ## - save all the text (one comment per line) to a separate (monthly) txt-file which can then be used as input for the Biber-tagger
 
+## maybe we should have two versions of this code? One that saves one comment per line and one that saves one sentence per line?
+
+
 import json
+import os
+
+for file in 
+
+
 
 
 
