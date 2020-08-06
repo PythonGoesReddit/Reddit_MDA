@@ -13,8 +13,8 @@ import os
 path = >>>specify file path here<<<
 
 for filename in os.listdir(path):
-  jsonfile = open(os.path.join(path, filename),"r")
-  textfile = open(os.path.join(path, filename + "_text"), "w")
+  jsonfile = open(os.path.join(path, filename), "r", errors="surrogateescape")
+  textfile = open(os.path.join(path, filename + "_text"), "w", errors="surrogateescape")
   for line in jsonfile:
     try:
         comment = json.loads(line.strip())
