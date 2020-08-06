@@ -13,7 +13,7 @@ import os
 path = >>>specify file path here<<<
 
 for filename in os.listdir(path):
-  jsonfile = open(filename,"r")
+  jsonfile = open(os.path.join(path, filename),"r")
   textfile = open(os.path.join(path, filename + "_text"), "w")
   for line in jsonfile:
     try:
