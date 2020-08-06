@@ -18,9 +18,9 @@ for filename in os.listdir(path):
   for line in jsonfile:
     try:
         comment = json.loads(line.strip())
+        textfile.write(comment["body"])
     except json.decoder.JSONDecodeError:
         print("JSONDecodeError encountered")
-    textfile.write(comment["body"])
   jsonfile.close()
   textfile.close()
 
