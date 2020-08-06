@@ -17,7 +17,7 @@ for filename in os.listdir(path):
   textfile = open(os.path.join(path, filename + "_text.txt"), "w", errors="replace")
   counter = 0
   for line in jsonfile:
-  counter += 1
+    counter += 1
     try:
         comment = json.loads(line.strip())
         textfile.write(json.dumps([counter:comment["body"]]))
