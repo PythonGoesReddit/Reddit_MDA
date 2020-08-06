@@ -15,10 +15,12 @@ path = >>>specify file path here<<<
 for filename in os.listdir(path):
   jsonfile = open(os.path.join(path, filename), "r", errors="surrogateescape")
   textfile = open(os.path.join(path, filename + "_text.txt"), "w", errors="replace")
+  counter = 0
   for line in jsonfile:
+  counter += 1
     try:
         comment = json.loads(line.strip())
-        textfile.write(comment["body"])
+        textfile.write(json.dumps([counter:comment["body"]]))
     except json.decoder.JSONDecodeError:
         print("JSONDecodeError encountered")
   jsonfile.close()
