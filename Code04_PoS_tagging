@@ -1,0 +1,20 @@
+### this code should:
+### - take monthly files as input (in pure txt or dictionary format)
+### - run the Standford Tagger (part of NLTK module) over the files
+### - save the annotated files
+
+import nltk
+
+# open files
+
+# Step 1: Tokenisation
+
+# Step 2: Tagging
+
+# save output
+
+
+
+
+
+
