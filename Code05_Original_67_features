@@ -1,0 +1,114 @@
+### this code should:
+### - take PoS-tagged monthly files (in txt or dictionary format) as input
+### - identify the original 67 features of Biber's analysis
+### - count the occurances for each feature by comment
+### - save the feature count for each feature for each comment to a new txt-file (which can later be combined with the additional features)
+
+import os
+
+path = >>>specify file path here<<<
+
+## function for feature 1: past tense
+def feature_01
+
+## function for feature 2: verbs in the perfect aspect
+def feature
+
+## function for feature 1: present tense
+def feature
+
+## function for feature 1: place adverbials
+def feature
+
+## function for feature 1: time adverbials
+def feature
+
+## function for feature 1: first person pronouns
+def feature
+
+## function for feature 1: second person pronouns
+def feature
+
+## function for feature 1: third person pronouns
+def feature
+
+## function for feature 1: pronoun IT
+def feature
+
+## function for feature 1: demonstrative pronouns
+def feature
+
+## function for feature 1: indefinite pronouns
+def feature
+
+## function for feature 1: DO as pro-verb
+def feature
+
+## function for feature 1: WH-questions
+def feature
+
+## function for feature 1: Nominalisations
+def feature
+
+## function for feature 1: gerunds
+def feature
+
+## function for feature 1: nouns
+def feature
+
+## function for feature 1: agentless passives
+def feature
+
+## function for feature 1: BY passives
+def feature
+
+## function for feature 1: BE as main verb
+def feature
+
+## function for feature 1: existential THERE
+def feature
+
+## function for feature 1: THAT verb complements
+def feature
+
+## function for feature 1: THAT adjective complements
+def feature
+
+## function for feature 1: WH clauses
+def feature
+
+## function for feature 1: infinitives
+def feature
+
+## function for feature 1: present participial clauses
+def feature
+
+## function for feature 1: past participial clauses
+def feature
+
+## function for feature 1: past prt. WHIZ deletions
+def feature
+
+## function for feature 1: present prt. WHIZ deletions
+def feature
+
+## function for feature 1: THAT relatives, subject position
+def feature
+
+## function for feature 1: THAT relatives, object position
+def feature
+
+## function for feature 1: WH relatives, subject position
+def feature
+
+## function for feature 1: WH relatives, object position
+def feature
+
+## function for feature 1: WH relatives, pied piping
+def feature
+
+## function for feature 1: sentence relatives
+def feature
+
+## function for feature 1: adv. ubordinator, clause
+def feature
