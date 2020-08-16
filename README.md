@@ -3,8 +3,10 @@
 List of files:
 
 System requirements: 
-- for this code to run, the computer needs to have Python version XY installed, as well as the following modules:
-- 
+- Developed using Python version 3.74
+- Required packages:
+  - json
+  - os
 
 Operation instructions:
 - order in which to run files
