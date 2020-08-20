@@ -9,7 +9,7 @@ System requirements:
 - Required packages:
   - json
   - os
-  -nltk
+  - nltk
 
 Operation instructions:
 - Dependency: Reddit_Bibers_Features.py
