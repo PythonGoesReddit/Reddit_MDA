@@ -7,14 +7,14 @@ System requirements:
 - Required packages:
   - json
   - os
+  -nltk
 
 Operation instructions:
-- order in which to run files
-- ?
+- Dependency: Reddit_Bibers_Features.py
 
 Contributors & Contact information:
 Bohmann, Axel ()
 Maccori Kozma, Gustavo ()
 Mahler, Hanna ()
-McConnell, Kyla ()
+McConnell, Kyla (kyla-mcconnell)
 Tosin, Rafaela ()

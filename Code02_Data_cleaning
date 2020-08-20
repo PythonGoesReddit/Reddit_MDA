@@ -1,4 +1,0 @@
-## remove deleted commments, i.e. comments for which the body text is only "deleted"
-## remove comments posted by bots (how can we reliably identify them?)
-## remonve comments written in languages other than English (automatic language detection programms?)
-## remove special characters and graphicons? 
