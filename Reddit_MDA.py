@@ -114,6 +114,7 @@ def feature4_func(wordlist):
 ## NEEDED: function for feature 11: alternating uppercase-lowercase - Kyla ??
 ## NEEDED: function for feature 12: community-specific acronyms/lexical items (such as 'op') - Gustavo ??
 
+## Question: What level of precision for the feature-identifying functions do we want to set in advance? 
 
 
 # Data prep ("cleaning") functions:
