@@ -34,6 +34,7 @@ def open_reddit_json(folder_path):
 ## NEEDED: function to remove deleted commments, i.e. comments for which the body text is only "deleted" - Kyla or Axel
 ## NEEDED: function to remove comments posted by bots (how can we reliably identify them?) - Gustavo
 ## NEEDED: function to remove posts with too few English words - Axel 
+## Question: What about quoted material from previous comments/posts? Should we exclude it, and if yes, how?
 ## NEEDED: function to save preprocessed data and check if this step could be skipped for debugging - Kyla
 
 
