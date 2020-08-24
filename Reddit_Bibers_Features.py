@@ -5,8 +5,12 @@
 ### - save the feature count for each feature for each comment to a new 
 ### txt-file (which can later be combined with the additional features)
 
-### this code presupposes cleaned, all-lowercase data!
+### this code presupposes cleaned, all-lowercase, POS-tagged data!
 
+### for some functions it makes more sense to have the tagged comment as 
+### one long string, not at split items in a list. 
+### produce two versions of each tagged comment and then have each function
+### specify which version they want?
 
 
 ## function for feature 1: past tense
@@ -14,11 +18,10 @@ def feature_01(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are a verb in the past tense."""
   counter = 0
-  pastlist = []
-# this "pastlist" should contain "any past tense form that occurs in the dictionary, or
-# any word not otherwise identified that is longer than six letters and ends in ed."
+## regex: \b\w_+_VBD\b # all words tagged with _VBD for past tense verbs
+## regex: \b\w{5,20}ed_\w+\b # all words longe then 6 characters ending in "ed"
   for item in tagged_list:
-    if item in pastlist:
+    if item :
       counter = counter + 1
     else:
       pass
@@ -180,6 +183,8 @@ def feature:
 ## function for feature 14: Nominalisations
 def feature:
 ## all words ending in -tion, -ment, -ness, -ity plus plural forms
+## regex: \b\w+tions?_\w+\b \b\w+ments?_\w+\b \b\w+ness_\w+\b
+##        \b\w+ity_\w+\b \b\w+nesses_\w+\b \b\w+ities_\w+\b
 
 ## function for feature 15: gerunds
 def feature:
@@ -189,6 +194,10 @@ def feature:
 def feature:
 ## all nouns in the dictionary, excluding those forms counted as nominalisations
 ## or gerunds
+## regex: \b\w+_NNS?\b if not in:
+##        \b\w+tions?_\w+\b \b\w+ments?_\w+\b \b\w+ness_\w+\b
+##        \b\w+ity_\w+\b \b\w+nesses_\w+\b \b\w+ities_\w+\b
+    
 
 ## function for feature 17: agentless passives
 def feature:
@@ -208,6 +217,7 @@ def feature:
 def feature:
 ## there + (xx) + BE
 ## there's
+## regex: \bthere_\w+\sis
 
 ## function for feature 21: THAT verb complements
 def feature:
