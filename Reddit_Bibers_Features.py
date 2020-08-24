@@ -2,11 +2,12 @@
 ### - take PoS-tagged monthly files (in txt or dictionary format) as input
 ### - identify the original 67 features of Biber's analysis
 ### - count the occurances for each feature by comment
-### - save the feature count for each feature for each comment to a new txt-file (which can later be combined with the additional features)
+### - save the feature count for each feature for each comment to a new 
+### txt-file (which can later be combined with the additional features)
 
-import os
+### this code presupposes cleaned, all-lowercase data!
 
-path = >>>specify file path here<<<
+
 
 ## function for feature 1: past tense
 def feature_01(tagged_list):
@@ -31,16 +32,30 @@ def feature_02(tagged_list):
   for item in tagged_list:
     if       :
 # HAVE + (ADV) + (ADV) + VBN
-# or HAVE + N/PRO + VBN
+# or HAVE + N/PRO + VBN (including contracted forms of HAVE)
       counter = counter + 1
     else:
       pass
   return(counter)
 
 ## function for feature 3: present tense
-def feature
+def feature_03(tagged_list):
+  """This function takes a list of words with PoS tags as input and returns the number of 
+  verbs in the present tense."""
+  counter = 0
+  presenttenselist =
+## all VB (base form) or VBZ (3rd person singular) verb forms in the dictionary,
+## excluding infinitives
+  for item in tagged_list:
+    if item in presenttenselist:
+      counter = counter + 1
+    else:
+      pass
+  return(counter)
+    
 
 ## function for feature 4: place adverbials
+## DONE!
 def feature_04(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are place adverbials."""
@@ -59,6 +74,7 @@ def feature_04(tagged_list):
   return(counter)
 
 ## function for feature 5: time adverbials
+## DONE!
 def feature_05(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are time adverbials."""
@@ -76,6 +92,7 @@ def feature_05(tagged_list):
   return(counter)
 
 ## function for feature 6: first person pronouns
+## DONE!
 def feature_06(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are first person pronouns."""
@@ -89,6 +106,7 @@ def feature_06(tagged_list):
   return(counter)
 
 ## function for feature 7: second person pronouns
+## DONE!
 def feature_07(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are second person pronouns."""
@@ -102,6 +120,7 @@ def feature_07(tagged_list):
   return(counter)
 
 ## function for feature 8: third person pronouns
+## DONE!
 def feature_08(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are third person pronouns."""
@@ -116,6 +135,7 @@ def feature_08(tagged_list):
   return(counter)
 
 ## function for feature 9: pronoun IT
+## DONE!
 def feature_09(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are the pronoun IT."""
@@ -128,9 +148,12 @@ def feature_09(tagged_list):
   return(counter)
 
 ## function for feature 10: demonstrative pronouns
-def feature
+def feature:
+## THAT/THIS/THESE/THOSE + V/AUX/CL-P/WHP/and
+## THAT's
 
 ## function for feature 11: indefinite pronouns
+## DONE!
 def feature_11(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are indefinite pronouns."""
@@ -146,60 +169,91 @@ def feature_11(tagged_list):
 
 ## function for feature 12: DO as pro-verb
 def feature
+## every instance of DO if not in the following constructions:
+## DO + (ADV) + V
+## ALL-P/WHP + DO
 
 ## function for feature 13: WH-questions
-def feature
+def feature:
+## CL-P + WHO + AUX
 
 ## function for feature 14: Nominalisations
-def feature
+def feature:
+## all words ending in -tion, -ment, -ness, -ity plus plural forms
 
 ## function for feature 15: gerunds
-def feature
+def feature:
+## all participle forms serving nominal functions, edited manually
 
 ## function for feature 16: nouns
-def feature
+def feature:
+## all nouns in the dictionary, excluding those forms counted as nominalisations
+## or gerunds
 
 ## function for feature 17: agentless passives
-def feature
+def feature:
+## BE + (ADV) + (ADV) + VBN not followed by BY
+## BE + N/PRO + VBN not followed by BY
 
 ## function for feature 18: BY passives
-def feature
+def feature:
+## BE + (ADV) + (ADV) + VBN + BY
+## BE + N/PRO + VBN + BY
 
 ## function for feature 19: BE as main verb
-def feature
+def feature:
+## BE + DET/POSSPRO/TITLE/PREP/ADJ
 
 ## function for feature 20: existential THERE
-def feature
+def feature:
+## there + (xx) + BE
+## there's
 
 ## function for feature 21: THAT verb complements
-def feature
+def feature:
+## and/nor/but/or/also/ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE
+## PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is not V/AUX/CL-p/and)
+## PUB/PRV/SUA + PREP + xxx + N + that (where xxx is and number of words but 
+## not xxx = N)
+    
 
 ## function for feature 22: THAT adjective complements
-def feature
+def feature:
+## ADJ + that
 
 ## function for feature 23: WH clauses
-def feature
+def feature:
+## PUB/PRV/SUA + WHP/WHO + xxx (where xxx is not AUX)
 
 ## function for feature 24: infinitives
-def feature
+def feature:
+## to + (ADV) + VB
 
 ## function for feature 25: present participial clauses
-def feature
+def feature:
+## ALL-P + VBG + PREP/DET/WHP/WHO/PRO/ADV
+## (edited manually)
 
 ## function for feature 26: past participial clauses
-def feature
+def feature:
+## ALL-P + VBN +PREP/ADV (edited manually)
 
 ## function for feature 27: past prt. WHIZ deletions
-def feature
+def feature:
+## N/QUANPRO + VBN + PREP/BE/ADV (edited manually)
 
 ## function for feature 28: present prt. WHIZ deletions
-def feature
+def feature:
+## N + VBG (edited manually)
 
 ## function for feature 29: THAT relatives, subject position
-def feature
+def feature:
+## N + that + (ADV) + AUX/V
 
 ## function for feature 30: THAT relatives, object position
-def feature
+def feature:
+## N + that + DET/SUBJPRO/POSSPRO/it/ADJ/pluralnoun/propernoun/possessive
+## noun/TITLE
 
 ## function for feature 31: WH relatives, subject position
 def feature
@@ -214,18 +268,63 @@ def feature
 def feature
 
 ## function for feature 35: adv. subordinator, cause
-def feature
+## DONE!
+def feature_35(tagged_list):
+  """This function takes a list of words with PoS tags as input and returns the number of items
+  that are BECAUSE (= adverbial subordinator of cause)."""
+  counter = 0
+  for item in tagged_list:
+    if item == "because":
+      counter = counter + 1
+    else:
+      pass
+  return(counter)
 
 ## function for feature 36: adv. subordinator, concession
-def feature
+## DONE!
+def feature_36(tagged_list):
+  """This function takes a list of words with PoS tags as input and returns the number of items
+  that are THOUGH or ALTOUGH (= adverbial subordinators of concession)."""
+  counter = 0
+  for item in tagged_list:
+    if item == "although" or item == "though":
+      counter = counter + 1
+    else:
+      pass
+  return(counter)
 
 ## function for feature 37: adv. subordinator, condition
-def feature
+## DONE!
+def feature_37(tagged_list):
+  """This function takes a list of words with PoS tags as input and returns the number of items
+  that are IF or UNLESS (= adverbial subordinators of condition)."""
+  counter = 0
+  for item in tagged_list:
+    if item == "if" or item == "unless":
+      counter = counter + 1
+    else:
+      pass
+  return(counter)
 
 ## function for feature 38: adv. subordinator, other
-def feature
+def feature_38(tagged_list):
+  """This function takes a list of words with PoS tags as input and returns the number of items
+  that are adverbial subordinators with multiple function."""
+  counter = 0
+  advsubordlist = ["since", "while", "whilst", "whereupon", "whereas", "whereby",
+                   "such that", "inasmuch as", "forasmuch as", "insofar as", 
+                   "insomuch as", "as long as", "as soon as"]
+  ## add to advsubordlist: "so that XXX" and "such that XXX", with XXX being
+  ## everything but noun or adjective
+  for item in tagged_list:
+    if item in advsubordlist:
+      counter = counter + 1
+    else:
+      pass
+  return(counter)
 
 ## function for feature 39: preposition
+## DONE!
 def feature_39(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are prepositions."""
@@ -261,6 +360,7 @@ def feature
 def feature
 
 ## function for feature 46: downtoners
+## DONE!
 def feature_06(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are downtoners."""
@@ -278,6 +378,7 @@ def feature_06(tagged_list):
 def feature
 
 ## function for feature 48: amplifiers
+## DONE!
 def feature_48(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are amplifiers."""
@@ -299,6 +400,7 @@ def feature
 def feature
 
 ## function for feature 51: demonstratives
+## DONE!
 def feature_51(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are demonstratives."""
@@ -312,6 +414,7 @@ def feature_51(tagged_list):
   return(counter)
 
 ## function for feature 52: possibility modals
+## DONE!
 def feature_52(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are possibility modals."""
@@ -325,6 +428,7 @@ def feature_52(tagged_list):
   return(counter)
 
 ## function for feature 53: necessity modals
+## DONE!
 def feature_53(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are necessity modals."""
@@ -338,6 +442,7 @@ def feature_53(tagged_list):
   return(counter)
 
 ## function for feature 54: predictive modals
+## DONE!
 def feature_54(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are predictive modals."""
@@ -351,6 +456,7 @@ def feature_54(tagged_list):
   return(counter)
 
 ## function for feature 55: public verbs
+## DONE!
 def feature_55(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are public verbs."""
@@ -366,6 +472,7 @@ def feature_55(tagged_list):
   return(counter)
 
 ## function for feature 56: private verbs
+## DONE!
 def feature_56(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are private verbs."""
@@ -383,6 +490,7 @@ def feature_56(tagged_list):
   return(counter)
 
 ## function for feature 57: suasive verbs
+## DONE!
 def feature_57(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are suasive verbs."""
@@ -398,6 +506,7 @@ def feature_57(tagged_list):
   return(counter)
 
 ## function for feature 58: SEEM/APPEAR
+## DONE!
 def feature_06(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are the verbs SEEM or APPEAR."""
@@ -434,6 +543,7 @@ def feature
 def feature
 
 ## function for feature 67: analytic negation
+## DONE!
 def feature_06(tagged_list):
   """This function takes a list of words with PoS tags as input and returns the number of items
   that are NOT (= analytic negation)."""
