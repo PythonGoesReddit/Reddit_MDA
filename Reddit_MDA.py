@@ -7,31 +7,51 @@ import nltk
 path = "FILEPATH"
 
 # Preprocessing functions
+
+## Open file, remove deleted comments, split into sentences, simplify metainfo, add unique ID
+### Returns dict of dicts in format {id: {body: str, author: str, link_id: str, sentence_no: int, subreddit: str}
 def open_reddit_json(folder_path):
+    '''Takes Reddit json file as input. Separates each sentence into one dictionary.  Simplifies metainfo (retains body, author, link_id, subreddit). Removes deleted comments. 
+    Returns dict of dicts where the key is the filename plus a unique (ascending) integer identifier, the value is the body and other metainfo as a dict.'''
     errors = 0
     for filename in os.listdir(folder_path):
         if os.path.splitext(filename)[1] == ".json": #open file only if extension is .json, else will try to open folders and other random files
+            base = os.path.splitext(filename)[0] #strip the .json extension
             with open(os.path.join(path, filename), "r", errors="replace") as j:
-                base = os.path.splitext(filename)[0] #strip the .json extension so that we can save a file with the same name as .txt later
-                #textfile = open(os.path.join(path, "cleaned", base + "_cleaned.txt"), "a", errors="replace") #open new file to write -- same name but .txt
-                textfile = open(os.path.join(path, "cleaned", base + "_cleaned.json"), "w", errors="replace")
-                counter = 0
+                print("Opening file: " + str(filename))
+                prepped_json = {}
+                counter = 0 #counts number of comments
                 for line in j:
                     counter += 1
-                    try:
-                        comment = json.loads(line.strip())["body"]
-                        counter_comment = {counter: comment}
-                        textfile.write(json.dumps(counter_comment))
-                        #textfile.write(comment + " \n ")
+
+                    try:   
+                        if json.loads(line.strip())["body"] != "[deleted]": #does not consider deleted comments
+                            comment = json.loads(line.strip())["body"]
+                            author = json.loads(line.strip())["author"]
+                            link_id = json.loads(line.strip())["link_id"]
+                            subreddit = json.loads(line.strip())["subreddit"]
+
+                            if len(comment.split(".")) > 1: #for comments that are more than 1 sentence
+                                sentence_counter = 0
+                                for sentence in comment.split("."):
+                                    if len(sentence) > 1:
+                                        sentence_counter +=1 #keep track of which sentence it is (1st, 2nd, etc.)
+                                        comment_dict = {"body": sentence, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}
+
+                            else:
+                                sentence_counter = 1
+                                comment_dict = {"body": comment, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}
+
+                            prepped_json[str(base + "_" + str(counter))] = comment_dict
+
                     except json.decoder.JSONDecodeError:
                         errors +=1 #keeps track of how many errors are encountered/lines skipped
-                textfile.close()
-    print("Total lines skipped = " + str(errors))
-    print("Saving and exiting...")
 
-## NEEDED: function to remove unneeded meta info (author custom CSS, etc.) - Kyla
+                print("Total lines skipped = " + str(errors))
+            return prepped_json
+
+
 ## NEEDED: function to change data from one dictionary entry per comment to one entry per sentence - Axel(??) 
-## NEEDED: function to remove deleted commments, i.e. comments for which the body text is only "deleted" - Kyla or Axel
 ## NEEDED: function to remove comments posted by bots (how can we reliably identify them?) - Gustavo
 ## NEEDED: function to remove posts with too few English words - Axel 
 ## Question: What about quoted material from previous comments/posts? Should we exclude it, and if yes, how?
