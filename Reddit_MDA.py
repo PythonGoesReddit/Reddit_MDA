@@ -51,7 +51,6 @@ def open_reddit_json(folder_path):
             return prepped_json
 
 
-## NEEDED: function to change data from one dictionary entry per comment to one entry per sentence - Axel(??) 
 ## NEEDED: function to remove comments posted by bots (how can we reliably identify them?) - Gustavo
 ## NEEDED: function to remove posts with too few English words - Axel 
 ## Question: What about quoted material from previous comments/posts? Should we exclude it, and if yes, how?
