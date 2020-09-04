@@ -638,8 +638,22 @@ def feature_48(untagged_list):
   return(counter)
 
 ## function for feature 49: emphatics
-def feature:
-## [for sure|a lot|such a|real + ADJ|so + ADJ|DO + V|just|really|most|more]
+def feature_49(tagged_string):
+    """This function takes string of words with PoS tags as input and returns the
+    number of emphatics within that string."""
+    string1 = r"\b[just|really|most|more]_"
+    string2 = r"\bfor_\w+\ssure_"
+    string3 = r"\b[real|so]_\w+\s\w+_[JJ|JJR|JJS]\b"
+    string4 = r""
+    string5 = r""
+    matches1 = re.findall(string1, tagged_string)
+    matches2 = re.findall(string2, tagged_string)
+    matches3 = re.findall(string3, tagged_string)
+    matches4 = re.findall(string4, tagged_string)
+    matches5 = re.findall(string5, tagged_string)
+    counter = len(matches1) + len(matches2) + len(matches3) + len(matches4) + len(matches5)
+    return(counter)
+## |a lot|such a|DO + V|
 
 ## function for feature 50: discourse particles
 ## DONE!!
@@ -759,24 +773,37 @@ def feature_57(untagged_list):
   return(counter)
 
 ## function for feature 58: SEEM/APPEAR
-## DONE!
+## DONE!!
 def feature_06(untagged_list):
-  """This function takes a list of words with PoS tags as input and returns the number of items
-  that are the verbs SEEM or APPEAR."""
-  counter = 0
-  for item in untagged_list:
-    if item == "appear" or item == "seem":
-      counter = counter + 1
+    """This function takes a list of words with PoS tags as input and returns the number of items
+    that are the verbs SEEM or APPEAR."""
+    counter = 0
+    string1 = r"appea[r|rs|red|ring]"
+    string2 = r"see[m|ms|ming|med]"
+    for item in untagged_list:
+        if item == string1 or item == string2:
+            counter = counter + 1
     else:
-      pass
-  return(counter)
+        pass
+    return(counter)
 
 ## function for feature 59: contractions
-def feature:
-## all contractions on pronouns
-## all contractions on auxiliary forms (negation)
-## separately: 's suffixed on nouns:
-##  N's + AUX/ADV+V/ADV+AUX/DET/POSSPRO/PREP/ADJ+CL-P
+## DONE!!
+def feature_59(tagged_string):
+    """This function takes a string of words with PoS tags as input and returns the
+    number of contractions within the string."""
+    string1 = r"\b\w+_PRP\s'[m|re|s|d]_" ## all contractions on pronouns
+    string2 = r"\b\w+_MD\sn't_" ## all contractions on auxiliary forms (negation)
+    string3 = r"\b\w+_[NN|NNS|NNP|NNPS]\s's_w+\s\w+_[MD|DT|PRP|IN]\b"
+    string4 = r"\b\w+_[NN|NNS|NNP|NNPS]\s's_w+\s\w+_[RB|RBR|RBS]\s\w+_[MD|VB|VBG|VBN|VBD|VBP|VBZ]\b"
+    string5 = r"\b\w+_[NN|NNS|NNP|NNPS]\s's_w+\s\w+_[JJ|JJR|JJS]\s\S_."
+    matches1 = re.findall(string1, tagged_string)
+    matches2 = re.findall(string2, tagged_string)
+    matches3 = re.findall(string3, tagged_string)
+    matches4 = re.findall(string4, tagged_string)
+    matches5 = re.findall(string5, tagged_string)
+    counter = len(matches1) + len(matches2) + len(matches3) + len(matches4) + len(matches5)
+    return(counter)    
 
 ## function for feature 60: THAT deletion
 def feature_60(tagged_string):
@@ -819,11 +846,12 @@ def feature_62(tagged_string):
     return(counter)
     
 ## function for feature 63: split auxiliaries
+## DONE!!
 def feature_63(tagged_string):
     """This function takes a string of words with PoS tags as input and returns the number of items
     that are split auxiliaries."""
-    string1 = r"\s\w+_MD\s\w+_[RB|RBR|RBS]\s\w+_VB\s"
-    string2 = r"\s\w+_MD\s\w+_[RB|RBR|RBS]\s\w+_[RB|RBR|RBS]\s\w+_VB\s"
+    string1 = r"\b\w+_MD\s\w+_[RB|RBR|RBS]\s\w+_VB\b"
+    string2 = r"\b\w+_MD\s\w+_[RB|RBR|RBS]\s\w+_[RB|RBR|RBS]\s\w+_VB\b"
     matches1 = re.findall(string1, tagged_string)
     matches2 = re.findall(string2, tagged_string)
     counter = len(matches1) + len(matches2)
@@ -864,21 +892,18 @@ def feature_65(tagged_string):
 ## and + WHP/WHO/adverbial subordinator/discourseparticle/conjunct
 
 ## function for feature 66: synthetic negation
+## DONE!!
 def feature_66(tagged_string):
     """This function takes a string of words with PoS tags as input and returns the number of items
-    that are NOT (= analytic negation)."""
-    string1 = r""
-    string2 = r""
-    string3 = r""
-    string4 = r""
+    that are synthetic negation."""
+    string1 = r"\b[neither|nor]_\w+\b"
+    string2 = r"\b[no]_\w+\s\w+_[JJ|JJR|JJS|NN|NNS|NNP|NNPS]\b"
+    string3 = r"\b[no]_\w+\s[each|all|every|many|much|few|several|some|any]_"
     matches1 = re.findall(string1, tagged_string)
     matches2 = re.findall(string2, tagged_string)
     matches3 = re.findall(string3, tagged_string)
-    matches4 = re.findall(string4, tagged_string)
-    counter = len(matches1) + len(matches2) + len(matches3) + len(matches4)
+    counter = len(matches1) + len(matches2) + len(matches3)
     return(counter)
-## no + QUANT/ADJ/N
-## neither, nor
 
 ## function for feature 67: analytic negation
 ## DONE!
@@ -895,16 +920,30 @@ def feature_67(untagged_list):
 
 
 ## additional feature 1: comparatives 
-def feature_comp():
-    """This function takes ... as input and returns the number of comparative
-    adjectives within the ...."""
-  
+## DONE!!
+def feature_comp(tagged_list):
+    """This function takes a list of words with PoS tags as input and returns the number of comparative
+    adjectives within the list."""
+    counter = 0
+    for item in tagged_list:
+        if item == r"\w+_JJR":
+            counter = counter + 1
+        else:
+            pass
+    return(counter)
   
 ## additional featuer 2: superlatives
-def feature_sup():
-    """This function takes ... as input and returns the number of superlative
-    adjectives within the ...."""
-
+## DONE!!
+def feature_sup(tagged_list):
+    """This function takes list of words with PoS tags as input and returns the number of superlative
+    adjectives within the list."""
+    counter = 0
+    for item in tagged_list:
+        if item == r"\w+_JJS":
+            counter = counter + 1
+        else:
+            pass
+    return(counter)
 
 
 
