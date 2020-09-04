@@ -80,7 +80,7 @@ def open_reddit_json(folder_path):
 def feature_tagger(preprocessed_json):
     '''This function takes the preprocessed json and adds the key "hashtag_no" with the value of the number of hashtags in the sentence
     Additionally adds the key "link_no" with the value of the number of links in the sentence, the key "capital_counter" with the value of the
-    number of capitalized words in the sentence, the  key "question_no" with the value of the number of question marks and teh key "exclamation_no"
+    number of capitalized words in the sentence, the  key "question_no" with the value of the number of question marks and the key "exclamation_no"
     with value of the number of exclamation marks.'''
     for id in preprocessed_json:
         full_info = preprocessed_json.get(id)
@@ -125,7 +125,9 @@ def feature_tagger(preprocessed_json):
 
 ## NEEDED: function for feature 7: emoticons - Gustavo
 ## NEEDED: function for feature 10: strategic lengthening - Kyla ?? (I don't know what this means though...)
+##          -> this refers to repetition of vowels or consonants, like in  "He is soooooo cuteeee!"
 ## NEEDED: function for feature 11: alternating uppercase-lowercase - Kyla ??
+##          -> for some examples see https://www.reddit.com/r/puppersheckingdying/
 ## NEEDED: function for feature 12: community-specific acronyms/lexical items (such as 'op') - Gustavo ??
 
 ## Question: What level of precision for the feature-identifying functions do we want to set in advance? 
@@ -141,28 +143,49 @@ def feature_tagger(preprocessed_json):
 
 # Tagging and feature extraction functions 
 ## NEEDED: update of following code for Stanford tagger - Hanna (to function, file opening - line by line not whole file duplicated?)
-# open files
-for filename in os.listdir(path):
-# at the moment, the code is written with the assumption of the data being in txt-files with one commment per line
-  untagged_file = open(os.path.join(path, filename), "r", errors="surrogateescape")
-  tagged_file = open(os.path.join(path, filename + "_tagged.txt"), "w", errors = "replace")
-  for line in untagged_file:
-# Step 1: Tokenisation
-    tokens = nltk.word_tokenize(line)
-# Step 2: Tagging
-    tagged = nltk.pos_tags(tokens)
-    tagged_file.write(tagged + "/n")
-# save output
-  tagged_file.close()
-  untagged_file.close()
-
-## NEEDED: additional functions from Nini's MAT output - Hanna
+## -> did I do this correctly?
 ### Might (doch) be better here to import from Hannas other file, i.e. 
-from Reddit_Bibers_Features import feature_01, feature_02
+from Reddit_Bibers_Features import feature_01, feature_02, feature_03, feature_04
 ### Might also be worth it to try to reduce the number of functions here, combining ones that can be combined.
+### -> this is probably a good idea, but only once all the functions are finished and working,
+###    since they take different input formats. 
 ### Also worth thinking about function names for informativity
-## NEEDED: function for comparatives - Hanna
-## NEEDED: function for superlatives - Hanna
+
+def Biber_tagger(cleaned_json):
+    """This function takes the preprocessed and cleaned jsons as input and adds
+    a key with a counter as value for each of Biber's original 67 features, as well as 
+    two additional features (comparatives and superlatives). The functions for
+    identifying each individual feature need to be imported beforehand."""
+    for id in cleaned_json:
+        full_info = cleaned_json.get(id)
+        rawtext = full_info["body"]   
+## create the three necessary input formats for the functions    
+## Untagged list
+        untagged_list =  nltk.word_tokenize(rawtext)
+## Tagged list
+        tagged_list1 = nltk.pos_tag(untagged_list)
+## This doed not return the format I expected. I thought it would be word_TAG,
+## but it is actually a tuple ("word", "TAG")...
+## The following code puts it in the format I want:
+        tagged_list = []
+        for tup in tagged_list1:
+            fixedstring = str(tup[0] + "_" + tup[1])
+            tagged_list.append(fixedstring)
+    
+### 2.3 Tagged string
+        tagged_string = " "
+        tagged_string = tagged_string.join(tagged_list)
+
+## Apply the functions from the "Reddit_Bibers_Features.py" script
+        full_info["f01_counter"] = feature_01(tagged_list)
+        full_info["f02_counter"] = feature_02(tagged_string)
+        full_info["f03_counter"] = feature_03(tagged_list)
+        full_info["f04_counter"] = feature_04(untagged_list)
+    
+        cleaned_json[id] = full_info
+    return cleaned_json
+
+## for functions on superlatives + comparatives: see Reddit_Bibers_Features.py
 
 
 

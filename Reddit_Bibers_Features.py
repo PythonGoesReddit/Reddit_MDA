@@ -10,6 +10,7 @@
 ### this doesn't work because with a sting I can run a for-loop over the 
 ### individual items. - work with strings and re.findall (or similar) instead?
 
+#### -> use .count("") function???
 
 ## function for feature 1: past tense
 ## DONE!
@@ -845,7 +846,7 @@ def feature_66(tagged_string):
 
 ## function for feature 67: analytic negation
 ## DONE!
-def feature_06(untagged_list):
+def feature_67(untagged_list):
   """This function takes a list of words without PoS tags as input and returns the number of items
   that are NOT (= analytic negation)."""
   counter = 0
@@ -857,7 +858,12 @@ def feature_06(untagged_list):
   return(counter)
 
 
-
+## additional feature 1: comparatives 
+  
+  
+  
+  
+## additional featuer 2: superlatives
 
 
 
