@@ -5,6 +5,7 @@ Created on Fri Sep  4 13:15:40 2020
 @author: mahle
 """
 import nltk
+import re
 
 ## function for feature 1: past tense
 ## DONE!
@@ -21,20 +22,18 @@ def feature_01(tagged_list):
 
 ## function for feature 2: verbs in the perfect aspect
 def feature_02(tagged_string):
-  """This function takes a string of words with PoS tags as input and returns the number of 
-  perfect aspect forms."""
-  counter = 0
-  for item in tagged_string:
-    string1 = "[have|has|'ve|'s]_\w+\s\w+_VBD"
-    string1a = "[have|has|'ve|'s]_\w+\s\w+_RB\s\w+_VBD"
-    string1b = "[have|has|'ve|'s]_\w+\s\w+_RB\s\w+_RB\s\w+_VBD"
-    string2 = "[have|has]_\w+\s\w+_[NN|NNS|NNP|NNPS|PRP|PRP$]\s\w+_VBD"
-    if item == string1 or item == string2 or item == string1a or item == string1b:
-## problem with for-loop over string
-      counter = counter + 1
-    else:
-      pass
-  return(counter)
+    """This function takes a string of words with PoS tags as input and returns the number of 
+    perfect aspect forms."""
+    string1 = r"\b[have|has|'ve|'s]_\w+\s\w+_VBD"
+    string2 = r"\b[have|has|'ve|'s]_\w+\s\w+_RB\s\w+_VBD"
+    string3 = r"\b[have|has|'ve|'s]_\w+\s\w+_RB\s\w+_RB\s\w+_VBD"
+    string4 = r"\b[have|has]_\w+\s\w+_[NN|NNS|NNP|NNPS|PRP|PRP$]\s\w+_VBD"
+    matches1 = re.findall(string1, tagged_string)
+    matches2 = re.findall(string2, tagged_string)
+    matches3 = re.findall(string3, tagged_string)
+    matches4 = re.findall(string4, tagged_string)
+    counter = len(matches1) + len(matches2) + len(matches3) + len(matches4)
+    return(counter)
 
 ## function for feature 3: present tense
 def feature_03(tagged_list):
@@ -76,7 +75,7 @@ dict1 = {"text1": {"body": "Is this really all that you remember from your Pytho
          "text2": {"body": "Well, my dear, I think you should better get off your desk now and take a well-deserved break outside!"}, 
          "text3": {"body": "There are a number of things to pay attention to when composing this intricate piece of code - your snoring dog is not one of them."}, 
          "text4": {"body": "Apart from eating ice cream, every team member musn't forget to always push their changes to the GitHub page."}, 
-         "text5": {"body": "I feel like in the end all of this is going to take much longer than any of us had hoped for."}}
+         "text5": {"body": "I feel like in the end all of this is going to take much longer than anyone of us has hoped for."}}
 
 ### 2. Open each dictionary entry in the three formats that I need
 for text in dict1:
@@ -108,16 +107,6 @@ for text in dict1:
 ### 4. Save the output
     dict1[text] = full_info
 
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     

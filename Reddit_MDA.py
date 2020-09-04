@@ -130,7 +130,9 @@ def feature_tagger(preprocessed_json):
 ##          -> for some examples see https://www.reddit.com/r/puppersheckingdying/
 ## NEEDED: function for feature 12: community-specific acronyms/lexical items (such as 'op') - Gustavo ??
 
+
 ## Question: What level of precision for the feature-identifying functions do we want to set in advance? 
+## How many comments from how many months should inspect to determine the level of precision?
 
 
 # Data prep ("cleaning") functions:
