@@ -24,6 +24,10 @@ def feature_01(tagged_list):
     counter = 0
     for item in tagged_list:
         if item == r"\w+_VBD" or item == r"\w{5,20}ed_\w+":
+        # This will catch a lot of things that aren't really verbs; mostly adjectival uses of past participles like "excited" but some others also.
+        # The second condition is in there probably to improve recall (catch everything), but precision will suffer as it essentially throws out the
+        # probabilistic work of the POS tagger. I'd suggest simply going with the first condition (or perhaps using the second condition but only
+        # if the word itself is not in our standard English vocab list?
             counter = counter + 1
         else:
             pass
@@ -33,6 +37,10 @@ def feature_01(tagged_list):
 def feature_02(tagged_string):
     """This function takes a string of words with PoS tags as input and returns the number of 
     perfect aspect forms."""
+    # Should the past perfect with "had" not also contribute towards counts here?
+    # If I read this correctly, you need round parentheses below. Square ones are for one-character disjunctions.
+    # Might also add "?:" to avoid grouping, i.e. (?:have|has|'ve|'s|had|'d)
+    # Issues remain with "'s" and "'d" which are not unambiguously forms of HAVE.
     string1 = r"\b[have|has|'ve|'s]_\w+\s\w+_VBD\b"
     string2 = r"\b[have|has|'ve|'s]_\w+\s\w+_RB\s\w+_VBD\b"
     string3 = r"\b[have|has|'ve|'s]_\w+\s\w+_RB\s\w+_RB\s\w+_VBD\b"
@@ -145,7 +153,10 @@ def feature_09(untagged_list):
 def feature_10(tagged_string):
     """This function takes a list of words with PoS tags as input and returns the number of items
     that are demonstrative pronouns."""
+    # Here also, you probably want round parentheses rather than square ones if I am not mistaken.
     string1 = r"\b[that|this|these|those]_\w+\s\w+_[VB|VBD|VBG|VBN|VBP|VBZ|MD|WP]"
+    # Are we sure the above only catches demonstratives? What about complementizer/relativizer THAT ("Things that go bump in the night"...)
+    # Again, here it would seem that the work of disambiguating demonstratives from other items should be done by the tagger?
     string2 = r"\b[that|this|these|those]_\w+\s[and|\.]"
     string3 = r"\bthat_\w+\s's_"
     matches1 = re.findall(string1, tagged_string)
@@ -172,11 +183,12 @@ def feature_11(untagged_list):
 def feature_12(tagged_string):
     """This function takes a string of words with PoS tags as input and returns the number of items
     that are DO used as a pro-verb."""
+    # Round brackets needed instead of square below
     string1 = r"\b[do|does|doing|did|done]_"
     string2 = r"\b[do|does|doing|did|done]_\w+\s\w+_VB"
     string3 = r"\b[do|does|doing|did|done]_\w+\s\w+_[RB|RBR|RBS]\s\w+_VB"
     string4 = r"_[\.|]\s[do|does|doing|did|done]_"
-    string5 = r"\b[who|whom|whose|which]_\w+\s[do|does|doing|did|done]_"
+    string5 = r"\b[who|whom|whose|which]_\w+\s[do|does|doing|did|done]_" # Not sure about this one; could be either pro-verb or do-support in question, right?
     matches1 = re.findall(string1, tagged_string)
     matches2 = re.findall(string2, tagged_string)
     matches3 = re.findall(string3, tagged_string)
@@ -191,6 +203,8 @@ def feature_13(tagged_string):
     that are WH-questions."""
     string1 = r"_\.\swho_\w+\s\w+_MD"
     string2 = r"_\.\swho_\w+\s[do|does|doing|did|have|has|had|having|be|been|am|are|is|was|were|being]_"
+    # This is only "who" as a question word, right? What about the other WH-q-words?
+    # Also, what about questions with a simple lexical verb, e.g. "Who left the stove on?" "What happened to Martha?" etc.
     matches1 = re.findall(string1, tagged_string)
     matches2 = re.findall(string2, tagged_string)
     counter = len(matches1) + len(matches2)
@@ -201,6 +215,7 @@ def feature_14(tagged_list):
     """This function takes a list of words with PoS tags as input and returns the number of items
     that are nominalisations."""
     counter = 0
+    # Round parentheses
     string1 = r"\w+[tions|tion|ments|ment|ness|ity|nesses|ities]_\w+"
     for item in tagged_list:
         if item == string1:
