@@ -4,11 +4,29 @@ import os
 import nltk
 import string
 import re
+import string
 
 #All path variables
 path = "FILEPATH"
 
+# A list of English words
+eng_vocab_lower = set(word.lower() for word in nltk.corpus.words.words('en'))
+
 # Preprocessing functions
+
+def check_English(text):
+    '''Calculates how many % of all words in a piece of text are English.
+    Parameter text is a string, parameter cutoff a float between 0 and 1.
+    Returns either True or False depending on % of English words in the text,
+    so it can be used as part of an if-statement.'''
+    words = [x.lower().strip(string.punctuation) for x in text.split() if x.strip(string.punctuation)]
+    eng_words = [x for x in words if x in eng_vocab_lower]
+    perc_eng = len(eng_words)/len(words)
+    if perc_eng >= 0.4:
+        return True
+    else:
+        return False
+    
 
 ## Open file, remove deleted comments, split into sentences, simplify metainfo, add unique ID
 ### Returns dict of dicts in format {id: {body: str, author: str, link_id: str, sentence_no: int, subreddit: str}
@@ -27,7 +45,7 @@ def open_reddit_json(folder_path):
                     counter += 1
 
                     try:   
-                        if json.loads(line.strip())["body"] != "[deleted]": #does not consider deleted comments
+                        if json.loads(line.strip())["body"] != "[deleted]" and check_English(json.loads(line.strip())["body"]): #does not consider deleted comments or comments 
                             comment = json.loads(line.strip())["body"]
                             author = json.loads(line.strip())["author"]
                             link_id = json.loads(line.strip())["link_id"]
@@ -53,7 +71,6 @@ def open_reddit_json(folder_path):
             return prepped_json
 
 ## NEEDED: function to remove comments posted by bots (how can we reliably identify them?) - Gustavo
-## NEEDED: function to remove posts with too few English words - Axel 
 ## Question: What about quoted material from previous comments/posts? Should we exclude it, and if yes, how?
 
 
@@ -138,6 +155,9 @@ def feature_tagger(preprocessed_json):
 
 
 # Data prep ("cleaning") functions:
+def clean_comment(text):
+    '''Need to figure out how the output of this function will be integrated in the downstream workflow
+    before I continue writing.'''
 ## NEEDED: function to turn all words to lowercase - Axel
 ## NEEDED: function to normalize deviant and creative spelling - Axel (probably combined with lowercase?)
 ## NEEDED: function to remove punctuation (?) - Axel
@@ -167,7 +187,7 @@ def Biber_tagger(cleaned_json):
 ## Untagged list
         untagged_list =  nltk.word_tokenize(rawtext)
 ## Tagged list
-        tagged_list1 = nltk.pos_tag(untagged_list)
+        tagged_list1 = nltk.pos_tag(untagged_list) # This also isn't currently using the Stanford Tagger, which we said we wanted for consistency with Nini.
 ## This doed not return the format I expected. I thought it would be word_TAG,
 ## but it is actually a tuple ("word", "TAG")...
 ## The following code puts it in the format I want:
