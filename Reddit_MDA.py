@@ -44,7 +44,11 @@ def open_reddit_json(folder_path):
                 for line in j:
                     counter += 1
 
-                    try:   
+                    try: 
+
+                        ### reduce if-else block, else statement not necessary
+                         
+                         ## add bot checker here, also username ends with bot
                         if json.loads(line.strip())["body"] != "[deleted]" and check_English(json.loads(line.strip())["body"]): #does not consider deleted comments or comments 
                             comment = json.loads(line.strip())["body"]
                             author = json.loads(line.strip())["author"]
@@ -62,7 +66,7 @@ def open_reddit_json(folder_path):
                                 sentence_counter = 1
                                 comment_dict = {"body": comment, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}
 
-                            prepped_json[str(base + "_" + str(counter))] = comment_dict
+                            prepped_json[str(base + "_" + str(counter) + "_" + sentence_no)] = comment_dict
 
                     except json.decoder.JSONDecodeError:
                         errors +=1 #keeps track of how many errors are encountered/lines skipped
@@ -71,6 +75,8 @@ def open_reddit_json(folder_path):
             return prepped_json
 
 ## NEEDED: function to remove comments posted by bots (how can we reliably identify them?) - Gustavo
+    ## BotDefense/BotBust scrape -> divided by year, checked against usernames
+    ## usernames that literally include the word bot
 ## Question: What about quoted material from previous comments/posts? Should we exclude it, and if yes, how?
 
 
@@ -101,7 +107,9 @@ def feature_tagger(preprocessed_json):
     Additionally adds the key "link_no" with the value of the number of links in the sentence, the key "capital_counter" with the value of the
     number of capitalized words in the sentence, the  key "question_no" with the value of the number of question marks and the key "exclamation_no"
     with value of the number of exclamation marks.'''
-    for id in preprocessed_json:
+
+    ##change variable comment to sentence
+    for id in preprocessed_json: 
         full_info = preprocessed_json.get(id)
         comment = full_info["body"] 
 
@@ -118,6 +126,7 @@ def feature_tagger(preprocessed_json):
         capital_counter = 0
         for word in comment:
 
+            #split into two counters, one for platform internal, one for platform external links 
           if word.startswith("u/") or word.startswith("r/") or word.startswith("http") or word.startswith("www"):
             link_counter += 1
 
