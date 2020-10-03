@@ -71,11 +71,11 @@ def feature_04(untagged_list):
 ### 1. Create a dictionary with an several entries that each have an
 ###    element called "body" containing some text
 
-dict1 = {"text1": {"body": "Is this really all that you remember from your Python class, which really wasn't that long ago?"}, 
+dict1 = {"text1": {"body": "Is this really all that you remember from your Python class, which really was not that long ago?"}, 
          "text2": {"body": "Well, my dear, I think you should better get off your desk now and take a well-deserved break outside!"}, 
          "text3": {"body": "There are a number of things to pay attention to when composing this intricate piece of code - your snoring dog is not one of them."}, 
          "text4": {"body": "Apart from eating ice cream, every team member musn't forget to always push their changes to the GitHub page."}, 
-         "text5": {"body": "I feel like in the end all of this is going to take much longer than anyone of us has hoped for."}}
+         "text5": {"body": "The dog that I saw isn't going to take slightly longer than I'd hoped for."}}
 
 ### 2. Open each dictionary entry in the three formats that I need
 for text in dict1:
