@@ -158,14 +158,21 @@ def tag_sentence(sentence):
 #     sentence = sentence_dict["body"]
 #     tagged_sentence = tag_sentence(sentence)
 
+#     noun_counter_f3 = 0
+#     verb_counter_f5 = 0
 #     for word_tuple in tagged_sentence:
 #         if word_tuple[1].startswith("N"): #i.e. all nouns
-#             function_for_nouns(word) #here we use all the things hanna has listed on the other file
+#             noun_counter_f3 = noun_counter_f3 + function_for_nouns(word_tuple[0]) 
+#           #here we use all the things hanna has listed on the other file, might be multiple functions and multiple counters
+
 #         elif word_tuple[1].startswith("V"): #i.e. all verbs
-#             function_for_verbs(word)
-# then just have to find an elegant way to save these back in as key and values in the sentence dictionary, i.e. adding them all up for the sentence
+#             verb_counter_f5 = verb_counter_f5 + function_for_verbs(word_tuple[0]) #same here with verbs
 
+#             if word_tuple[0] in ["should", "could", "modalverb"]:
+#                    do this other function and save to counter, etc. 
 
+#    sentence_dict["examplefeature_n3"] = noun_counter_f3
+#    sentence_dict["examplefeature_n5"] = verb_counter_f5
 
 
 
