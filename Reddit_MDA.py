@@ -111,7 +111,6 @@ def raw_word_tagger(preprocessed_json):
         internal_link_counter = 0
         capital_counter = 0  
         for word in sentence.split():
-            print(word)
             if word.startswith("u/") or word.startswith("r/"):
                 internal_link_counter += 1
 
@@ -134,11 +133,40 @@ def clean_sentence(sentence):
     '''Takes a sentence and returns it in all lowercase, with deviant/creative spelling normalized, 
     with punctuation removed, and emojis removed.'''
     ## NEEDED: normalize deviant and creative spelling - Axel
-    sentence = lower(sentence.strip(string.punctuation))
+    sentence = sentence.strip(string.punctuation).lower()
     ## NEEDED: remove emojis - Gustavo
+    return sentence
 
 def tag_sentence(sentence):
-    '''Takes a sentence and tags it using the XX tagger.'''
+    '''Takes a sentence, cleans it with clean_sentence, and tags it using the NLTK averaged_perceptron_tagger. 
+    Returns a list of tuples of (word, pos_tag).'''
+    cleaned_sentence = clean_sentence(sentence)
+    tokens = nltk.word_tokenize(cleaned_sentence)
+    tagged_sentence = nltk.pos_tag(tokens)
+    return tagged_sentence
+
+
+# Biber tagging can probably come in the same script no problem once we've optimized the functions, 
+# having 1000 or 2000 lines is not really an issue), example of my thoughts below, KM
+# EX:
+# preprocessed_file = open_reddit_json(path)
+# full_dict = sentence_tagger(preprocessed_file)
+# full_dict = raw_word_tagger(full_dict)
+
+# for id in full_dict: 
+#     sentence_dict = full_dict.get(id)
+#     sentence = sentence_dict["body"]
+#     tagged_sentence = tag_sentence(sentence)
+
+#     for word_tuple in tagged_sentence:
+#         if word_tuple[1].startswith("N"): #i.e. all nouns
+#             function_for_nouns(word) #here we use all the things hanna has listed on the other file
+#         elif word_tuple[1].startswith("V"): #i.e. all verbs
+#             function_for_verbs(word)
+# then just have to find an elegant way to save these back in as key and values in the sentence dictionary, i.e. adding them all up for the sentence
+
+
+
 
 
 # Output functions
@@ -148,7 +176,6 @@ def tag_sentence(sentence):
 
 # CALL FUNCTIONS DOWN HERE
 ## NEEDED: Multiprocessing set up -- Axel & Kyla ?
-current_file = open_reddit_json(path)
 
 
 
@@ -164,7 +191,9 @@ current_file = open_reddit_json(path)
 
 
 
-############### Code below needs to be updated I believe? KM ###############
+
+
+############### Code below needs to be updated I believe? Can we delete this for now Hanna? KM ###############
 
 
 
