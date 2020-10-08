@@ -10,6 +10,7 @@
 ### beginning of a sentence. However, when we separate the comments into
 ### individual sentences, these pieces of punctuation will no longer be at the
 ### beginning of each sentence. Any solutions?
+## startswith? KM
 
 ### functions 55 to 57, in which I check whether a verb is within a previously
 ### defined list, do not yet take inflectional endings into account!
@@ -31,6 +32,7 @@ import string
 ## - feature 27: past prt. WHIZ deletions
 ## - feature 28: present prt. WHIZ deletions
 ## - feature 62: split infinitives
+## imperatives (listed as feature 4 in the other script) KM
   ## FULL VERBS ONLY
 ## - feature 58: 'seem'/'appear'
 ## - feature 55: public verbs
