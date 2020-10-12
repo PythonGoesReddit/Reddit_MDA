@@ -26,9 +26,10 @@ def check_English(text):
     else:
         return False
     
+# initialize empty feature dictionary
 def open_reddit_json(folder_path):
     '''Takes Reddit json file as input. Separates each sentence into one dictionary.  Simplifies metainfo (retains body, author, link_id, subreddit). Removes deleted and non-English comments. 
-    Returns dict of dicts in format {id: {body: str, author: str, link_id: str, sentence_no: int, subreddit: str}'''
+    Returns dict of dicts in format {id: {body: str, author: str, link_id: str, sentence_no: int, subreddit: str, features: dict}'''
     errors = 0
     for filename in os.listdir(folder_path):
         if os.path.splitext(filename)[1] == ".json": #open file only if extension is .json, else will try to open folders and other random files
@@ -50,7 +51,10 @@ def open_reddit_json(folder_path):
                         sentence_counter = 0
                         for sentence in nltk.tokenize.sent_tokenize(body): #separates into sentences
                             sentence_counter +=1 #keep track of which sentence it is (1st, 2nd, etc.)
-                            sentence_dict = {"body": sentence, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}
+                            sentence_dict = {"body": sentence, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}#
+                            feature_dict = {"vpast_001": 0, "vperfect_002": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0, "prothirper_008": 0, "proit_009" "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0,
+                            "vsplitinf_062": 0, "vimperative_204": 0, "vseemappear_058": 0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "whclause_023": 0, "thatdel_060": 0}
+                            sentence_dict["features"] = feature_dict
                             prepped_json[str(base + "_" + str(link_id) + "_" + str(sentence_counter))] = sentence_dict #creates a dict within a dict, so that the key (filename, linkid, sentence number) calls the whole dict
 
                     except json.decoder.JSONDecodeError:
@@ -73,6 +77,7 @@ def open_reddit_json(folder_path):
 ## NEEDED: work on and flush out the following code:
 ## Think about more informative function names
 
+## add dict in dict for tags
 def sentence_tagger(preprocessed_json):
     '''Takes the preprocessed json and adds the key "hashtag_1" with the value of the number of hashtags in the sentence
     Additionally adds the key "link_2" with the value of the number of links in the sentence, the key "capital_3" with the value of the
@@ -145,6 +150,18 @@ def tag_sentence(sentence):
     tagged_sentence = nltk.pos_tag(tokens)
     return tagged_sentence
 
+def verb_features(sentence, features_dict):
+    
+
+
+
+# Output functions
+## NEEDED: function to write a matrix of text_id * variables - Kyla?
+## NEEDED: function to write meta-info for each text - Kyla
+
+
+# CALL FUNCTIONS DOWN HERE
+## NEEDED: Multiprocessing set up -- Axel & Kyla ?
 
 # Biber tagging can probably come in the same script no problem once we've optimized the functions, 
 # having 1000 or 2000 lines is not really an issue), example of my thoughts below, KM
@@ -153,17 +170,16 @@ def tag_sentence(sentence):
 # full_dict = sentence_tagger(preprocessed_file)
 # full_dict = raw_word_tagger(full_dict)
 
-# for id in full_dict: 
-#     sentence_dict = full_dict.get(id)
+# for sentence in full_dict: 
+#     sentence_dict = full_dict.get(sentence)
 #     sentence = sentence_dict["body"]
 #     tagged_sentence = tag_sentence(sentence)
 
-#     noun_counter_f3 = 0
-#     verb_counter_f5 = 0
+    #change to dictionary, pass dictionary to function, function method updates dict (no return function)
 #     for word_tuple in tagged_sentence:
 #         if word_tuple[1].startswith("N"): #i.e. all nouns
 #             noun_counter_f3 = noun_counter_f3 + function_for_nouns(word_tuple[0]) 
-#           #here we use all the things hanna has listed on the other file, might be multiple functions and multiple counters
+#           #one function per POS/condition, takes features dict as input, updates this dict with +=
 
 #         elif word_tuple[1].startswith("V"): #i.e. all verbs
 #             verb_counter_f5 = verb_counter_f5 + function_for_verbs(word_tuple[0]) #same here with verbs
@@ -176,80 +192,12 @@ def tag_sentence(sentence):
 
 
 
-# Output functions
-## NEEDED: function to write a matrix of text_id * variables - Kyla?
-## NEEDED: function to write meta-info for each text - Kyla
-
-
-# CALL FUNCTIONS DOWN HERE
-## NEEDED: Multiprocessing set up -- Axel & Kyla ?
-
-
-
-
 
 
 
 # General open questions
 ## Question: What level of precision for the feature-identifying functions do we want to set in advance? 
 ## How many comments from how many months should inspect to determine the level of precision?
-
-
-
-
-
-
-
-############### Code below needs to be updated I believe? Can we delete this for now Hanna? KM ###############
-
-
-
-
-# Tagging and feature extraction functions 
-## NEEDED: update of following code for Stanford tagger - Hanna (to function, file opening - line by line not whole file duplicated?)
-## -> did I do this correctly?
-### Might (doch) be better here to import from Hannas other file, i.e. 
-from Reddit_Bibers_Features import feature_01, feature_02, feature_03, feature_04
-### Might also be worth it to try to reduce the number of functions here, combining ones that can be combined.
-### -> this is probably a good idea, but only once all the functions are finished and working,
-###    since they take different input formats. 
-### Also worth thinking about function names for informativity
-
-def Biber_tagger(cleaned_json):
-    """This function takes the preprocessed and cleaned jsons as input and adds
-    a key with a counter as value for each of Biber's original 67 features, as well as 
-    two additional features (comparatives and superlatives). The functions for
-    identifying each individual feature need to be imported beforehand."""
-    for id in cleaned_json:
-        full_info = cleaned_json.get(id)
-        rawtext = full_info["body"]   
-## create the three necessary input formats for the functions    
-## Untagged list
-        untagged_list =  nltk.word_tokenize(rawtext)
-## Tagged list
-        tagged_list1 = nltk.pos_tag(untagged_list) # This also isn't currently using the Stanford Tagger, which we said we wanted for consistency with Nini.
-## This doed not return the format I expected. I thought it would be word_TAG,
-## but it is actually a tuple ("word", "TAG")...
-## The following code puts it in the format I want:
-        tagged_list = []
-        for tup in tagged_list1:
-            fixedstring = str(tup[0] + "_" + tup[1])
-            tagged_list.append(fixedstring)
-    
-### 2.3 Tagged string
-        tagged_string = " "
-        tagged_string = tagged_string.join(tagged_list)
-
-## Apply the functions from the "Reddit_Bibers_Features.py" script
-        full_info["f01_counter"] = feature_01(tagged_list)
-        full_info["f02_counter"] = feature_02(tagged_string)
-        full_info["f03_counter"] = feature_03(tagged_list)
-        full_info["f04_counter"] = feature_04(untagged_list)
-    
-        cleaned_json[id] = full_info
-    return cleaned_json
-
-## for functions on superlatives + comparatives: see Reddit_Bibers_Features.py
 
 
 
