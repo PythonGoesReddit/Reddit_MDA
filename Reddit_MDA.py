@@ -52,7 +52,7 @@ def open_reddit_json(folder_path):
                         for sentence in nltk.tokenize.sent_tokenize(body): #separates into sentences
                             sentence_counter +=1 #keep track of which sentence it is (1st, 2nd, etc.)
                             sentence_dict = {"body": sentence, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}#
-                            feature_dict = {"vpast_001": 0, "vperfect_002": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0, "prothirper_008": 0, "proit_009" "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0,
+                            feature_dict = {"vpast_001": 0, "vperfect_002": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0, "prothirper_008": 0, "proit_009": 0, "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0,
                             "vsplitinf_062": 0, "vimperative_204": 0, "vseemappear_058": 0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "whclause_023": 0, "thatdel_060": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0}
                             sentence_dict["features"] = feature_dict
                             prepped_json[str(base + "_" + str(link_id) + "_" + str(sentence_counter))] = sentence_dict #creates a dict within a dict, so that the key (filename, linkid, sentence number) calls the whole dict
@@ -137,13 +137,29 @@ def tag_sentence(sentence):
     tagged_sentence = nltk.pos_tag(tokens)
     return tagged_sentence
 
-def analyze_noun(tagged_sentence, features_dict):
-    '''Takes a sentence, cleans it with clean_sentence, and tags it using the NLTK averaged_perceptron_tagger. 
-    Returns a list of tuples of (word, pos_tag).'''
+def analyze_verb(word_tuple, features_dict):
+    '''Takes a tagged sentence (list of tuples) and dictionary of all possible tags and updates relevant keys: 
+    "vpast_001", "vperfect_002", "vpresent_003", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
+    "vsplitinf_062", "vimperative_204", "vseemappear_058", "vpublic_055", "vprivate_056".'''
+    if word_tuple[1] == "VBD":
+        feature_dict["vpast_001"] += 1
+    elif word_tuple[1] == "VBP" or word_tuple[1] == "VBZ":
+        feature_dict["vpresent_003"] += 1
+    elif word_tuple[1] == "VB": #is this the right form for infinitives?
+        feature_dict["vinfinitive_024"] += 1
+    elif word_tuple[1] == "VBG": #gerund or present participle.. is this ok?
+        feature_dict["vpresentpart_025"] += 1
+    elif word_tuple[1] == "VBN":
+        feature_dict["vpastpart_026"] += 1
+    
+    
+    
 
-def analyze_verb(tagged_sentence, features_dict):
-    '''Takes a sentence, cleans it with clean_sentence, and tags it using the NLTK averaged_perceptron_tagger. 
-    Returns a list of tuples of (word, pos_tag).'''
+        ##missing: present perfect, whiz stuff, split infinitives (does this really work with single words?), imperatives
+
+
+def analyze_noun(word_tuple, features_dict):
+    '''Takes a tagged sentence (list of tuples) and dictionary of all possible tags and updates relevant keys: (list here).'''
 
 # Output functions
 ## NEEDED: function to write a matrix of text_id * variables - Kyla?
@@ -166,10 +182,10 @@ for id in preprocessed_file: #loops through all individual sentences in the file
 
     for word_tuple in tagged_sentence: #based on POS, apply different function, each of which updates feature_dict
         if word_tuple[1].startswith("N"): #i.e. all nouns
-           analyze_noun(tagged_sentence, feature_dict)
+           analyze_noun(word_tuple, feature_dict)
 
         elif word_tuple[1].startswith("V"): #i.e. all verbs
-           analyze_verb(tagged_sentence, feature_dict)
+           analyze_verb(word_tuple, feature_dict)
 
 ## Add output functions here at end
 
