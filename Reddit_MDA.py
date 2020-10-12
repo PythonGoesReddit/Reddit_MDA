@@ -53,7 +53,7 @@ def open_reddit_json(folder_path):
                             sentence_counter +=1 #keep track of which sentence it is (1st, 2nd, etc.)
                             sentence_dict = {"body": sentence, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}#
                             feature_dict = {"vpast_001": 0, "vperfect_002": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0, "prothirper_008": 0, "proit_009" "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0,
-                            "vsplitinf_062": 0, "vimperative_204": 0, "vseemappear_058": 0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "whclause_023": 0, "thatdel_060": 0}
+                            "vsplitinf_062": 0, "vimperative_204": 0, "vseemappear_058": 0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "whclause_023": 0, "thatdel_060": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0}
                             sentence_dict["features"] = feature_dict
                             prepped_json[str(base + "_" + str(link_id) + "_" + str(sentence_counter))] = sentence_dict #creates a dict within a dict, so that the key (filename, linkid, sentence number) calls the whole dict
 
@@ -77,60 +77,47 @@ def open_reddit_json(folder_path):
 ## NEEDED: work on and flush out the following code:
 ## Think about more informative function names
 
-## add dict in dict for tags
-def sentence_tagger(preprocessed_json):
-    '''Takes the preprocessed json and adds the key "hashtag_1" with the value of the number of hashtags in the sentence
-    Additionally adds the key "link_2" with the value of the number of links in the sentence, the key "capital_3" with the value of the
-    number of capitalized words in the sentence, the  key "question_8" with the value of the number of question marks and the key "exclamation_9"
-    with value of the number of exclamation marks.'''
+def analyze_sentence(preprocessed_json):
+    '''Takes the preprocessed json and adds to the features sub-dictionary the following keys and counts (values): "hashtag_201": no. of hashtags,
+    "question_208": no. of question marks, "exclamation_209": no of exclamation marks, "lenchar_210": len of sentence in char, "lenword_211": len of sentence in words'''
 
     for id in preprocessed_json: 
         sentence_dict = preprocessed_json.get(id)
         sentence = sentence_dict["body"] 
+        feature_dict = sentence_dict["features"]
 
         hashtag_counter = sentence.count("#")
-        sentence_dict["hashtag_1"] = hashtag_counter
+        feature_dict["hashtag_201"] = hashtag_counter
 
         question_counter = sentence.count("?")
-        sentence_dict["question_8"] = question_counter
+        feature_dict["question_208"] = question_counter
 
         exclamation_counter = sentence.count("!")
-        sentence_dict["exclamation_9"] = exclamation_counter 
+        feature_dict["exclamation_209"] = exclamation_counter 
 
-        sentence_dict["sentence_len"] = len(sentence) 
+        feature_dict["lenchar_210"] = len(sentence) 
+        feature_dict["lenword_211"] = len(sentence.split(" ")) 
 
-        preprocessed_json[id] = sentence_dict
-    return preprocessed_json
-
-def raw_word_tagger(preprocessed_json):
-    '''Takes the preprocessed json and adds the key "link_2" with the number of external links, "internal_link_2" with the number of internal links 
-    and "capital_3" with the number of words in all caps.'''
+def analyze_raw_words(preprocessed_json):
+    '''Takes the preprocessed json and updates the counts of the following keys in the features sub-dictionary: "link_202": no. of external links, 
+    "interlink_203": no. of internal links, "caps_204": no of words in all caps.'''
     ## NEEDED: feature 7: emoticons - Gustavo
     ## NEEDED: feature 10: strategic lengthening 
     ## NEEDED: feature 11: alternating uppercase-lowercase 
     for id in preprocessed_json: 
         sentence_dict = preprocessed_json.get(id)
         sentence = sentence_dict["body"]
+        feature_dict = sentence_dict["features"]
 
-        link_counter = 0
-        internal_link_counter = 0
-        capital_counter = 0  
         for word in sentence.split():
             if word.startswith("u/") or word.startswith("r/"):
-                internal_link_counter += 1
+                feature_dict["link_202"] += 1 
 
             if "http" in word or "www" in word:
-                link_counter += 1
+                feature_dict["interlink_203"] += 1 
 
             if word.isupper() and (word not in ["A", "I"]): #Capital A at the beginning of sentences is commmon but this will throw out A in the middle of a string, i.e. EVERYBODY GETS A JOOOB
-                capital_counter +=1
-
-        sentence_dict["link_2"] = link_counter
-        sentence_dict["internal_link_2"] = internal_link_counter
-        sentence_dict["capital_3"] = capital_counter  
-    
-        preprocessed_json[id] = sentence_dict
-    return preprocessed_json
+                feature_dict["caps_204"] += 1  
 
 ## NEEDED: function for feature 12: community-specific acronyms/lexical items (such as 'op') - Gustavo ??
 
@@ -150,10 +137,13 @@ def tag_sentence(sentence):
     tagged_sentence = nltk.pos_tag(tokens)
     return tagged_sentence
 
-def verb_features(sentence, features_dict):
-    
+def analyze_noun(tagged_sentence, features_dict):
+    '''Takes a sentence, cleans it with clean_sentence, and tags it using the NLTK averaged_perceptron_tagger. 
+    Returns a list of tuples of (word, pos_tag).'''
 
-
+def analyze_verb(tagged_sentence, features_dict):
+    '''Takes a sentence, cleans it with clean_sentence, and tags it using the NLTK averaged_perceptron_tagger. 
+    Returns a list of tuples of (word, pos_tag).'''
 
 # Output functions
 ## NEEDED: function to write a matrix of text_id * variables - Kyla?
@@ -163,33 +153,25 @@ def verb_features(sentence, features_dict):
 # CALL FUNCTIONS DOWN HERE
 ## NEEDED: Multiprocessing set up -- Axel & Kyla ?
 
-# Biber tagging can probably come in the same script no problem once we've optimized the functions, 
-# having 1000 or 2000 lines is not really an issue), example of my thoughts below, KM
-# EX:
-# preprocessed_file = open_reddit_json(path)
-# full_dict = sentence_tagger(preprocessed_file)
-# full_dict = raw_word_tagger(full_dict)
+preprocessed_file = open_reddit_json(path) #reads in file, separates into sentences, initializes feature dict
 
-# for sentence in full_dict: 
-#     sentence_dict = full_dict.get(sentence)
-#     sentence = sentence_dict["body"]
-#     tagged_sentence = tag_sentence(sentence)
+analyze_sentence(preprocessed_file) #updates raw-sentence based counts (i.e. punctuation marks, length)
+analyze_raw_words(preprocessed_file) #updates raw-word based counts (i.e. links, emojis)
 
-    #change to dictionary, pass dictionary to function, function method updates dict (no return function)
-#     for word_tuple in tagged_sentence:
-#         if word_tuple[1].startswith("N"): #i.e. all nouns
-#             noun_counter_f3 = noun_counter_f3 + function_for_nouns(word_tuple[0]) 
-#           #one function per POS/condition, takes features dict as input, updates this dict with +=
+for id in preprocessed_file: #loops through all individual sentences in the file one by one
+     sentence_dict = full_dict.get(id) #retrieves entire dictionary and all sub-dicts for the given sentence
+     sentence = sentence_dict["body"] #retrieves sentence only (str)) 
+     feature_dict = sentence_dict["features"] #retrieves feature_dict for the given sentence
+     tagged_sentence = tag_sentence(sentence) #tags sentence, returning list of tuples with (word, pos)
 
-#         elif word_tuple[1].startswith("V"): #i.e. all verbs
-#             verb_counter_f5 = verb_counter_f5 + function_for_verbs(word_tuple[0]) #same here with verbs
+    for word_tuple in tagged_sentence: #based on POS, apply different function, each of which updates feature_dict
+        if word_tuple[1].startswith("N"): #i.e. all nouns
+           analyze_noun(tagged_sentence, feature_dict)
 
-#             if word_tuple[0] in ["should", "could", "modalverb"]:
-#                    do this other function and save to counter, etc. 
+        elif word_tuple[1].startswith("V"): #i.e. all verbs
+           analyze_verb(tagged_sentence, feature_dict)
 
-#    sentence_dict["examplefeature_n3"] = noun_counter_f3
-#    sentence_dict["examplefeature_n5"] = verb_counter_f5
-
+## Add output functions here at end
 
 
 
