@@ -7,28 +7,31 @@ import re
 import string
 
 #All path variables
-path = "FILEPATH"
+path = "/Users/kylamcconnell/Documents/Github/Reddit_MDA/sample_data/json"
 
 # Preprocessing functions
 
 eng_vocab_lower = set(word.lower() for word in nltk.corpus.words.words('en')) # List of English words for check_English()
 
 def check_English(text):
-    '''Calculates how many % of all words in a piece of text are English.
+    '''Calculates what % of all words in a piece of text are English.
     Parameter text is a string, parameter cutoff a float between 0 and 1.
     Returns either True or False depending on % of English words in the text,
     so it can be used as part of an if-statement.'''
     words = [x.lower().strip(string.punctuation) for x in text.split() if x.strip(string.punctuation)]
     eng_words = [x for x in words if x in eng_vocab_lower]
-    perc_eng = len(eng_words)/len(words) #BUG: I get a divide by 0 error here (KM)
-    if perc_eng >= 0.4:
-        return True
-    else:
-        return False
+    if len(words) > 0:
+        perc_eng = len(eng_words)/len(words) #BUG: I get a divide by 0 error here (KM)
+        if perc_eng >= 0.4:
+            return True
+        else:
+            return False
     
 # initialize empty feature dictionary
 def open_reddit_json(folder_path):
-    '''Takes Reddit json file as input. Separates each sentence into one dictionary.  Simplifies metainfo (retains body, author, link_id, subreddit). Removes deleted and non-English comments. 
+    '''Takes Reddit json file. Separates each sentence into one dictionary.  
+    Simplifies metainfo (retains body, author, link_id, subreddit). 
+    Removes deleted and non-English comments. 
     Returns dict of dicts in format {id: {body: str, author: str, link_id: str, sentence_no: int, subreddit: str, features: dict}'''
     errors = 0
     for filename in os.listdir(folder_path):
@@ -52,8 +55,10 @@ def open_reddit_json(folder_path):
                         for sentence in nltk.tokenize.sent_tokenize(body): #separates into sentences
                             sentence_counter +=1 #keep track of which sentence it is (1st, 2nd, etc.)
                             sentence_dict = {"body": sentence, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}#
-                            feature_dict = {"vpast_001": 0, "vperfect_002": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0, "prothirper_008": 0, "proit_009": 0, "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0,
-                            "vsplitinf_062": 0, "vimperative_204": 0, "vseemappear_058": 0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "whclause_023": 0, "thatdel_060": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0}
+                            feature_dict = {"vpast_001": 0, "vperfect_002": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0, 
+                            "prothirper_008": 0, "proit_009": 0, "nouns_016": 0, "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, 
+                            "whclause_023": 0, "vpresentwhiz_028":0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "vseemappear_058": 0, "thatdel_060": 0, "vsplitinf_062": 0,
+                            "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_210": 0}
                             sentence_dict["features"] = feature_dict
                             prepped_json[str(base + "_" + str(link_id) + "_" + str(sentence_counter))] = sentence_dict #creates a dict within a dict, so that the key (filename, linkid, sentence number) calls the whole dict
 
@@ -138,28 +143,36 @@ def tag_sentence(sentence):
     return tagged_sentence
 
 def analyze_verb(word_tuple, features_dict):
-    '''Takes a tagged sentence (list of tuples) and dictionary of all possible tags and updates relevant keys: 
+    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys: 
     "vpast_001", "vperfect_002", "vpresent_003", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
-    "vsplitinf_062", "vimperative_204", "vseemappear_058", "vpublic_055", "vprivate_056".'''
+    "vsplitinf_062", "vimperative_210", "vseemappear_058", "vpublic_055", "vprivate_056".'''
     if word_tuple[1] == "VBD":
         feature_dict["vpast_001"] += 1
     elif word_tuple[1] == "VBP" or word_tuple[1] == "VBZ":
         feature_dict["vpresent_003"] += 1
     elif word_tuple[1] == "VB": #is this the right form for infinitives?
         feature_dict["vinfinitive_024"] += 1
-    elif word_tuple[1] == "VBG": #gerund or present participle.. is this ok?
+    elif word_tuple[1] == "VBG": #gerund or present participle.. is this ok? or do we have to separate these
         feature_dict["vpresentpart_025"] += 1
     elif word_tuple[1] == "VBN":
         feature_dict["vpastpart_026"] += 1
-    
-    
-    
+    #elif word_tuple[1] == "MD":
+        ## feature 52: possibility modals
+        ## feature 53: necessity modals
+        ## feature 54: predictive modals
+        ## feature 63: split auxiliaries
+        ## feature 59: contractions
 
         ##missing: present perfect, whiz stuff, split infinitives (does this really work with single words?), imperatives
 
 
 def analyze_noun(word_tuple, features_dict):
-    '''Takes a tagged sentence (list of tuples) and dictionary of all possible tags and updates relevant keys: (list here).'''
+    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys: (list here).'''
+    features_dict["nouns_016"] += 1
+    ## - feature 14: nominalisations
+
+def analyze_adverb(word_tuple, features_dict):
+    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys: (list here).'''
 
 # Output functions
 ## NEEDED: function to write a matrix of text_id * variables - Kyla?
@@ -175,21 +188,22 @@ analyze_sentence(preprocessed_file) #updates raw-sentence based counts (i.e. pun
 analyze_raw_words(preprocessed_file) #updates raw-word based counts (i.e. links, emojis)
 
 for id in preprocessed_file: #loops through all individual sentences in the file one by one
-     sentence_dict = full_dict.get(id) #retrieves entire dictionary and all sub-dicts for the given sentence
+     sentence_dict = preprocessed_file.get(id) #retrieves entire dictionary and all sub-dicts for the given sentence
      sentence = sentence_dict["body"] #retrieves sentence only (str)) 
      feature_dict = sentence_dict["features"] #retrieves feature_dict for the given sentence
      tagged_sentence = tag_sentence(sentence) #tags sentence, returning list of tuples with (word, pos)
 
-    for word_tuple in tagged_sentence: #based on POS, apply different function, each of which updates feature_dict
-        if word_tuple[1].startswith("N"): #i.e. all nouns
+     for word_tuple in tagged_sentence: #based on POS, apply different function, each of which updates feature_dict
+         if word_tuple[1].startswith("V"): #i.e. all verbs
+           analyze_verb(word_tuple, feature_dict)
+         elif word_tuple[1].startswith("N") or word_tuple[1] == "MD": #i.e. all nouns
            analyze_noun(word_tuple, feature_dict)
 
-        elif word_tuple[1].startswith("V"): #i.e. all verbs
-           analyze_verb(word_tuple, feature_dict)
+    #for testing purposes
+     print(sentence, feature_dict)
+
 
 ## Add output functions here at end
-
-
 
 
 
