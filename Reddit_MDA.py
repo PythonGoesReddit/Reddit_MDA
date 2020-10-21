@@ -54,11 +54,18 @@ def open_reddit_json(folder_path):
                         sentence_counter = 0
                         for sentence in nltk.tokenize.sent_tokenize(body): #separates into sentences
                             sentence_counter +=1 #keep track of which sentence it is (1st, 2nd, etc.)
-                            sentence_dict = {"body": sentence, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}#
+                            sentence_dict = {"body": sentence, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}
                             feature_dict = {"vpast_001": 0, "vperfect_002": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0, 
-                            "prothirper_008": 0, "proit_009": 0, "nouns_016": 0, "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, 
-                            "whclause_023": 0, "vpresentwhiz_028":0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "vseemappear_058": 0, "thatdel_060": 0, "vsplitinf_062": 0,
-                            "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_210": 0}
+                            "prothirper_008": 0, "proit_009": 0, "prodemons_010": 0, "proindef_011": 0, "pverbdo_012": 0, "whquest_013": 0, "nominalis_014": 0, "gerund_015": 0,
+                            "nouns_016": 0, "passagentl_017": 0, "passby_018": 0, "mainvbe_019": 0, "exthere_020": 0, "thatvcom_021": 0, "thatacom_022": 0, "whclause_023": 0,
+                            "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0, "thatresub_029": 0, "thatreobj_030": 0,
+                            "whresub_031": 0, "whreobj_032": 0, "whrepied_033": 0, "sentencere_034": 0, "advsubcause_035": 0, "advsubconc_036": 0, "advsubcond_037": 0,
+                            "advsubother_038": 0, "prepositions_039": 0, "adjattr_040": 0, "adjpred_041": 0, "adverbs_042": 0, "ttratio_043": 0, "wordlength_044": 0, "conjuncts_045": 0,
+                            "downtoners_046": 0, "hedges_047": 0, "amplifiers_048": 0, "emphatics_049": 0, "discpart_050": 0, "demonstr_051": 0, "modalsposs_052": 0,
+                            "modalsness_053": 0, "modalspred_054": 0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "vseemappear_058": 0, "contractions_059": 0, 
+                            "thatdel_060": 0, "strandprep_061": 0, "vsplitinf_062": 0, "vsplitaux_063": 0, "coordphras_064": 0, "coordnonp_065": 0, "negsyn_066": 0, 
+                            "negana_067": 0, "hashtag_201": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_205": 0,
+                            "question_208": 0, "exclamation_209": 0, "lenchar_210": 0, "lenword_211": 0, "comparatives_212": 0, "superlatives_213": 0}
                             sentence_dict["features"] = feature_dict
                             prepped_json[str(base + "_" + str(link_id) + "_" + str(sentence_counter))] = sentence_dict #creates a dict within a dict, so that the key (filename, linkid, sentence number) calls the whole dict
 
@@ -78,7 +85,6 @@ def open_reddit_json(folder_path):
 
 # Untagged feature extraction functions
 
-## NEEDED: function to calculate length of comment / sentence (?)
 ## NEEDED: work on and flush out the following code:
 ## Think about more informative function names
 
@@ -142,10 +148,12 @@ def tag_sentence(sentence):
     tagged_sentence = nltk.pos_tag(tokens)
     return tagged_sentence
 
-def analyze_verb(word_tuple, features_dict):
+def analyze_verb(word_tuple, features_dict): 
+    # is this really what we need to identify most complex features? I thought we go over every word in the sentence and once a word matches the POS tag XY,
+    # we then start a function that again takes the whole sentence as input, since for most features we also need information on the surrounding words?
     '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys: 
     "vpast_001", "vperfect_002", "vpresent_003", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
-    "vsplitinf_062", "vimperative_210", "vseemappear_058", "vpublic_055", "vprivate_056".'''
+    "vsplitinf_062", "vimperative_205", "vseemappear_058", "vpublic_055", "vprivate_056".'''
     if word_tuple[1] == "VBD":
         feature_dict["vpast_001"] += 1
     elif word_tuple[1] == "VBP" or word_tuple[1] == "VBZ":
@@ -173,6 +181,10 @@ def analyze_noun(word_tuple, features_dict):
 
 def analyze_adverb(word_tuple, features_dict):
     '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys: (list here).'''
+    
+def analyze_adjective(word_tuple, features_dict):
+    ## 212 comparatives
+    ## 213 superlatives
 
 # Output functions
 ## NEEDED: function to write a matrix of text_id * variables - Kyla?
