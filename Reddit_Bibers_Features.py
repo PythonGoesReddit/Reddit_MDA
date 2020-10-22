@@ -46,59 +46,6 @@ def feature_03(tagged_string):
     matches1 = re.findall(string1, tagged_string)
     counter = matches1
     return(counter)
-    
-
-## function for feature 6: first person pronouns
-def feature_06(untagged_list):
-    """This function takes a list of words without PoS tags as input and returns the number of items
-    that are first person pronouns."""
-    counter = 0
-    firstpersonlist = ["i", "me", "we", "us", "my", "our", "myself", "ourselves"]
-    for item in untagged_list:
-        if item in firstpersonlist:
-            counter = counter + 1
-        else:
-            pass
-    return(counter)
-
-## function for feature 7: second person pronouns
-def feature_07(untagged_list):
-    """This function takes a list of words without PoS tags as input and returns the number of items
-    that are second person pronouns."""
-    counter = 0
-    secondpersonlist = ["you", "yourself", "your", "yourselves"]
-    for item in untagged_list:
-        if item in secondpersonlist:
-            counter = counter + 1
-        else:
-            pass
-    return(counter)
-
-## function for feature 8: third person pronouns
-def feature_08(untagged_list):
-    """This function takes a list of words without PoS tags as input and returns the number of items
-    that are third person pronouns."""
-    counter = 0
-    thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "himself",
-                       "herself", "themselves"]
-    for item in untagged_list:
-        if item in thirdpersonlist:
-            counter = counter + 1
-        else:
-            pass
-    return(counter)
-
-## function for feature 9: pronoun IT
-def feature_09(untagged_list):
-    """This function takes a list of words without PoS tags as input and returns the number of items
-    that are the pronoun IT."""
-    counter = 0
-    for item in untagged_list:
-        if item == "it":
-            counter = counter + 1
-        else:
-            pass
-    return(counter)
 
 ## function for feature 10: demonstrative pronouns
 def feature_10(tagged_string):
@@ -116,19 +63,6 @@ def feature_10(tagged_string):
     counter = len(matches1) + len(matches2) + len(matches3)
     return(counter)
 
-## function for feature 11: indefinite pronouns
-def feature_11(untagged_list):
-    """This function takes a list of words without PoS tags as input and returns the number of items
-    that are indefinite pronouns."""
-    counter = 0
-    indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone",
-                        "everything", "nobody", "none", "nothing", "nowhere", "somebody", "someone", "something"]
-    for item in untagged_list:
-        if item in indefpronounlist:
-            counter = counter + 1
-        else:
-            pass
-    return(counter)
 
 ## function for feature 12: DO as pro-verb
 def feature_12(tagged_string):
@@ -744,7 +678,7 @@ def feature_61(tagged_string):
 ## function for feature 62: split infinitives
 def feature_62(tagged_string):
     """This function takes a string of words with PoS tags as input and returns the number of items
-    that are the verbs SEEM or APPEAR."""
+    that are split infinitives."""
     string1 = r"\bto_\w+\s\w+_[RB|RBR|RBS]\s\w+_VB\b"
     string2 = r"\bto_\w+\s\w+_[RB|RBR|RBS]\s\w+_[RB|RBR|RBS]\s\w+_VB\b"
     matches1 = re.findall(string1, tagged_string)

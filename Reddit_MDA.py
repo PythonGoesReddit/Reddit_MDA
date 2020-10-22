@@ -151,10 +151,10 @@ def tag_sentence(sentence):
 def analyze_verb(word_tuple, features_dict): 
     # is this really what we need to identify most complex features? I thought we go over every word in the sentence and once a word matches the POS tag XY,
     # we then start a function that again takes the whole sentence as input, since for most features we also need information on the surrounding words?
-    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys: "vpast_001", "vperfect_002", "vpresent_003", "pverbdo_012", 
-    "passagentl_017", "passby_018","mainvbe_019", "whclause_023", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
-    "emphatics_049", "modalsposs_052", "modalsness_053", "modalspred_054", "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
-    "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''
+    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys: "vpast_001", "vperfect_002", "vpresent_003", 
+    "whclause_023", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
+    "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
+    "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''    
     if word_tuple[1] == "VBD": # here, we intentionally only use the first of the two conditions that Biber proposes for finding past tense verbs
         features_dict["vpast_001"] += 1
     elif word_tuple[1] == "VBP" or word_tuple[1] == "VBZ": # this needs a lookahead function to check that it is not preceeded by 'to'
@@ -165,20 +165,21 @@ def analyze_verb(word_tuple, features_dict):
         features_dict["vpresentpart_025"] += 1
     elif word_tuple[1] == "VBN":
         features_dict["vpastpart_026"] += 1
-    elif word_tuple[1] == "MD":
-        
-        ## feature 52: possibility modals
-        ## feature 53: necessity modals
-        ## feature 54: predictive modals
-        ## feature 63: split auxiliaries
-        ## feature 59: contractions
-    elif word_tuple[1] != "MD":
-        if word_tuple[0].startswith("seem") or word_tuple[0].startswith("appear"):
-            features_dict["vseemappear_058"] += 1
-        if 
-        # 55, 56, 57 -> 23, 60
+    if word_tuple[0].startswith("seem") or word_tuple[0].startswith("appear"):
+        features_dict["vseemappear_058"] += 1
+    if word_tuple[0].startswith():
+    # 55, 56, 57 -> 23, 60
+    
+    # still missing: "vperfect_002", "whclause_023", "vpastwhiz_027", "vpresentwhiz_028",
+    # "vpublic_055", "vprivate_056", "vsuasive_057", "contractions_059", "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".
 
-        ##missing: present perfect, whiz stuff, split infinitives (does this really work with single words?), imperatives
+def analyze_modal(word_tuple, features_dict):
+    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys: 
+    "pverbdo_012", "passagentl_017", "passby_018","mainvbe_019",
+    "emphatics_049", "modalsposs_052", "modalsness_053", "modalspred_054", "contractions_059", 
+    "vimperative_205".'''
+    # still missing: "pverbdo_012", "passagentl_017", "passby_018","mainvbe_019", "emphatics_049", "modalsposs_052", "modalsness_053",
+    # "modalspred_054", "contractions_059", vimperative_205".
 
 def analyze_adverb(word_tuple, features_dict):
     '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys:
@@ -210,7 +211,6 @@ def analyze_adverb(word_tuple, features_dict):
         features_dict["advtime_005"] += 1
     elif 
     # still missing: "advsubother_038", "conjuncts_045", "downtoners_046", "hedges_047", "amplifiers_048", "discpart_050"
-        
  
 def analyze_adjective(word_tuple, features_dict):
     '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys:
@@ -243,22 +243,36 @@ def analyze_noun(word_tuple, features_dict):
     if word_tuple[0].endswith("tions") or word_tuple[0].endswith("tion") or word_tuple[0].endswith("ments") or word_tuple[0].endswith("ment") or word_tuple[0].endswith("ness") or word_tuple[0].endswith("ity") or word_tuple[0].endswith("nesses") or word_tuple[0].endswith("ities"):
         features_dict["nominalis_014"] += 1
         
-        
 def analyze_pronoun(word_tuple, features_dict):
     '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys:
     "profirpers_006", "prosecpers_007", "prothirper_008", "proit_009", "prodemons_010", "proindef_011", "contractions_059".'''
+    firstpersonlist = ["i", "me", "we", "us", "my", "our", "myself", "ourselves"]
+    secondpersonlist = ["you", "yourself", "your", "yourselves"]
+    thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "himself","herself", "themselves"]
+    indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "everything", "nobody", "none", "nothing", "nowhere", "somebody", "someone", "something"]
+    if word_tuple[0] == "it":
+        features_dict["proit_009"] += 1
+    elif word_tuple[0] in firstpersonlist:
+        features_dict["profirpers_006"] += 1
+    elif word_tuple[0] in secondpersonlist:
+        features_dict["prosecpers_007"] += 1
+    elif word_tuple[0] in thirdpersonlist:
+        features_dict["prothirdper_008"] += 1
+    elif word_tuple[0] in indefpronounlist:
+        features_dicht["proindef_011"] += 1    
+    # still missing: "prodemons_010", "contractions_059"
 
 def analyze_conjunction(word_tuple, features_dict):
     '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys:
     "coordphras_064", "coordnonp_065".'''
-    
+    # still missing: "coordphras_064", "coordnonp_065"
  
 def analyze_determiner(word_tuple, features_dict):
     '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys:
     "demonstr_051", "negsyn_066".'''
+    # still missing: "demonstr_051", "negsyn_066"
     
-    
-def analyze_wh_words(word_tuple, features_dict):
+def analyze_wh_word(word_tuple, features_dict):
     '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys:
     "whquest_013", "thatvcom_021", "thatacom_022", "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032", 
     "whrepied_033", "sentencere_034", "conjuncts_045".'''
@@ -270,16 +284,17 @@ def analyze_wh_words(word_tuple, features_dict):
         # 29
         # 30
     elif 
+    # still missing: "whquest_013", "thatvcom_021", "thatacom_022", "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032", "whrepied_033", "conjuncts_045"
 
 def analyze_there(word_tuple, features_dict):
     '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys: 
     "exthere_020".'''
     features_dict["exthere_020"] += 1
     
-    
 def analyze_particle(word_tuple, features_dict):
     '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys: 
     "hedges_047", "discpart_050".'''
+    # still missing: "hedges_047", "discpart_050"
     
 ## still missing: the two features that run on the whole sentence: 43 type/token ratio and 44 word length
     
@@ -303,28 +318,30 @@ for id in preprocessed_file: #loops through all individual sentences in the file
      tagged_sentence = tag_sentence(sentence) #tags sentence, returning list of tuples with (word, pos)
 
      for word_tuple in tagged_sentence: #based on POS, apply different function, each of which updates feature_dict
-         if word_tuple[1].startswith("V") or word_tuple[1] == "MD": #i.e. all verbs
-             analyze_verb(word_tuple, feature_dict)
-         elif word_tuple[1].startswith("N"): #i.e. all nouns
-             analyze_noun(word_tuple, feature_dict)
+         if word_tuple[1].startswith("V"):
+             analyze_verb(word_tuple, features_dict)
+         elif word_tuple[1] == "MD":
+             analyze_modal(word_tuple, features_dict)
+         elif word_tuple[1].startswith("N"):
+             analyze_noun(word_tuple, features_dict)
          elif word_tuple[1].startswith("RB"):
-             analyze_adverb(word_tuple, feature_dict)
+             analyze_adverb(word_tuple, features_dict)
          elif word_tuple[1].startswith("J"):
-             analyze_adjective(word_tuple, feature_dict)
+             analyze_adjective(word_tuple, features_dict)
          elif word_tuple[1].startswith("I"):
-             analyze_preposition(word_tuple, feature_dict)
+             analyze_preposition(word_tuple, features_dict)
          elif word_tuple[1].startswith("W"):
-             analyze_wh_words(word_tuple, feature_dict)
+             analyze_wh_word(word_tuple, features_dict)
          elif word_tuple[1].startswith("CC"):
-             analyze_conjunction(word_tuple, feature_dict)
+             analyze_conjunction(word_tuple, features_dict)
          elif word_tuple[1].startswith("RP"):
-             analyze_particle(word_tuple, feature_dict)
+             analyze_particle(word_tuple, features_dict)
          elif word_tuple[1].startswith("DT"):
-             analyze_determiner(word_tuple, feature_dict)
+             analyze_determiner(word_tuple, features_dict)
          elif word_tuple[1].startswith("PR"):
-             analyze_pronoun(word_tuple, feature_dict)
+             analyze_pronoun(word_tuple, features_dict)
          elif word_tuple[1].startswith("EX"):
-             analyze_there(word_tuple, feature_dict)
+             analyze_there(word_tuple, features_dict)
     # the order of these elif-statements should probably be based on some Pos-counts extracted from our data, not on intuition
 
     #for testing purposes
