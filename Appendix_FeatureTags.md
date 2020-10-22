@@ -111,16 +111,16 @@
  - feature 57: suasive verbs
  - feature 23: WH-clauses (depend on public/private/suasive verbs)
  - feature 60: THAT deletion (depends on public/private/suasive verbs)
-   PRIMARY VERBS ONLY
+## PRIMARY VERBS ONLY
  - feature 59: contractions
-     'BE' ONLY
+# 'BE' ONLY
  - feature 19: 'be' as main verb 
  - feature 17: agentless passives
  - feature 18: 'by' passives
-     'DO' ONLY
+# 'DO' ONLY
  - feature 12: 'do' as a pro-verb     
  - feature 49: emphatics (belong to multiple word classes)
-   MODAL AUXILIARIES ONLY
+## MODAL AUXILIARIES ONLY
  - feature 52: possibility modals
  - feature 53: necessity modals
  - feature 54: predictive modals
