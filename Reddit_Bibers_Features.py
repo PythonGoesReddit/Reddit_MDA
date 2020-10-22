@@ -19,23 +19,6 @@ import re
 import string
 
 
-
-## function for feature 1: past tense
-def feature_01(tagged_list):
-    """This function takes a list of words with PoS tags as input and returns the number of items
-    that are a verb in the past tense."""
-    counter = 0
-    for item in tagged_list:
-        if item == r"\w+_VBD" or item == r"\w{5,20}ed_\w+":
-        # This will catch a lot of things that aren't really verbs; mostly adjectival uses of past participles like "excited" but some others also.
-        # The second condition is in there probably to improve recall (catch everything), but precision will suffer as it essentially throws out the
-        # probabilistic work of the POS tagger. I'd suggest simply going with the first condition (or perhaps using the second condition but only
-        # if the word itself is not in our standard English vocab list?
-            counter = counter + 1
-        else:
-            pass
-    return(counter)
-
 ## function for feature 2: verbs in the perfect aspect
 def feature_02(tagged_string):
     """This function takes a string of words with PoS tags as input and returns the number of 
@@ -64,41 +47,6 @@ def feature_03(tagged_string):
     counter = matches1
     return(counter)
     
-
-## function for feature 4: place adverbials
-def feature_04(untagged_list):
-    """This function takes a list of words without PoS tags as input and returns the number of items
-    that are place adverbials."""
-    counter = 0
-    placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "around", 
-                 "ashore", "astern", "away", "behind", "below", "beneath", "beside", "downhill",
-                 "downstairs", "downstream", "east", "far", "hereabouts", "indoors", "inland", "inshore",
-                 "inside", "locally", "near", "nearby", "north", "nowhere", "outdoors", "outside", 
-                 "overboard", "overland", "overseas", "south", "underfoot", "underground", "underneath",
-                 "uphill", "upstairs", "upstream", "west"]
-    for item in untagged_list:
-        if item in placelist:
-            counter = counter + 1
-        else:
-            pass
-    return(counter)
-
-## function for feature 5: time adverbials
-def feature_05(untagged_list):
-    """This function takes a list of words without PoS tags as input and returns the number of items
-    that are time adverbials."""
-    counter = 0
-    timelist = ["afterwards", "again", "earlier", "early", "eventually", "formerly",
-                "immediately", "initially", "instantly", "late", "lately", "later", "momentarily", 
-                "now", "nowadays", "once", "originally", "presently", "previously", "recently", 
-                "shortly", "simultaneously", "soon", "subsequently", "today", "tomorrow", "tonight",
-                "yesterday"]
-    for item in untagged_list:
-        if item in timelist:
-            counter = counter + 1
-        else:
-            pass
-    return(counter)
 
 ## function for feature 6: first person pronouns
 def feature_06(untagged_list):
@@ -213,19 +161,6 @@ def feature_13(tagged_string):
     counter = len(matches1) + len(matches2)
     return(counter)
 
-## function for feature 14: Nominalisations
-def feature_14(tagged_list):
-    """This function takes a list of words with PoS tags as input and returns the number of items
-    that are nominalisations."""
-    counter = 0
-    # Round parentheses
-    string1 = r"\w+[tions|tion|ments|ment|ness|ity|nesses|ities]_\w+"
-    for item in tagged_list:
-        if item == string1:
-            counter = counter + 1
-        else:
-            pass
-    return(counter)
 
 ## function for feature 15: gerunds
 ## (edited manually)
@@ -488,41 +423,6 @@ def feature_34(tagged_string):
     counter = matches1
     return counter
 
-## function for feature 35: adv. subordinator, cause
-def feature_35(untagged_list):
-    """This function takes a list of words without PoS tags as input and returns the number of items
-    that are BECAUSE (= adverbial subordinator of cause)."""
-    counter = 0
-    for item in untagged_list:
-        if item == "because":
-            counter = counter + 1
-        else:
-            pass
-    return(counter)
-
-## function for feature 36: adv. subordinator, concession
-def feature_36(untagged_list):
-    """This function takes a list of words without PoS tags as input and returns the number of items
-    that are THOUGH or ALTOUGH (= adverbial subordinators of concession)."""
-    counter = 0
-    for item in untagged_list:
-        if item == "although" or item == "though" or item == "tho":
-            counter = counter + 1
-        else:
-            pass
-    return(counter)
-
-## function for feature 37: adv. subordinator, condition
-def feature_37(untagged_list):
-    """This function takes a list of words without PoS tags as input and returns the number of items
-    that are IF or UNLESS (= adverbial subordinators of condition)."""
-    counter = 0
-    for item in untagged_list:
-        if item == "if" or item == "unless":
-            counter = counter + 1
-        else:
-            pass
-    return(counter)
 
 ## function for feature 38: adv. subordinator, other
 def feature_38(tagged_string):
@@ -539,23 +439,6 @@ def feature_38(tagged_string):
     matches4 = re.findall(string4, tagged_string)
     matches5 = re.findall(string5, tagged_string)
     counter = len(matches1) + len(matches2) + len(matches3) + (len(matches4) - len(matches5))
-    return(counter)
-
-## function for feature 39: preposition
-def feature_39(untagged_list):
-    """This function takes a list of words without PoS tags as input and returns the number of items
-    that are prepositions."""
-    counter = 0
-    prepositionlist = ["against", "amid", "amidst", "among", "amongst", "at", "besides",
-                       "between", "by", "despite", "during", "except", "for", "from", "in", "into", "minus",
-                       "notwithstanding", "of", "off", "on", "onto", "opposite", "out", "per", "plus", "pro",
-                       "re", "than", "through", "throughout", "thru", "to", "toward", "towards", "upon", 
-                       "versus", "via", "with", "within", "without"]
-    for item in untagged_list:
-        if item in prepositionlist:
-            counter = counter + 1
-        else:
-                pass
     return(counter)
 
 ## function for feature 40: attributive adjective
@@ -582,17 +465,6 @@ def feature_41(tagged_string):
     counter = (len(matches1) - len(matches2)) + (len(matches3) - len(matches4))
     return(counter)
 
-## function for feature 42: adverbs
-def feature_42(tagged_list):
-    """This function takes a list of words with PoS tags as input and returns the number of items
-    that are adverbs."""
-    counter = 0
-    for item in tagged_list:
-        if item == r"\w+_[RB|RBR|RBS]":
-            counter = counter + 1
-        else:
-            pass
-    return(counter)
 
 ## function for feature 43: type/token ratio
 def feature_43(untagged_list):
@@ -823,19 +695,6 @@ def feature_57(untagged_list):
             pass
     return(counter)
 
-## function for feature 58: SEEM/APPEAR
-def feature_58(untagged_list):
-    """This function takes a list of words without PoS tags as input and returns the number of items
-    that are the verbs SEEM or APPEAR."""
-    counter = 0
-    string1 = r"appea[r|rs|red|ring]"
-    string2 = r"see[m|ms|ming|med]"
-    for item in untagged_list:
-        if item == string1 or item == string2:
-            counter = counter + 1
-    else:
-        pass
-    return(counter)
 
 ## function for feature 59: contractions
 def feature_59(tagged_string):
@@ -965,41 +824,6 @@ def feature_66(tagged_string):
     counter = len(matches1) + len(matches2) + len(matches3)
     return(counter)
 
-## function for feature 67: analytic negation
-def feature_67(untagged_list):
-    """This function takes a list of words without PoS tags as input and returns the number of items
-    that are NOT (= analytic negation)."""
-    counter = 0
-    for item in untagged_list:
-        if item == "not":
-            counter = counter + 1
-        else:
-            pass
-    return(counter)
-
-## additional feature 1: comparatives 
-def feature_comp(tagged_list):
-    """This function takes a list of words with PoS tags as input and returns the number of comparative
-    adjectives within the list."""
-    counter = 0
-    for item in tagged_list:
-        if item == r"\w+_JJR":
-            counter = counter + 1
-        else:
-            pass
-    return(counter)
-  
-## additional featuer 2: superlatives
-def feature_sup(tagged_list):
-    """This function takes list of words with PoS tags as input and returns the number of superlative
-    adjectives within the list."""
-    counter = 0
-    for item in tagged_list:
-        if item == r"\w+_JJS":
-            counter = counter + 1
-        else:
-            pass
-    return(counter)
 
 
 
