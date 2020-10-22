@@ -104,20 +104,23 @@
  - feature 62: split infinitives
  - feature 205: imperatives
 
-## FULL VERBS ONLY
+### FULL VERBS ONLY
  - feature 58: 'seem'/'appear'
  - feature 55: public verbs
  - feature 56: private verbs
  - feature 57: suasive verbs
  - feature 23: WH-clauses (depend on public/private/suasive verbs)
  - feature 60: THAT deletion (depends on public/private/suasive verbs)
-   PRIMARY VERBS ONLY
- - feature 12: 'do' as a pro-verb
- - feature 19: 'be' as main verb
+### PRIMARY VERBS ONLY
+ - feature 59: contractions
+#### 'BE' ONLY
+ - feature 19: 'be' as main verb 
  - feature 17: agentless passives
  - feature 18: 'by' passives
- - feature 59: contractions
-   MODAL AUXILIARIES ONLY
+#### 'DO' ONLY
+ - feature 12: 'do' as a pro-verb     
+ - feature 49: emphatics (belong to multiple word classes)
+### MODAL AUXILIARIES ONLY
  - feature 52: possibility modals
  - feature 53: necessity modals
  - feature 54: predictive modals
@@ -135,16 +138,22 @@
  - feature 48: amplifiers
  - feature 67: analytic negation
  - feature 46: downtoners
+ - feature 45: conjuncts (belong to multiple word classes)
+ - feature 47: hedges (belong to multiple word classes)
+ - feature 50: discourse particles (belong to multiple word classes)
 
  ## ADJECTIVES
  - feature 40: attributive adjective
  - feature 41: predicative adjective
  - feature 212: comparatives
  - feature 213: superlatives
+ - feature 49: emphatics (belong to multiple word classes)
 
  ## PREPOSITIONS
  - feature 39: preposition
  - feature 61: stranded prepositions
+ - feature 45: conjuncts (belong to multiple word classes)
+ - feature 47: hedges (belong to multiple word classes)
 
  ## NOUNS
  - feature 14: nominalisations
@@ -174,20 +183,19 @@
  - feature 32: WH relatives, object position
  - feature 33: WH relatives, pied piping
  - feature 13: WH-questions
+ - feature 45: conjuncts (belong to multiple word classes)
+ - feature 21: 'that' verb complements
+ - feature 22: 'that' adjective complements
+ - feature 29: 'that' relatives, subject position
+ - feature 30: 'that' relatives, object position
+ 
+ ## EXISTENTIAL 'THERE' (EX)
+ - feature 20: existential 'there'
+ 
+ ## PARTICLES (RP)
+ - feature 47: hedges (belong to multiple word classes)
+ - feature 50: discourse particles (belong to multiple word classes)
 
  ## WHOLE SENTENCE
  - feature 43: type/token ratio
  - feature 44: word length
-
-## UNCLEAR:
- - feature 20: existential 'there' -> what would 'there' be tagged as?
- - feature 21: 'that' verb complements -> what would 'that' be tagged as?
- - feature 22: 'that' adjective complements -> what would 'that' be tagged as?
- - feature 29: 'that' relatives, subject position
- - feature 30: 'that' relatives, object position
- - feature 45: conjuncts (belong to multiple word classes)
- - feature 47: hedges (belong to multiple word classes)
- - feature 49: emphatics (belong to multiple word classes)
- - feature 50: discourse particles -> what would they be tagged as?
-
-
