@@ -5,6 +5,9 @@ import nltk
 import string
 import re
 import string
+import time
+from datetime import timedelta
+start_time = time.time()
 
 #All path variables
 path = "/Users/kylamcconnell/Documents/Github/Reddit_MDA/sample_data/json"
@@ -355,6 +358,6 @@ for id in preprocessed_file: #loops through all individual sentences in the file
 # General open questions
 ## Question: What level of precision for the feature-identifying functions do we want to set in advance? 
 ## How many comments from how many months should inspect to determine the level of precision?
-
+print(timedelta(seconds=time.time() - start_time))
 
 
