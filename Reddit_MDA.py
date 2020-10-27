@@ -151,6 +151,27 @@ def tag_sentence(sentence):
     tagged_sentence = nltk.pos_tag(tokens)
     return tagged_sentence
 
+    
+## Definition of stopword lists and checkword lists for following POS-functions
+placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "around", 
+                 "ashore", "astern", "away", "behind", "below", "beneath", "beside", "downhill",
+                 "downstairs", "downstream", "east", "far", "hereabouts", "indoors", "inland", "inshore",
+                 "inside", "locally", "near", "nearby", "north", "nowhere", "outdoors", "outside", 
+                 "overboard", "overland", "overseas", "south", "underfoot", "underground", "underneath",
+                 "uphill", "upstairs", "upstream", "west"]
+timelist = ["afterwards", "again", "earlier", "early", "eventually", "formerly",
+                "immediately", "initially", "instantly", "late", "lately", "later", "momentarily", 
+                "now", "nowadays", "once", "originally", "presently", "previously", "recently", 
+                "shortly", "simultaneously", "soon", "subsequently", "today", "tomorrow", "tonight",
+                "yesterday"]
+firstpersonlist = ["i", "me", "we", "us", "my", "our", "myself", "ourselves"]
+secondpersonlist = ["you", "yourself", "your", "yourselves"]
+thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "himself","herself", "themselves"]
+indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "everything", "nobody", "none", "nothing", "nowhere", "somebody", "someone", "something"]
+
+
+## POS-functions
+
 def analyze_verb(word_tuple, features_dict): 
     # is this really what we need to identify most complex features? I thought we go over every word in the sentence and once a word matches the POS tag XY,
     # we then start a function that again takes the whole sentence as input, since for most features we also need information on the surrounding words?
@@ -189,17 +210,6 @@ def analyze_adverb(word_tuple, features_dict):
     "advplace_004", "advtime_005", "advsubcause_035", "advsubconc_036", "advsubcond_037", "advsubother_038", "adverbs_042", "conjuncts_045",
     "downtoners_046", "hedges_047", "amplifiers_048", "discpart_050", "negana_067".'''
     features_dict["adverbs_042"] += 1
-    placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "around", 
-                 "ashore", "astern", "away", "behind", "below", "beneath", "beside", "downhill",
-                 "downstairs", "downstream", "east", "far", "hereabouts", "indoors", "inland", "inshore",
-                 "inside", "locally", "near", "nearby", "north", "nowhere", "outdoors", "outside", 
-                 "overboard", "overland", "overseas", "south", "underfoot", "underground", "underneath",
-                 "uphill", "upstairs", "upstream", "west"]
-    timelist = ["afterwards", "again", "earlier", "early", "eventually", "formerly",
-                "immediately", "initially", "instantly", "late", "lately", "later", "momentarily", 
-                "now", "nowadays", "once", "originally", "presently", "previously", "recently", 
-                "shortly", "simultaneously", "soon", "subsequently", "today", "tomorrow", "tonight",
-                "yesterday"]
     if word_tuple[0] == "because":
         features_dict["advsubcause_035"] += 1
     elif word_tuple[0] == "although" or word_tuple[0] == "though" or word_tuple[0] == "tho":
@@ -249,10 +259,6 @@ def analyze_noun(word_tuple, features_dict):
 def analyze_pronoun(word_tuple, features_dict):
     '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys:
     "profirpers_006", "prosecpers_007", "prothirper_008", "proit_009", "prodemons_010", "proindef_011", "contractions_059".'''
-    firstpersonlist = ["i", "me", "we", "us", "my", "our", "myself", "ourselves"]
-    secondpersonlist = ["you", "yourself", "your", "yourselves"]
-    thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "himself","herself", "themselves"]
-    indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "everything", "nobody", "none", "nothing", "nowhere", "somebody", "someone", "something"]
     if word_tuple[0] == "it":
         features_dict["proit_009"] += 1
     elif word_tuple[0] in firstpersonlist:
@@ -262,7 +268,7 @@ def analyze_pronoun(word_tuple, features_dict):
     elif word_tuple[0] in thirdpersonlist:
         features_dict["prothirdper_008"] += 1
     elif word_tuple[0] in indefpronounlist:
-        features_dicht["proindef_011"] += 1    
+        features_dict["proindef_011"] += 1    
     # still missing: "prodemons_010", "contractions_059"
 
 def analyze_conjunction(word_tuple, features_dict):
