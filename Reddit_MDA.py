@@ -9,7 +9,6 @@ import time
 from datetime import timedelta
 start_time = time.time()
 
-#All path variables
 path = "/Users/kylamcconnell/Documents/Github/Reddit_MDA/sample_data/json"
 
 # Preprocessing functions
@@ -191,7 +190,7 @@ def analyze_verb(word_tuple, features_dict):
         features_dict["vpastpart_026"] += 1
     if word_tuple[0].startswith("seem") or word_tuple[0].startswith("appear"):
         features_dict["vseemappear_058"] += 1
-    if word_tuple[0].startswith():
+    #if word_tuple[0].startswith():
     # 55, 56, 57 -> 23, 60
     
     # still missing: "vperfect_002", "whclause_023", "vpastwhiz_027", "vpresentwhiz_028",
@@ -222,7 +221,7 @@ def analyze_adverb(word_tuple, features_dict):
         features_dict["advplace_004"] += 1
     elif word_tuple[0] in timelist:
         features_dict["advtime_005"] += 1
-    elif 
+    #elif 
     # still missing: "advsubother_038", "conjuncts_045", "downtoners_046", "hedges_047", "amplifiers_048", "discpart_050"
  
 def analyze_adjective(word_tuple, features_dict):
@@ -285,14 +284,14 @@ def analyze_wh_word(word_tuple, features_dict):
     '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys:
     "whquest_013", "thatvcom_021", "thatacom_022", "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032", 
     "whrepied_033", "sentencere_034", "conjuncts_045".'''
-    if word_tuple[0] == "which" # and previousword_tuple[0] == ",":
+    if word_tuple[0] == "which": # and previousword_tuple[0] == ",":
         features_dict["sentencere_034"] += 1
-    if word_tuple[0] == "that":
+    #if word_tuple[0] == "that":
         # 21
         # 22
         # 29
         # 30
-    elif 
+    #elif 
     # still missing: "whquest_013", "thatvcom_021", "thatacom_022", "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032", "whrepied_033", "conjuncts_045"
 
 def analyze_there(word_tuple, features_dict):
@@ -308,12 +307,12 @@ def analyze_particle(word_tuple, features_dict):
 ## still missing: the two features that run on the whole sentence: 43 type/token ratio and 44 word length
     
 # Output functions
-## NEEDED: function to write a matrix of text_id * variables - Kyla?
-## NEEDED: function to write meta-info for each text - Kyla
+## NEEDED: function to write a matrix of text_id * variables
+## NEEDED: function to write meta-info for each text 
 
 
 # CALL FUNCTIONS DOWN HERE
-## NEEDED: Multiprocessing set up -- Axel & Kyla ?
+## NEEDED: Multiprocessing set up 
 
 preprocessed_file = open_reddit_json(path) #reads in file, separates into sentences, initializes feature dict
 
@@ -326,31 +325,32 @@ for id in preprocessed_file: #loops through all individual sentences in the file
      feature_dict = sentence_dict["features"] #retrieves feature_dict for the given sentence
      tagged_sentence = tag_sentence(sentence) #tags sentence, returning list of tuples with (word, pos)
 
-     for word_tuple in tagged_sentence: #based on POS, apply different function, each of which updates feature_dict
-         if word_tuple[1].startswith("V"):
-             analyze_verb(word_tuple, features_dict)
-         elif word_tuple[1] == "MD":
-             analyze_modal(word_tuple, features_dict)
-         elif word_tuple[1].startswith("N"):
-             analyze_noun(word_tuple, features_dict)
-         elif word_tuple[1].startswith("RB"):
-             analyze_adverb(word_tuple, features_dict)
-         elif word_tuple[1].startswith("J"):
-             analyze_adjective(word_tuple, features_dict)
-         elif word_tuple[1].startswith("I"):
-             analyze_preposition(word_tuple, features_dict)
-         elif word_tuple[1].startswith("W"):
-             analyze_wh_word(word_tuple, features_dict)
-         elif word_tuple[1].startswith("CC"):
-             analyze_conjunction(word_tuple, features_dict)
-         elif word_tuple[1].startswith("RP"):
-             analyze_particle(word_tuple, features_dict)
-         elif word_tuple[1].startswith("DT"):
-             analyze_determiner(word_tuple, features_dict)
-         elif word_tuple[1].startswith("PR"):
-             analyze_pronoun(word_tuple, features_dict)
-         elif word_tuple[1].startswith("EX"):
-             analyze_there(word_tuple, features_dict)
+     for index in len(tagged_sentence): #based on POS, apply different function, each of which updates feature_dict
+         current_tag = tagged_sentence[index][1]
+         if current_tag.startswith("V"):
+             analyze_verb(index, sentence_dict)
+         elif current_tag == "MD":
+             analyze_modal(index, tagged_sentence, features_dict)
+         elif current_tag.startswith("N"):
+             analyze_noun(index, tagged_sentence, features_dict)
+         elif current_tag.startswith("RB"):
+             analyze_adverb(index, tagged_sentence,features_dict)
+         elif current_tag.startswith("J"):
+             analyze_adjective(index, tagged_sentence, features_dict)
+         elif current_tag.startswith("I"):
+             analyze_preposition(index, tagged_sentence, features_dict)
+         elif current_tag.startswith("W"):
+             analyze_wh_word(index, tagged_sentence,features_dict)
+         elif current_tag.startswith("CC"):
+             analyze_conjunction(index, tagged_sentence,features_dict)
+         elif current_tag.startswith("RP"):
+             analyze_particle(index, tagged_sentence,features_dict)
+         elif current_tag.startswith("DT"):
+             analyze_determiner(index, tagged_sentence, features_dict)
+         elif current_tag.startswith("PR"):
+             analyze_pronoun(index, tagged_sentence, features_dict)
+         elif current_tag.startswith("EX"):
+             analyze_there(index, tagged_sentence, features_dict)
     # the order of these elif-statements should probably be based on some Pos-counts extracted from our data, not on intuition
 
     #for testing purposes
