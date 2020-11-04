@@ -177,7 +177,7 @@ def analyze_verb(index, tagged_sentence, features_dict):
     "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
     "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''    
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    if word_tuple[1] == "VBD": # here, we intentionally only use the first of the two conditions that Biber proposes for finding past tense verbs
+    if word_tuple[1] == "VBD":
         features_dict["vpast_001"] += 1
     elif word_tuple[1] == "VBP" or word_tuple[1] == "VBZ": # this needs a lookahead function to check that it is not preceeded by 'to'
         features_dict["vpresent_003"] += 1
@@ -238,7 +238,7 @@ def analyze_preposition(index, tagged_sentence, features_dict):
     '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys: 
     "advsubcause_035", "advsubconc_036", "advsubcond_037", "advsubother_038", "prepositions_039", 
     "conjuncts_045", "hedges_047", "strandprep_061".'''
-    features_dict["prepositions_039"] += 1 # here, we also deviate from Biber, who suggests a list of prepositions instead of using the POS-tag
+    features_dict["prepositions_039"] += 1 
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
     if word_tuple[0] == "because":
         features_dict["advsubcause_035"] += 1
