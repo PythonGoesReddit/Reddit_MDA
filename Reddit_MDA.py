@@ -177,11 +177,16 @@ def analyze_verb(index, tagged_sentence, features_dict):
     "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
     "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''    
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    if index < 0:
+        prev_tuple = tagged_sentence[index - 1]
+    else:
+        prev_tuple = ("NA", "NA")
     if word_tuple[1] == "VBD":
         features_dict["vpast_001"] += 1
-    elif word_tuple[1] == "VBP" or word_tuple[1] == "VBZ": # this needs a lookahead function to check that it is not preceeded by 'to'
+    elif (word_tuple[1] == "VBP" or word_tuple[1] == "VBZ") and tagged_sentence[index - 1][0] != "to": # this needs a lookahead function to check that it is not preceeded by 'to'
+        print(tagged_sentence[index-1][0])
         features_dict["vpresent_003"] += 1
-    elif word_tuple[1] == "VB": #is this the right form for infinitives?
+    elif word_tuple[1] == "VVI": 
         features_dict["vinfinitive_024"] += 1
     elif word_tuple[1] == "VBG": #gerund or present participle.. is this ok? or do we have to separate these
         features_dict["vpresentpart_025"] += 1
