@@ -177,7 +177,7 @@ WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", 
        "whenever", "whatever", "however"]
 discpart = ["well", "now", "anyway", "anyhow", "anyways"]
 QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
-ALL-P = [".", "!", "?", ":", ";", ","]  # here, Biber also includes the long dash -- , but I am unsure how this would be rendered
+ALLP = [".", "!", "?", ":", ";", ","]  # here, Biber also includes the long dash -- , but I am unsure how this would be rendered
 downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "only", "partially", "partly", "practically", "scarcely", "slightly", "somewhat"]
 amplifierlist = ["absolutely", "altogether", "completely", "enormously", "entirely", "extremely", "fully", "greatly", "highly", 
                  "intensely", "perfectly", "strongly", "thoroughly", "totally", "utterly", "very"]
@@ -297,7 +297,7 @@ def analyze_preposition(index, tagged_sentence, features_dict):
     elif word_tuple[0] == "if" or word_tuple[0] == "unless":
         features_dict["advsubcond_037"] += 1
         
-    elif tuple_plus1[0] in ALL-P:
+    elif tuple_plus1[0] in ALLP:
         features_dict["strandprep_061"] += 1
     # still missing: "advsubother_038", "conjuncts_045", "hedges_047"
     
