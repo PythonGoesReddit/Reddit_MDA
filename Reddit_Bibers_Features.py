@@ -338,26 +338,6 @@ def feature_32(tagged_string):
     counter = len(matches1)
     return(counter)  
 
-## function for feature 33: WH relatives, pied piping
-def feature_33(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns
-    the number of wh-relatives with pied piping."""
-    string1 = r"\b\w+_IN\s[who|whom|whose|which]_"
-    matches1 = re.findall(string1, tagged_string)
-    counter = len(matches1)
-    return(counter)
-
-## function for feature 34: sentence relatives
-## (edited manually)
-def feature_34(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns
-    the number of sentence relatives."""
-    string1 = r"_,\swhich_"
-    matches1 = re.findall(string1, tagged_string)
-    counter = matches1
-    return counter
-
-
 ## function for feature 38: adv. subordinator, other
 def feature_38(tagged_string):
     """This function takes a string of words with PoS tags as input and returns the number of items
@@ -374,31 +354,6 @@ def feature_38(tagged_string):
     matches5 = re.findall(string5, tagged_string)
     counter = len(matches1) + len(matches2) + len(matches3) + (len(matches4) - len(matches5))
     return(counter)
-
-## function for feature 40: attributive adjective
-def feature_40(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns the number of items
-    that are attributive adjectives."""
-    string1 = r"_[JJ|JJR|JJS]\s\w+_[JJ|JJR|JJS|NN|NNS]\b"
-    matches1 = re.findall(string1, tagged_string)
-    counter = len(matches1)
-    return(counter)
-
-## function for feature 41: predicative adjective
-def feature_41(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns
-    the number of predicative adjectives."""
-    string1 = r"\b[be|am|are|is|was|were|been|being]_\w+\s\w+_[JJ|JJR|JJS]\s\w+_"
-    string2 = r"\b[be|am|are|is|was|were|been|being]_\w+\s\w+_[JJ|JJR|JJS]\s\w+_[JJ|JJR|JJS|RB|RBR|RBS|NN|NNP|NNPS|NNS]\b"
-    string3 = r"\b[be|am|are|is|was|were|been|being]_\w+\s\w+_[JJ|JJR|JJS]\s\w+_[RB|RBR|RBS]\s\w+_"
-    string4 = r"\b[be|am|are|is|was|were|been|being]_\w+\s\w+_[JJ|JJR|JJS]\s\w+_[RB|RBR|RBS]\s\w+_[JJ|JJR|JJS|NN|NNP|NNS|NNPS]\b"
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    matches4 = re.findall(string4, tagged_string)
-    counter = (len(matches1) - len(matches2)) + (len(matches3) - len(matches4))
-    return(counter)
-
 
 ## function for feature 43: type/token ratio
 def feature_43(untagged_list):
@@ -519,28 +474,6 @@ def feature_49(tagged_string):
     matches5 = re.findall(string5, tagged_string)
     matches6 = re.findall(string6, tagged_string)
     counter = len(matches1) + len(matches2) + len(matches3) + len(matches4) + len(matches5) + len(matches6)
-    return(counter)
-
-## function for feature 50: discourse particles
-def feature_50(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns the number of items
-    that are discourse particles."""
-    string1 = r"_\.\s[well|now|anyway|anyhow|anyways]_"
-    matches1 = re.findall(string1, tagged_string)
-    counter = len(matches1)
-    return(counter)
-
-## function for feature 51: demonstratives
-def feature_51(untagged_list):
-    """This function takes a list of words without PoS tags as input and returns the number of items
-    that are demonstratives."""
-    counter = 0
-    demonstrativelist = ["that", "this", "these", "those"]
-    for item in untagged_list:
-        if item in demonstrativelist:
-            counter = counter + 1
-        else:
-            pass
     return(counter)
 
 ## function for feature 52: possibility modals
@@ -666,15 +599,6 @@ def feature_60(tagged_string):
 ## PUB/PRV/SUA + PRO/N + AUX/V
 ## PUB/PRV/SUA + ADJ/ADV/DET/POSSPRO + (ADJ) + N + AUX/V
 
-## function for feature 61: stranded prepositions
-def feature_61(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns the number of items
-    that are stranded prepositions."""
-    string1 = r"_IN\s\S_."
-    matches1 = re.findall(string1, tagged_string)
-    counter = len(matches1)
-    return(counter)
-
 ## function for feature 62: split infinitives
 def feature_62(tagged_string):
     """This function takes a string of words with PoS tags as input and returns the number of items
@@ -700,76 +624,6 @@ def feature_63(tagged_string):
     matches4 = re.findall(string4, tagged_string)
     counter = len(matches1) + len(matches2) + len(matches3) + len(matches4)
     return(counter)
-
-## function for feature 64: phrasal coordination
-def feature_64(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns
-    the number of phrasal coordinations."""
-    string1 = r"_[NN|NNS|NNP|NNPS]\sand_\w+\s\w+_[NN|NNS|NNP|NNPS]\b"
-    string2 = r"_[RB|RBR|RBS]\sand_\w+\s\w+_[RB|RBR|RBS]\b"
-    string3 = r"_[JJ|JJR|JJS]\sand_\w+\s\w+_[JJ|JJR|JJS]\b"
-    string4 = r"_[VB|VBD|VBG|VBN|VBP|VBZ]\sand_\w+\s\w+_[VB|VBD|VBG|VBN|VBP|VBZ]\b"
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    matches4 = re.findall(string4, tagged_string)
-    counter = len(matches1) + len(matches2) + len(matches3) + len(matches4)
-    return(counter)
-
-## function for feature 65: non-phrasal coordination
-## this function still needs work!
-def feature_65(tagged_string):
-    """This function takes a string of words with PoS tags as input and return the 
-    number of non-phrasal coordinations within the string."""
-    string1 = r"_,\sand_\w+\s[it|so|then|you|I|we|he|she|they|that|this|these|thsoe]_"
-    string2 = r"_,\sand_\w+\s\w+_[]"
-    string3 = r"_,\sand_\w+\sthere_\w+\s[be|am|are|is|was|were|been|being]_"
-    string4 = r"_.\sand_\w+\s"
-    string5 = r"\band_\w+\s[who|whom|whose|which|what|where|when|how|whether|why||whoever|whomever|whichever|wherever|whenever|whatever|however]_"
-    string6 = r"\band_\w+\s[well|now|anyway|anyhow|anyways|because|although|though|if|unless|since|while|whilst|whereupon|whereas|whereby]_"
-    string7 = r"\band_\w+\s[inasmuch|forasmuch|insofar|onsomuch]_\w+\sas_"
-    string8 = r"\band_\w+\sas_\w+\s[long|soon]_\w+\sas_"
-    string9 = r"\band_\w+\s[so|such]_\w+\sthat_\w+\s\w+_"
-    string10 = r"\band_\w+\s[so|such]_\w+\sthat_\w+\s\w+_[NN|NNS|NNP|NNPS|JJ|JJR|JJS]\b"
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    matches4 = re.findall(string4, tagged_string)
-    matches5 = re.findall(string5, tagged_string)
-    matches6 = re.findall(string6, tagged_string)
-    matches7 = re.findall(string7, tagged_string)
-    matches8 = re.findall(string8, tagged_string)
-    matches9 = re.findall(string9, tagged_string)
-    matches10 = re.findall(string10, tagged_string)   
-    counter = len(matches1) + len(matches2) + len(matches3) + len(matches4) + len(matches5) + len(matches6) + len(matches7) + len(matches8) + (len(matches9) - len(matches10))
-    return(counter)
-## and + conjunct -> see feature 45
-
-## function for feature 66: synthetic negation
-def feature_66(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns the number of items
-    that are synthetic negation."""
-    string1 = r"\b[neither|nor]_\w+\b"
-    string2 = r"\b[no]_\w+\s\w+_[JJ|JJR|JJS|NN|NNS|NNP|NNPS]\b"
-    string3 = r"\b[no]_\w+\s[each|all|every|many|much|few|several|some|any]_"
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    counter = len(matches1) + len(matches2) + len(matches3)
-    return(counter)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

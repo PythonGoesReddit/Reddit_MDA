@@ -167,24 +167,32 @@ firstpersonlist = ["i", "me", "we", "us", "my", "our", "myself", "ourselves"]
 secondpersonlist = ["you", "yourself", "your", "yourselves"]
 thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "himself","herself", "themselves"]
 indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "everything", "nobody", "none", "nothing", "nowhere", "somebody", "someone", "something"]
-
+punct_final = [".", "!", "?", ":", ";"] # here, Biber also includes the long dash -- , but I am unsure how this would be rendered
+belist = ["be", "am", "are", "is", "was", "were", "been", "being"]
+subjpro = ["I", "we", "he", "she", "they"]
+DEM = ["that", "this", "these", "those"]
+WHP = ["who", "whom", "whose", "which"]
+WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", "whichever", 
+       "whenever", "whatever", "however"]
+discpart = ["well", "now", "anyway", "anyhow", "anyways"]
+QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
+ALL-P = [".", "!", "?", ":", ";", ","]  # here, Biber also includes the long dash -- , but I am unsure how this would be rendered
 
 ## POS-functions
 
 def analyze_verb(index, tagged_sentence, features_dict): 
-    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys: "vpast_001", "vperfect_002", "vpresent_003", 
+    '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: "vpast_001", "vperfect_002", "vpresent_003", 
     "whclause_023", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
     "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
     "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''    
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
     if index < 0:
-        prev_tuple = tagged_sentence[index - 1]
+        tuple_minus1 = tagged_sentence[index - 1]
     else:
-        prev_tuple = ("NA", "NA")
+        tuple_minus1 = ("NA", "NA")
     if word_tuple[1] == "VBD":
         features_dict["vpast_001"] += 1
-    elif (word_tuple[1] == "VBP" or word_tuple[1] == "VBZ") and tagged_sentence[index - 1][0] != "to": # this needs a lookahead function to check that it is not preceeded by 'to'
-        print(tagged_sentence[index-1][0])
+    elif (word_tuple[1] == "VBP" or word_tuple[1] == "VBZ") and tuple_minus1[0] != "to":
         features_dict["vpresent_003"] += 1
     elif word_tuple[1] == "VVI": 
         features_dict["vinfinitive_024"] += 1
@@ -201,19 +209,28 @@ def analyze_verb(index, tagged_sentence, features_dict):
     # "vpublic_055", "vprivate_056", "vsuasive_057", "contractions_059", "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".
 
 def analyze_modal(index, tagged_sentence, features_dict):
-    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys: 
+    '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "pverbdo_012", "passagentl_017", "passby_018","mainvbe_019",
     "emphatics_049", "modalsposs_052", "modalsness_053", "modalspred_054", "contractions_059", 
     "vimperative_205".'''
+    word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    if index < 0:
+        tuple_minus1 = tagged_sentence[index - 1]
+    else:
+        tuple_minus1 = ("NA", "NA")
     # still missing: "pverbdo_012", "passagentl_017", "passby_018","mainvbe_019", "emphatics_049", "modalsposs_052", "modalsness_053",
     # "modalspred_054", "contractions_059", vimperative_205".
 
 def analyze_adverb(index, tagged_sentence, features_dict):
-    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys:
+    '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "advplace_004", "advtime_005", "advsubcause_035", "advsubconc_036", "advsubcond_037", "advsubother_038", "adverbs_042", "conjuncts_045",
     "downtoners_046", "hedges_047", "amplifiers_048", "discpart_050", "negana_067".'''
     features_dict["adverbs_042"] += 1
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    if index < 0:
+        tuple_minus1 = tagged_sentence[index - 1]
+    else:
+        tuple_minus1 = ("NA", "NA")
     if word_tuple[0] == "because":
         features_dict["advsubcause_035"] += 1
     elif word_tuple[0] == "although" or word_tuple[0] == "though" or word_tuple[0] == "tho":
@@ -230,43 +247,73 @@ def analyze_adverb(index, tagged_sentence, features_dict):
     # still missing: "advsubother_038", "conjuncts_045", "downtoners_046", "hedges_047", "amplifiers_048", "discpart_050"
  
 def analyze_adjective(index, tagged_sentence, features_dict):
-    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys:
+    '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "adjattr_040", "adjpred_041", "emphatics_049", "comparatives_212", "superlatives_213".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    tuple_plus1 = tagged_sentence[index + 1]
+    tuple_plus2 = tagged_sentence[index + 2]
+    if index < 0:
+        tuple_minus1 = tagged_sentence[index - 1]
+    else:
+        tuple_minus1 = ("NA", "NA")
     if word_tuple[1] == "JJR":
         features_dict["comparatives_212"] += 1
     elif word_tuple[1] == "JJS":
         features_dict["superlatives_213"] += 1
-    # still missing: "adjattr_040", "adjpred_041", "emphatics_049"
+    elif tuple_minus1[0] in belist:
+        if not tuple_plus1[1].startswith("NN") and not tuple_plus1[1].startswith("JJ") and not tuple_plus1[1].startswith("RB"):
+            features_dict["adjpred_041"] += 1
+        elif tuple_plus1[1].startswith("JJ"):
+            if not tuple_plus2[1].startswith("JJ") and not tuple_plus2[1].startswith("NN"):
+                features_dict["adjpred_041"] += 1
+    elif tuple_plus1[1].startswith("JJ") or tuple_plus1[1].startswith("NN"):
+        features_dict["adjattr_040"] += 1
+    # still missing: "emphatics_049"
       
 def analyze_preposition(index, tagged_sentence, features_dict):
-    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys: 
+    '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "advsubcause_035", "advsubconc_036", "advsubcond_037", "advsubother_038", "prepositions_039", 
     "conjuncts_045", "hedges_047", "strandprep_061".'''
     features_dict["prepositions_039"] += 1 
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    tuple_plus1 = tagged_sentence[index + 1]
+    if index < 0:
+        tuple_minus1 = tagged_sentence[index - 1]
+    else:
+        tuple_minus1 = ("NA", "NA")
     if word_tuple[0] == "because":
         features_dict["advsubcause_035"] += 1
     elif word_tuple[0] == "although" or word_tuple[0] == "though" or word_tuple[0] == "tho":
         features_dict["advsubconc_036"] += 1
     elif word_tuple[0] == "if" or word_tuple[0] == "unless":
         features_dict["advsubcond_037"] += 1
-    # still missing: "advsubother_038", "conjuncts_045", "hedges_047", "strandprep_061"
+        
+    elif tuple_plus1[0] in ALL-P:
+        features_dict["strandprep_061"] += 1
+    # still missing: "advsubother_038", "conjuncts_045", "hedges_047"
     
 def analyze_noun(index, tagged_sentence, features_dict):
-    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys:
+    '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "nominalis_014", "gerund_015", "nouns_016".'''
     features_dict["nouns_016"] += 1
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    if index < 0:
+        tuple_minus1 = tagged_sentence[index - 1]
+    else:
+        tuple_minus1 = ("NA", "NA")
     if word_tuple[0].endswith("ing") or word_tuple[0].endswith("ings"):
         features_dict["gerund_015"] += 1 # this is edited manually by Biber
     if word_tuple[0].endswith("tions") or word_tuple[0].endswith("tion") or word_tuple[0].endswith("ments") or word_tuple[0].endswith("ment") or word_tuple[0].endswith("ness") or word_tuple[0].endswith("ity") or word_tuple[0].endswith("nesses") or word_tuple[0].endswith("ities"):
         features_dict["nominalis_014"] += 1
         
 def analyze_pronoun(index, tagged_sentence, features_dict):
-    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys:
+    '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "profirpers_006", "prosecpers_007", "prothirper_008", "proit_009", "prodemons_010", "proindef_011", "contractions_059".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    if index < 0:
+        tuple_minus1 = tagged_sentence[index - 1]
+    else:
+        tuple_minus1 = ("NA", "NA")
     if word_tuple[0] == "it":
         features_dict["proit_009"] += 1
     elif word_tuple[0] in firstpersonlist:
@@ -280,39 +327,96 @@ def analyze_pronoun(index, tagged_sentence, features_dict):
     # still missing: "prodemons_010", "contractions_059"
 
 def analyze_conjunction(index, tagged_sentence, features_dict):
-    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys:
+    '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "coordphras_064", "coordnonp_065".'''
-    # still missing: "coordphras_064", "coordnonp_065"
- 
+    word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    tuple_plus1 = tagged_sentence[index + 1]
+    tuple_plus2 = tagged_sentence[index + 1]
+    if index < 0:
+        tuple_minus1 = tagged_sentence[index - 1]
+    else:
+        tuple_minus1 = ("NA", "NA")
+    if word_tuple[0] == "and":
+        if tuple_minus1[1].startswith("NN") and tuple_plus1[1].startswith("NN"):
+            features_dict["coordphras_064"] += 1
+        elif tuple_minus1[1].startswith("RB") and tuple_plus1[1].startswith("RB"):
+            features_dict["coordphras_064"] += 1
+        elif tuple_minus1[1].startswith("JJ") and tuple_plus1[1].startswith("JJ"):
+            features_dict["coordphras_064"] += 1
+        elif tuple_minus1[1].startswith("VB") and tuple_plus1[1].startswith("VB"):
+            features_dict["coordphras_064"] += 1
+        elif tuple_minus1[0] == ",":
+            if tuple_plus1[0] == "it" or tuple_plus1[0] == "so" or tuple_plus1[0] == "you" or tuple_plus1[0] == "then":
+                features_dict["coordnonp_065"] += 1
+            elif tuple_plus1[1] in subjpro or tuple_plus1[1] in DEM: # So far, this identification of demonstrative pronoun is likely to be too crude. Maybe re-use function for feature 10?
+                features_dict["coordnonp_065"] += 1
+            elif tuple_plus1[0] == "there" and tuple_plus2[0] in belist:
+                features_dict["coordnonp_065"] += 1
+        elif tuple_minus1[0] in punct_final: 
+            features_dict["coordnonp_065"] += 1
+        elif tuple_plus1[0] in WHP or tuple_plus1[0] in WHO or tuple_plus1[0] in discpart:
+            features_dict["coordnonp_065"] += 1
+        elif tuple_plus1[0] : #adverbial subordinator (nos. 35-8)
+            features_dict["coordnonp_065"] += 1
+        elif tuple_plus1[0] : #conjunct (no. 45)
+            features_dict["coordnonp_065"] += 1
+    # still missing: "coordnonp_065" (only for 'and' followed by adverbial subordinator or conjunct, depend on other features)
+
+
 def analyze_determiner(index, tagged_sentence, features_dict):
-    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys:
+    '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "demonstr_051", "negsyn_066".'''
-    # still missing: "demonstr_051", "negsyn_066"
-    
+    word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    tuple_plus1 = tagged_sentence[index + 1]
+    if word_tuple[0] in DEM:
+        features_dict["demonstr_051"] += 1
+    elif word_tuple[0] == "neither" or word_tuple[0] == "nor":
+        features_dict["negsyn_066"] += 1
+    elif word_tuple[0] == "no":
+        if tuple_plus1[1].startswith("NN") or tuple_plus1[1].startswith("JJ"):
+            features_dict["negsyn_066"] += 1
+        elif tuple_plus1[0] in QUAN:
+            features_dict["negsyn_066"] += 1
+     
 def analyze_wh_word(index, tagged_sentence, features_dict):
-    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys:
+    '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "whquest_013", "thatvcom_021", "thatacom_022", "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032", 
     "whrepied_033", "sentencere_034", "conjuncts_045".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    if word_tuple[0] == "which": # and previousword_tuple[0] == ",":
-        features_dict["sentencere_034"] += 1
+    if index < 0:
+        tuple_minus1 = tagged_sentence[index - 1]
+    else:
+        tuple_minus1 = ("NA", "NA")
+    if word_tuple[0] in WHP:
+        if tuple_minus1[1] == "IN":
+            features_dict["whrepied_033"] += 1
+    elif word_tuple[0] == "which" and tuple_minus1[0] == ",":
+        features_dict["sentencere_034"] += 1 # edited manually by Biber
     #if word_tuple[0] == "that":
         # 21
         # 22
         # 29
         # 30
     #elif 
-    # still missing: "whquest_013", "thatvcom_021", "thatacom_022", "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032", "whrepied_033", "conjuncts_045"
+    # still missing: "whquest_013", "thatvcom_021", "thatacom_022", "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032", "conjuncts_045"
 
 def analyze_there(index, tagged_sentence, features_dict):
-    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys: 
+    '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "exthere_020".'''
     features_dict["exthere_020"] += 1
     
 def analyze_particle(index, tagged_sentence, features_dict):
-    '''Takes a tagged word (tuple) and dictionary of all possible tags and updates relevant keys: 
+    '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "hedges_047", "discpart_050".'''
-    # still missing: "hedges_047", "discpart_050"
+    word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    if index < 0:
+        tuple_minus1 = tagged_sentence[index - 1]
+    else:
+        tuple_minus1 = ("NA", "NA")
+    if word_tuple[0] in discpart and tuple_minus1[0] in punct_final:
+        features_dict["discpart_050"] += 1
+    elif 
+    # still missing: "hedges_047"
     
 ## still missing: the two features that run on the whole sentence: 43 type/token ratio and 44 word length
     
