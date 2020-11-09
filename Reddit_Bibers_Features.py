@@ -110,20 +110,6 @@ def feature_15(tagged_list):
             pass
     return(counter) 
 
-## function for feature 16: nouns
-def feature_16(tagged_list):
-    """This function takes a list of words with PoS tags as input and returns the number of items
-    that are nouns (excluding nominalisations)."""
-    counter = 0
-    string1 = r"\b\w+_NNS?\b"
-    string2 = r"\b\w+[tions|tion|ments|ment|ness|ity|nesses|ities]_\w+\b"
-    for item in tagged_list:
-        if item == string1 and not item == string2:
-            counter = counter + 1
-        else:
-            pass
-        return(counter)    
-
 ## function for feature 17: agentless passives
 def feature_17(tagged_string):
     """This function takes a string of words with PoS tags as input and returns the 
@@ -163,19 +149,6 @@ def feature_19(tagged_string):
     counter = len(matches1)
     return(counter) 
 
-## function for feature 20: existential THERE
-def feature_20(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns the number of items
-    that are existential 'there'."""
-    string1 = r"\bthere_\w+\s[am|are|is|was|were|been|be|beign]_"
-    string2 = r"\bthere_\w+\s\w+_\w+\s[am|are|is|was|were|been|be|being]_"
-    string3 = r"\bthere_\w+\s's"
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    counter = len(matches1) + len(matches2) + len(matches3)
-    return(counter)
-
 ## function for feature 21: THAT verb complements
 ## this function still needs work!
 def feature_21(tagged_string):
@@ -194,16 +167,6 @@ def feature_21(tagged_string):
 ## PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is not V/AUX/CL-p/and)
 ## PUB/PRV/SUA + PREP + xxx + N + that (where xxx is and number of words but 
 ## not xxx = N)
-    
-
-## function for feature 22: THAT adjective complements
-def feature_22(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns the number of items
-    that are "that" followed by adjectival complements."""
-    string1 = r"\b\w+_[JJ|JJR|JJS]\sthat"
-    matches1 = re.findall(string1, tagged_string)
-    counter = len(matches1)
-    return(counter)
 
 ## function for feature 23: WH clauses
 ## this function still needs work!
@@ -245,7 +208,7 @@ def feature_24(tagged_string):
     return(counter)
 
 ## function for feature 25: present participial clauses
-## (edited manually)    
+## (edited manually)     
 def feature_25(tagged_string):
     """This function takes a string of words with PoS tags as input and returns the number of items
     that are infinitives."""
@@ -292,28 +255,6 @@ def feature_28(tagged_string):
     counter = len(matches1)
     return(counter)
 
-## function for feature 29: THAT relatives, subject position
-def feature_29(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns the number of items
-    that are relative clauses with 'that' in subject position."""
-    string1 = r"\b\w+_[NN|NNS]\sthat_\w+\s\w+_[MD|VB|VBD|VBG|VBN|VBP|VBZ]\b"
-    string2 = r"\b\w+_[NN|NNS]\sthat_\w+\s\w+_[RB|RBR|RBS]\s\w+_[MD|VB|VBD|VBG|VBN|VBP|VBZ]\b"
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    counter = len(matches1) + len(matches2)
-    return(counter)
-
-## function for feature 30: THAT relatives, object position
-def feature_30(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns
-    the number of that-relatives in object position."""
-    string1 = r"\b\w+_[NN|NNS|NNP|NNPS]\sthat_\w+\s\w+_[DT|JJ|JJR|JJS|NNS|NNP|NNPS]\b"
-    string2 = r"\b\w+_[NN|NNS|NNP|NNPS]\sthat_\w+\s[it|i|we|he|she|they|my|our|your|his|their|its]_"
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    counter = len(matches1) + len(matches2)
-    return(counter)
-
 ## function for feature 31: WH relatives, subject position
 def feature_31(tagged_string):
     """This function takes a string of words with PoS tags as input and returns
@@ -322,20 +263,6 @@ def feature_31(tagged_string):
     string2 = r"\b[ask|tell|told]\w+\s\w+\s\w+_[NN|NNP|NNPS|NNS]\swh[o|om|ose|ich]_\w+\s\w+_[MD|VB|VBD|VBG|VBN|VBP|VBZ]\b"
     string3 = r"\b\w+\s\w+_[NN|NNP|NNPS|NNS]\swh[o|om|ose|ich]_\w+\s\w+_[RB|RBR|RBS]\s\w+_[MD|VB|VBD|VBG|VBN|VBP|VBZ]\b"
     string4 = r"\b[ask|tell|told]\w+\s\w+\s\w+_[NN|NNP|NNPS|NNS]\swh[o|om|ose|ich]_\w+\s\w+[RB|RBR\RBS]\s\w+_[MD|VB|VBD|VBG|VBN|VBP|VBZ]\b"
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    matches4 = re.findall(string4, tagged_string)
-    counter = (len(matches1) - len(matches2)) + (len(matches3) - len(matches4))
-    return(counter)
-
-## function for feature 32: WH relatives, object position
-def feature_32(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns
-    the number of wh-relatives in object position."""
-    string1 = r"\b\w+\s\w+\s\w+_[NN|NNP|NNS|NNPS]\s[who|whose|which|whom]_\w+\s\w+\b"
-    matches1 = re.findall(string1, tagged_string)
-    counter = len(matches1)
     return(counter)  
 
 ## function for feature 38: adv. subordinator, other
@@ -347,12 +274,6 @@ def feature_38(tagged_string):
     string3 = r"\bas_\w+\s[long|soon]_\w+\sas_"
     string4 = r"\b[so|such]_\w+\sthat_\w+\s\w+_"
     string5 = r"\b[so|such]_\w+\sthat_\w+\s\w+_[NN|NNS|NNP|NNPS|JJ|JJR|JJS]\b"
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    matches4 = re.findall(string4, tagged_string)
-    matches5 = re.findall(string5, tagged_string)
-    counter = len(matches1) + len(matches2) + len(matches3) + (len(matches4) - len(matches5))
     return(counter)
 
 ## function for feature 43: type/token ratio
@@ -390,35 +311,6 @@ def feature_45(tagged_string):
     string12 = r"\w_\.\sthat_\w+_is_\w+\s,_"
     string13 = r"\bon_\w+\sthe_\w+\scontrary_"
     string14 = r"\bon_\w+\sthe_\w+\sother_\w+\shand_"
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    matches4 = re.findall(string4, tagged_string)
-    matches5 = re.findall(string5, tagged_string)
-    matches6 = re.findall(string6, tagged_string)
-    matches7 = re.findall(string7, tagged_string)
-    matches8 = re.findall(string8, tagged_string)
-    matches9 = re.findall(string9, tagged_string)
-    matches10 = re.findall(string10, tagged_string)
-    matches11 = re.findall(string11, tagged_string)
-    matches12 = re.findall(string12, tagged_string)
-    matches13 = re.findall(string13, tagged_string)
-    matches14 = re.findall(string14, tagged_string)
-    counter = len(matches1) + len(matches2) + len(matches3) + (len(matches4) - len(matches5)) + len(matches6) + len(matches7) + len(matches8) + len(matches9) + len(matches10) + len(matches11) + len(matches12) + len(matches13) + len(matches14)
-    return(counter)
-
-## function for feature 46: downtoners
-def feature_46(untagged_list):
-    """This function takes a list of words without PoS tags as input and returns the number of items
-    that are downtoners."""
-    counter = 0
-    downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "only",
-                     "partially", "partly", "practically", "scarcely", "slightly", "somewhat"]
-    for item in untagged_list:
-        if item in downtonerlist:
-            counter = counter + 1
-        else:
-            pass
     return(counter)
 
 ## function for feature 47: hedges
@@ -432,29 +324,6 @@ def feature_47(tagged_string):
     string5 = r"\b\w+\s[sort|kind]_\w+\sof_"
     string6 = r"\b\w+_[DT|JJ|JJR|JJS|PRP$]\s[sort|kind]_\w+\sof_"
     string7 = r"\b[what|where|when|how|whether|why|whoever|whomever|whichever|wherever|whenever|whatever|however]\w+_\s[sort|kind]_\w+\sof_"
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    matches4 = re.findall(string4, tagged_string)
-    matches5 = re.findall(string5, tagged_string)
-    matches6 = re.findall(string6, tagged_string)
-    matches7 = re.findall(string7, tagged_string)    
-    counter = len(matches1) + len(matches2) + len(matches3) + len(matches4) + (len(matches5) - len(matches6) - len(matches7))
-    return(counter)
-
-## function for feature 48: amplifiers
-def feature_48(untagged_list):
-    """This function takes a list of words without PoS tags as input and returns the number of items
-    that are amplifiers."""
-    counter = 0
-    amplifierlist = ["absolutely", "altogether", "completely", "enormously", "entirely", 
-                     "extremely", "fully", "greatly", "highly", "intensely", "perfectly", "strongly", 
-                     "thoroughly", "totally", "utterly", "very"]
-    for item in untagged_list:
-        if item in amplifierlist:
-            counter = counter + 1
-        else:
-            pass
     return(counter)
 
 ## function for feature 49: emphatics
@@ -467,13 +336,6 @@ def feature_49(tagged_string):
     string4 = r"\ba_\w+\slot_"
     string5 = r"\bsuch_\w+\sa_"
     string6 = r"\b[do|does|doing|did]_\w+\s\w+_[VB|VBD|VBG|VBN|VBP|VBZ]\b"
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    matches4 = re.findall(string4, tagged_string)
-    matches5 = re.findall(string5, tagged_string)
-    matches6 = re.findall(string6, tagged_string)
-    counter = len(matches1) + len(matches2) + len(matches3) + len(matches4) + len(matches5) + len(matches6)
     return(counter)
 
 ## function for feature 52: possibility modals
@@ -572,12 +434,6 @@ def feature_59(tagged_string):
     string3 = r"\b\w+_[NN|NNS|NNP|NNPS]\s's_w+\s\w+_[MD|DT|PRP|IN]\b"
     string4 = r"\b\w+_[NN|NNS|NNP|NNPS]\s's_w+\s\w+_[RB|RBR|RBS]\s\w+_[MD|VB|VBG|VBN|VBD|VBP|VBZ]\b"
     string5 = r"\b\w+_[NN|NNS|NNP|NNPS]\s's_w+\s\w+_[JJ|JJR|JJS]\s\S_\."
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    matches4 = re.findall(string4, tagged_string)
-    matches5 = re.findall(string5, tagged_string)
-    counter = len(matches1) + len(matches2) + len(matches3) + len(matches4) + len(matches5)
     return(counter)    
 
 ## function for feature 60: THAT deletion
@@ -585,15 +441,6 @@ def feature_59(tagged_string):
 def feature_60(tagged_string):
     """This function takes a string of words with PoS tags as input and returns the
     number of that-deletions within the string."""
-    string1 = r""
-    string2 = r""
-    string3 = r""
-    string4 = r""
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    matches4 = re.findall(string4, tagged_string)
-    counter = len(matches1) + len(matches2) + len(matches3) + len(matches4)
     return(counter)
 ## PUB/PRV/SUA + demonstrative pronoun/subjectpronoun
 ## PUB/PRV/SUA + PRO/N + AUX/V

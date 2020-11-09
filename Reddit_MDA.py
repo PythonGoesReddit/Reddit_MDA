@@ -170,6 +170,7 @@ indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "e
 punct_final = [".", "!", "?", ":", ";"] # here, Biber also includes the long dash -- , but I am unsure how this would be rendered
 belist = ["be", "am", "are", "is", "was", "were", "been", "being"]
 subjpro = ["I", "we", "he", "she", "they"]
+posspro = ["my", "our", "your", "his", "their", "its"]
 DEM = ["that", "this", "these", "those"]
 WHP = ["who", "whom", "whose", "which"]
 WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", "whichever", 
@@ -177,6 +178,11 @@ WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", 
 discpart = ["well", "now", "anyway", "anyhow", "anyways"]
 QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
 ALL-P = [".", "!", "?", ":", ";", ","]  # here, Biber also includes the long dash -- , but I am unsure how this would be rendered
+downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "only", "partially", "partly", "practically", "scarcely", "slightly", "somewhat"]
+amplifierlist = ["absolutely", "altogether", "completely", "enormously", "entirely", "extremely", "fully", "greatly", "highly", 
+                 "intensely", "perfectly", "strongly", "thoroughly", "totally", "utterly", "very"]
+asktelllist = ["ask", "asked", "asking", "asks", "tell", "telling", "tells", "told"]
+
 
 ## POS-functions
 
@@ -243,8 +249,11 @@ def analyze_adverb(index, tagged_sentence, features_dict):
         features_dict["advplace_004"] += 1
     elif word_tuple[0] in timelist:
         features_dict["advtime_005"] += 1
-    #elif 
-    # still missing: "advsubother_038", "conjuncts_045", "downtoners_046", "hedges_047", "amplifiers_048", "discpart_050"
+    elif word_tuple[0] in downtonerlist:
+        features_dict["downtoners_046"] += 1
+    elif word_tuple[0] in amplifierlist:
+        features_dict["amplifiers_048"] += 1 
+    # still missing: "advsubother_038", "conjuncts_045", "hedges_047", "discpart_050"
  
 def analyze_adjective(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
@@ -295,16 +304,14 @@ def analyze_preposition(index, tagged_sentence, features_dict):
 def analyze_noun(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "nominalis_014", "gerund_015", "nouns_016".'''
-    features_dict["nouns_016"] += 1
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    if index < 0:
-        tuple_minus1 = tagged_sentence[index - 1]
-    else:
-        tuple_minus1 = ("NA", "NA")
     if word_tuple[0].endswith("ing") or word_tuple[0].endswith("ings"):
         features_dict["gerund_015"] += 1 # this is edited manually by Biber
-    if word_tuple[0].endswith("tions") or word_tuple[0].endswith("tion") or word_tuple[0].endswith("ments") or word_tuple[0].endswith("ment") or word_tuple[0].endswith("ness") or word_tuple[0].endswith("ity") or word_tuple[0].endswith("nesses") or word_tuple[0].endswith("ities"):
-        features_dict["nominalis_014"] += 1
+    else:
+        if word_tuple[0].endswith("tions") or word_tuple[0].endswith("tion") or word_tuple[0].endswith("ments") or word_tuple[0].endswith("ment") or word_tuple[0].endswith("ness") or word_tuple[0].endswith("ity") or word_tuple[0].endswith("nesses") or word_tuple[0].endswith("ities"):
+            features_dict["nominalis_014"] += 1
+        else: 
+            features_dict["nouns_016"] += 1
         
 def analyze_pronoun(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
@@ -383,6 +390,9 @@ def analyze_wh_word(index, tagged_sentence, features_dict):
     "whquest_013", "thatvcom_021", "thatacom_022", "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032", 
     "whrepied_033", "sentencere_034", "conjuncts_045".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    tuple_plus1 = tagged_sentence[index + 1]
+    tuple_plus2 = tagged_sentence[index + 2]
+    tuple_minus2 = tagged_sentence[index - 2] # this still needs adjustments for index < 2 (start of sentence)
     if index < 0:
         tuple_minus1 = tagged_sentence[index - 1]
     else:
@@ -390,15 +400,27 @@ def analyze_wh_word(index, tagged_sentence, features_dict):
     if word_tuple[0] in WHP:
         if tuple_minus1[1] == "IN":
             features_dict["whrepied_033"] += 1
+        elif not tuple_plus1[1].startswith("RB") and not tuple_plus1[1].startswith("MD") and not tuple_plus1[1].startswith("VB"):
+            if not tuple_minus2[0] in asktelllist:
+                features_dict["whreobj_032"] += 1
     elif word_tuple[0] == "which" and tuple_minus1[0] == ",":
         features_dict["sentencere_034"] += 1 # edited manually by Biber
-    #if word_tuple[0] == "that":
+    elif word_tuple[0] == "that":
+        if tuple_minus1[1].startswith("JJ"):
+            features_dict["thatacom_022"] += 1
+        elif tuple_minus1[1].startswith("NN"):
+            if tuple_plus1[1].startswith("RB"):
+                if tuple_plus2[1].startswith("VB") or tuple_plus2[1].startswith("MD"):
+                    features_dict["thatresub_029"] += 1
+            elif tuple_plus1[1].startswith("VB") or tuple_plus1[1].startswith("MD"):
+                features_dict["thatresub_029"] += 1
+            elif tuple_plus1[1].startswith("DT") or tuple_plus1[1].startswith("JJ") or tuple_plus1[1] == "NNS" or tuple_plus1[1].startswith("NNP"):
+                features_dict["thatreobj_030"] += 1
+            elif tuple_plus1[0] == "it" or tuple_plus1[0] in subjpro or tuple_plus1[0] in posspro:
+                features_dict["thatreobj_030"] += 1
         # 21
-        # 22
-        # 29
-        # 30
     #elif 
-    # still missing: "whquest_013", "thatvcom_021", "thatacom_022", "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032", "conjuncts_045"
+    # still missing: "whquest_013", "thatvcom_021", "whresub_031", "conjuncts_045"
 
 def analyze_there(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
