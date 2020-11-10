@@ -374,7 +374,10 @@ def analyze_determiner(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "demonstr_051", "negsyn_066".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    tuple_plus1 = tagged_sentence[index + 1]
+    if index < len(tagged_sentence):
+        tuple_plus1 = tagged_sentence[index + 1]
+    else: 
+        tuple_plus1 = ("NA", "NA") # somehow this workaround does not work. I included this to fix the "list index out of range" error
     if word_tuple[0] in DEM:
         features_dict["demonstr_051"] += 1
     elif word_tuple[0] == "neither" or word_tuple[0] == "nor":
