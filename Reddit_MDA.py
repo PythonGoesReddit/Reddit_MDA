@@ -169,7 +169,7 @@ thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "h
 indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "everything", "nobody", "none", "nothing", "nowhere", "somebody", "someone", "something"]
 punct_final = [".", "!", "?", ":", ";"] # here, Biber also includes the long dash -- , but I am unsure how this would be rendered
 belist = ["be", "am", "are", "is", "was", "were", "been", "being"]
-subjpro = ["I", "we", "he", "she", "they"]
+subjpro = ["i", "we", "he", "she", "they"]
 posspro = ["my", "our", "your", "his", "their", "its"]
 DEM = ["that", "this", "these", "those"]
 WHP = ["who", "whom", "whose", "which"]
@@ -374,10 +374,10 @@ def analyze_determiner(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "demonstr_051", "negsyn_066".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    if index < len(tagged_sentence):
+    if index < (len(tagged_sentence)-1):
         tuple_plus1 = tagged_sentence[index + 1]
-    else: 
-        tuple_plus1 = ("NA", "NA") # somehow this workaround does not work. I included this to fix the "list index out of range" error
+    elif index == (len(tagged_sentence)-1):
+        tuple_plus1 = ("NA", "NA")
     if word_tuple[0] in DEM:
         features_dict["demonstr_051"] += 1
     elif word_tuple[0] == "neither" or word_tuple[0] == "nor":
@@ -465,6 +465,7 @@ for id in preprocessed_file: #loops through all individual sentences in the file
      tagged_sentence = tag_sentence(sentence) #tags sentence, returning list of tuples with (word, pos)
      
      for index in range(1, len(tagged_sentence)): #based on POS, apply different function, each of which updates s
+## shouldn't this range() start with 0 instead of 1 ?? (HM)
          current_tag = tagged_sentence[index][1]
          if current_tag.startswith("V"):
              analyze_verb(index, tagged_sentence, features_dict)
