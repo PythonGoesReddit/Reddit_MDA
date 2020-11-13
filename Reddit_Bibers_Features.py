@@ -1,16 +1,3 @@
-### these functions:
-### - take one of the following items as input (presuming cleaned, lowercase data):
-###   - a list with each word as a new item, without PoS-tags (untagged_list)
-###   - a list with each word as a new item together with its PoS-tag (tagged_list)
-###   - a string containing the whole sentence, each word with its PoS-tag (tagged_string)
-### - identify one of Biber's original 67 features
-### - return the count of the occurances the feature 
-
-### Many of these functions rely on punctuation to identify strings at the 
-### beginning of a sentence. However, when we separate the comments into
-### individual sentences, these pieces of punctuation will no longer be at the
-### beginning of each sentence. Any solutions?
-## startswith? KM
 
 ### functions 55 to 57, in which I check whether a verb is within a previously
 ### defined list, do not yet take inflectional endings into account!
@@ -31,11 +18,6 @@ def feature_02(tagged_string):
     string2 = r"\b[have|has|'ve|'s]_\w+\s\w+_RB\s\w+_VBD\b"
     string3 = r"\b[have|has|'ve|'s]_\w+\s\w+_RB\s\w+_RB\s\w+_VBD\b"
     string4 = r"\b[have|has]_\w+\s\w+_[NN|NNS|NNP|NNPS|PRP|PRP$]\s\w+_VBD\b"
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    matches4 = re.findall(string4, tagged_string)
-    counter = len(matches1) + len(matches2) + len(matches3) + len(matches4)
     return(counter)
 
 ## function for feature 3: present tense
@@ -57,10 +39,6 @@ def feature_10(tagged_string):
     # Again, here it would seem that the work of disambiguating demonstratives from other items should be done by the tagger?
     string2 = r"\b[that|this|these|those]_\w+\s[and|\.]"
     string3 = r"\bthat_\w+\s's_"
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    counter = len(matches1) + len(matches2) + len(matches3)
     return(counter)
 
 
@@ -68,18 +46,11 @@ def feature_10(tagged_string):
 def feature_12(tagged_string):
     """This function takes a string of words with PoS tags as input and returns the number of items
     that are DO used as a pro-verb."""
-    # Round brackets needed instead of square below
     string1 = r"\b[do|does|doing|did|done]_"
     string2 = r"\b[do|does|doing|did|done]_\w+\s\w+_VB"
     string3 = r"\b[do|does|doing|did|done]_\w+\s\w+_[RB|RBR|RBS]\s\w+_VB"
     string4 = r"_[\.|]\s[do|does|doing|did|done]_"
     string5 = r"\b[who|whom|whose|which]_\w+\s[do|does|doing|did|done]_" # Not sure about this one; could be either pro-verb or do-support in question, right?
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    matches4 = re.findall(string4, tagged_string)
-    matches5 = re.findall(string5, tagged_string)
-    counter = len(matches1) - (len(matches2) + len(matches3) + len(matches4) + len(matches5))
     return(counter)
 
 ## function for feature 13: WH-questions
@@ -118,11 +89,6 @@ def feature_17(tagged_string):
     string2 = r"\b[be|am|are|is|was|were|been|being]_V[B|BD|BG|BN|BP|BZ]\s\w+_[RB|RBR|RBS]\s\w+_VBN\s(?!by_)"
     string3 = r"\b[be|am|are|is|was|were|been|being]_V[B|BD|BG|BN|BP|BZ]\s\w+_[RB|RBR|RBS]\s\w+_[RB|RBR|RBS]\s\w+_VBN\s(?!by_)"
     string4 = r"\b[be|am|are|is|was|were|been|being]_V[B|BD|BG|BN|BP|BZ]\s\w+_[NN|NNS|NNP|NNPS|PRP|PRP$]\s\w+_VBN\s(?!by_)"
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    matches4 = re.findall(string4, tagged_string)
-    counter = len(matches1) + len(matches2) + len(matches3) + len(matches4)
     return(counter)    
 
 ## function for feature 18: BY passives
@@ -238,11 +204,6 @@ def feature_27(tagged_string):
     string2 = r"_[NN|NNS|NNP|NNPS]\s\w+_VBN\s[be|am|are|is|was|were|been|being]_"
     string3 = r"\b[everybody|somebody|anybody|everyone|someone|anyone|everything|something|anything]_\w+\s\w+_VBN\s\w+_[IN|RB|RBR|RBS]"
     string4 = r"\b[everybody|somebody|anybody|everyone|someone|anyone|everything|something|anything]_\w+\s\w+_VBN\s[be|am|are|is|was|were|been|being]_"
-    matches1 = re.findall(string1, tagged_string)
-    matches2 = re.findall(string2, tagged_string)
-    matches3 = re.findall(string3, tagged_string)
-    matches4 = re.findall(string4, tagged_string)
-    counter = len(matches1) + len(matches2) + len(matches3) + len(matches4)
     return(counter)
 
 ## function for feature 28: present prt. WHIZ deletions
@@ -257,8 +218,6 @@ def feature_28(tagged_string):
 
 ## function for feature 31: WH relatives, subject position
 def feature_31(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns
-    the number of wh-relatives in subject position."""
     string1 = r"\b\w+\s\w+_[NN|NNP|NNPS|NNS]\swh[o|om|ose|ich]_\w+\s\w+_[MD|VB|VBD|VBG|VBN|VBP|VBZ]\b"
     string2 = r"\b[ask|tell|told]\w+\s\w+\s\w+_[NN|NNP|NNPS|NNS]\swh[o|om|ose|ich]_\w+\s\w+_[MD|VB|VBD|VBG|VBN|VBP|VBZ]\b"
     string3 = r"\b\w+\s\w+_[NN|NNP|NNPS|NNS]\swh[o|om|ose|ich]_\w+\s\w+_[RB|RBR|RBS]\s\w+_[MD|VB|VBD|VBG|VBN|VBP|VBZ]\b"
@@ -267,8 +226,6 @@ def feature_31(tagged_string):
 
 ## function for feature 38: adv. subordinator, other
 def feature_38(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns the number of items
-    that are adverbial subordinators with multiple function."""
     string1 = r"\b[since|while|whilst|whereupon|whereas|whereby]_"
     string2 = r"\b[inasmuch|forasmuch|insofar|onsomuch]_\w+\sas_"
     string3 = r"\bas_\w+\s[long|soon]_\w+\sas_"
@@ -292,39 +249,6 @@ def feature_44(untagged_list):
     wordlengths=[len(x.strip(string.punctuation)) for x in untagged_list]
     meanWL = sum(wordlengths)/nwords
     return(meanWL)
-
-## function for feature 45: conjuncts
-def feature_45(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns the number of items
-    that are conjuncts."""
-    string1 = r"\b[alternatively|altogether|consequently|conversely|eg|e.g.|else|furthermore|hence|however|i.e.|instead|likewise|moreover|namely|nevertheless|nonetheless|notwithstanding|otherwise|rather|similarly|therefore|thus|viz.]_"
-    string2 = r"\bin_\w+\s[comparison|contrast|particular|addition|conclusion|consequence|sum|summary]_"
-    string3 = r"_\.\srather_\w+\s\w+_,"
-    string4 = r"_\.\srather_\w+\s\w+"
-    string5 = r"_\.\srather_\w+\s\w+_[JJ|JJR|JJS|RB|RBR|RBS]"
-    string6 = r"\bby_\w+\s[contrast|comparison]_"
-    string7 = r"\bfor_\w+\s[example|instance]_"
-    string8 = r"\bas_\w+\sa_\w+\s[result|consequence]_"
-    string9 = r"\bin_\w+\sany_\w+\s[event|case]_"
-    string10 = r"\bin_\w+\sother_\w+\swords_"
-    string11 = r"\w_\.\s[else|altogether]_\w+\s,_"
-    string12 = r"\w_\.\sthat_\w+_is_\w+\s,_"
-    string13 = r"\bon_\w+\sthe_\w+\scontrary_"
-    string14 = r"\bon_\w+\sthe_\w+\sother_\w+\shand_"
-    return(counter)
-
-## function for feature 47: hedges
-def feature_47(tagged_string):
-    """This function takes a string of words with PoS tags as input and returns the
-    number of hedges within that string."""
-    string1 = r"\b[almost|maybe]_"
-    string2 = r"\bat_\w+\sabout_"
-    string3 = r"\bsomething_\w+\slike_"
-    string4 = r"\bmore_\w+\sor_\w+\sless_"
-    string5 = r"\b\w+\s[sort|kind]_\w+\sof_"
-    string6 = r"\b\w+_[DT|JJ|JJR|JJS|PRP$]\s[sort|kind]_\w+\sof_"
-    string7 = r"\b[what|where|when|how|whether|why|whoever|whomever|whichever|wherever|whenever|whatever|however]\w+_\s[sort|kind]_\w+\sof_"
-    return(counter)
 
 ## function for feature 49: emphatics
 def feature_49(tagged_string):
