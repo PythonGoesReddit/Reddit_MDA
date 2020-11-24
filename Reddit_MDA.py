@@ -335,6 +335,15 @@ def analyze_preposition(index, tagged_sentence, features_dict):
         tuple_minus1 = tagged_sentence[index - 1]
     else:
         tuple_minus1 = ("NA", "NA")
+    if index < (len(tagged_sentence)-2):
+        tuple_plus2 = tagged_sentence[index + 2]
+    elif index >= (len(tagged_sentence)-2):
+        tuple_plus2 = ("NA", "NA")   
+    if index < (len(tagged_sentence)-2):
+        tuple_plus2 = tagged_sentence[index + 2]
+    elif index >= (len(tagged_sentence)-2):
+        tuple_plus2 = ("NA", "NA")
+    tuple_minus2 = tagged_sentence[index - 2] # this still needs adjustments for index < 2 (start of sentence)
     if word_tuple[0] == "because":
         features_dict["advsubcause_035"] += 1
     elif word_tuple[0] == "although" or word_tuple[0] == "though" or word_tuple[0] == "tho":
@@ -347,7 +356,7 @@ def analyze_preposition(index, tagged_sentence, features_dict):
         if tuple_minus1[0] == "kind" or tuple_minus1[0] == "sort":
             if tuple_minus2[1] not in ["DT", "JJ", "JJR", "JJS", "PRP", "WP"]:
                 features_dict["hedges_047"] += 1
-    elif word_tuple[0] == "at" and tuple_plus1[0] == "about:
+    elif word_tuple[0] == "at" and tuple_plus1[0] == "about":
         features_dict["hedges_047"] += 1
     elif word_tuple[0] == "like" and tuple_minus1[0] == "something":
         features_dict["hedges_047"] += 1
@@ -365,8 +374,8 @@ def analyze_preposition(index, tagged_sentence, features_dict):
     elif word_tuple[0] == "on" and tuple_plus1[0] == "the":
         if tuple_plus2[0] == "contrary":
             features_dict["conjuncts_045"] += 1
-        elif tuple_plus2[0] == "other" and tuple_plus3[0] == "hand":
-            features_dict["conjuncts_045"] += 1
+#        elif tuple_plus2[0] == "other" and tuple_plus3[0] == "hand":  ## tuple_plus3 needs to be defined
+#            features_dict["conjuncts_045"] += 1
     elif word_tuple[0] == "as" and tuple_plus1[0] == "a" and tuple_plus2[0] in ["result", "consequence"]:
         features_dict["conjuncts_045"] += 1
     # still missing: "advsubother_038"
