@@ -1,3 +1,16 @@
+### Notes for Dec meeting (KM)
+# Lots of raw code here but it all is untested -- need to start testing and stop writing new stuff to avoid overlooking major issues
+# Changed to handling lookaheads with try-except loops that pass over IndexErrors, to avoid having to define empty lookaheads
+# ^ However, this looks a little complicated in some places -- I thought it might be efficient but would like feedback here
+# ^ Main problem to avoid is IndexErrors, i.e. looking ahead when there is nothing there (past end of sent)
+# I see some pretty big issues in some of the ways we look for certain features, ex: hedges, but also others
+# Still missing bot handling, emoji counting and removal, community specific slang -- Gustavo?
+# Still missing cleaning steps -- spelling etc. 
+# We probably need some lemmatization (instead of defining lists of surface forms)
+# We'll have to restructure when we have a new tagger esp if it has more levels / is more specific -- maybe this can also help get rid of some of our global lists like place names
+# I think relying on 'not' statements is too risky.. ex line 280
+# relying on commas in functions for feature identification -- I think these will be removed by the tagger
+
 #All packages:
 import json
 import os
@@ -86,10 +99,6 @@ def open_reddit_json(folder_path):
 
 
 # Untagged feature extraction functions
-
-## NEEDED: work on and flush out the following code:
-## Think about more informative function names
-
 def analyze_sentence(preprocessed_json):
     '''Takes the preprocessed json and adds to the features sub-dictionary the following keys and counts (values): "hashtag_201": no. of hashtags,
     "question_208": no. of question marks, "exclamation_209": no of exclamation marks, "lenchar_210": len of sentence in char, "lenword_211": len of sentence in words'''
@@ -150,7 +159,6 @@ def tag_sentence(sentence):
     tagged_sentence = nltk.pos_tag(tokens)
     return tagged_sentence
 
-    
 ## Definition of stopword lists and checkword lists for following POS-functions
 placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "around", 
                  "ashore", "astern", "away", "behind", "below", "beneath", "beside", "downhill",
@@ -171,13 +179,14 @@ conjunctslist = ["alternatively", "altogether", "consequently", "conversely", "e
                  "hence", "however", "ie", "instead", "likewise", "moreover", "namely", "nevertheless",
                  "nonetheless", "notwithstanding", "otherwise", "rather", "similarly", "therefore", "thus", "viz"]
 punct_final = [".", "!", "?", ":", ";"] # here, Biber also includes the long dash -- , but I am unsure how this would be rendered
-belist = ["be", "am", "are", "is", "was", "were", "been", "being"]
+belist = ["be", "am", "are", "is", "was", "were", "been", "being"] 
+# we could probably lemmatize instead of using a manual list for forms of verbs (KM)
 subjpro = ["i", "we", "he", "she", "they"]
 posspro = ["my", "our", "your", "his", "their", "its"]
 DEM = ["that", "this", "these", "those"]
 WHP = ["who", "whom", "whose", "which"]
 WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", "whichever", 
-       "whenever", "whatever", "however"] #can be accomplished with tag WDT (KM)
+       "whenever", "whatever", "however"] # can this be accomplished with tag WDT? (KM)
 discpart = ["well", "now", "anyway", "anyhow", "anyways"]
 QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
 ALLP = [".", "!", "?", ":", ";", ","]  # here, Biber also includes the long dash -- , but I am unsure how this would be rendered
@@ -187,8 +196,7 @@ amplifierlist = ["absolutely", "altogether", "completely", "enormously", "entire
 asktelllist = ["ask", "asked", "asking", "asks", "tell", "telling", "tells", "told"] #this could also be accomplished with .startswith("ask"), .startswith("tell") or == "told" (KM)
 
 
-## POS-functions
-
+#POS-functions
 def analyze_verb(index, tagged_sentence, features_dict): 
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: "vpast_001", "vperfect_002", "vpresent_003", 
     "whclause_023", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
@@ -215,7 +223,7 @@ def analyze_verb(index, tagged_sentence, features_dict):
         word_plus2 = tagged_sentence[index + 2]
         if word_plus1[1] == "WDT" and word_plus2[1] == "PRP":
             features_dict["whclause_023"] += 1
-    except:
+    except IndexError:
         pass
         
     #"vperfect_002" -> how many places should it lookahead for a form of have?
@@ -237,18 +245,7 @@ def analyze_modal(index, tagged_sentence, features_dict):
     "emphatics_049", "modalsposs_052", "modalsness_053", "modalspred_054", "contractions_059", 
     "vimperative_205".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    # if index < 0:
-    #     word_minus1 = tagged_sentence[index - 1]
-    # else:
-    #     word_minus1 = ("NA", "NA")
-    # if index < (len(tagged_sentence)-1):
-    #     word_plus1 = tagged_sentence[index + 1]
-    # elif index == (len(tagged_sentence)-1):
-    #     word_plus1 = ("NA", "NA")
-    # if index < (len(tagged_sentence)-2):
-    #     word_plus2 = tagged_sentence[index + 2]
-    # elif index >= (len(tagged_sentence)-2):
-    #     word_plus2 = ("NA", "NA")
+
     # still missing: "pverbdo_012", "passagentl_017", "passby_018","mainvbe_019", "emphatics_049", "modalsposs_052", "modalsness_053",
     # "modalspred_054", "contractions_059", vimperative_205".
 
@@ -278,19 +275,20 @@ def analyze_adverb(index, tagged_sentence, features_dict):
         features_dict["hedges_047"] += 1
     elif word_tuple[0] in conjunctslist:
         features_dict["conjuncts_045"] += 1 # so far, this list only includes "eg" not "e.g.", since that would probably be split by the tagger?
-    elif word_tuple[0] == "rather" and index == 0:
-        try: #putting this in a try-loop will avoid having to define a separate tuple_plus1 that has only NAs if its not possible (out of range error will trigger except)
-            word_plus1 = tagged_sentence[index + 1] 
-            if word_plus1[0] == ",":
+    #Revisit below (KM)
+    try: 
+        word_plus1 = tagged_sentence[index + 1] 
+        if word_tuple[0] == "rather" and index == 0:
+            if word_plus1[0] == ",": #punctuation will be removed already, right? (KM)
                 features_dict["conjuncts_045"] += 1
             elif word_plus1[1] not in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS"]:
-                features_dict["conjuncts_045"] += 1 #could this be based on an in and not a not in (in case something unexpected happens)
-            elif word_tuple[0] == "else" and index == 0 and word_plus1[0] == ",":
+                features_dict["conjuncts_045"] += 1 #can this be reframed as in instead of a not-statement? (KM)
+        elif word_tuple[0] == "else" and index == 0 and word_plus1[0] == ",": #again, commas (KM)
                 features_dict["conjuncts_045"] += 1
-            elif word_tuple[0] == "altogether" and index == 0 and word_plus1 == ",":
+        elif word_tuple[0] == "altogether" and index == 0 and word_plus1 == ",":
                 features_dict["conjuncts_045"] += 1
-        except:
-            pass
+    except IndexError:
+        pass
     # still missing: "advsubother_038", "discpart_050"
  
 def analyze_adjective(index, tagged_sentence, features_dict):
@@ -314,23 +312,29 @@ def analyze_adjective(index, tagged_sentence, features_dict):
     elif word_tuple[1] == "JJS":
         features_dict["superlatives_213"] += 1
     
-    try: #this might be more efficient becuase it will fail as soon as it can't make one of your variables (minus1 or plus1)
-        if index > 0:
-            word_minus1 = tagged_sentence[index - 1]
-            if word_minus1[0] in belist:
-                try:
-                    word_plus1 = tagged_sentence[index + 1]
-                    word_plus2 = tagged_sentence[index + 2]
-                    if not word_plus1[1].startswith("NN") and not word_plus1[1].startswith("JJ") and not word_plus1[1].startswith("RB"): #using not seems a little risky to me, what if theres a tagging error?
-                        features_dict["adjpred_041"] += 1
-                    elif word_plus1[1].startswith("JJ") and not word_plus2[1].startswith("JJ") and not word_plus2[1].startswith("NN"):
-                        features_dict["adjpred_041"] += 1
-                    elif word_plus1[1].startswith("JJ") or word_plus1[1].startswith("NN"):
-                        features_dict["adjattr_040"] += 1
-                except:
-                    pass
-    except:
-        pass
+    #We need to revist this (KM)
+    if index > 0:
+        word_minus1 = tagged_sentence [index - 1]
+        if word_minus1[0] in belist:
+            try:
+                word_plus1 = tagged_sentence[index + 1]
+                if word_plus1[1].startswith("JJ") or word_plus1[1].startswith("NN"):
+                    features_dict["adjattr_040"] += 1
+                elif not word_plus1[1].startswith("RB"): 
+                    #using not seems a little risky to me, what if theres a tagging error? (KM)
+                    #also I'm not totally sure this logic is correct for what you're trying to catch (KM)
+                    features_dict["adjpred_041"] += 1
+                else:
+                    try:
+                        word_plus2 = tagged_sentence[index + 2]
+                        if word_plus1[1].startswith("JJ") and not word_plus2[1].startswith("JJ") and not word_plus2[1].startswith("NN"):
+                            features_dict["adjpred_041"] += 1
+                    except IndexError:
+                        pass  
+            except IndexError:
+                pass
+
+
     # still missing: "emphatics_049"
       
 def analyze_preposition(index, tagged_sentence, features_dict):
@@ -362,20 +366,22 @@ def analyze_preposition(index, tagged_sentence, features_dict):
         features_dict["advsubconc_036"] += 1
     elif word_tuple[0] == "if" or word_tuple[0] == "unless":
         features_dict["advsubcond_037"] += 1
-   # elif word_tuple[0] == "of": -- unfininshed if statement as far as i can tell?
+    elif word_tuple[0] == "of": 
+       pass #What was meant here? (KM)
     
-    try:
-        if index > 0:
-            word_minus1 = tagged_sentence[index - 1]
+    if index > 0:
+        word_minus1 = tagged_sentence[index - 1]
         if word_tuple[0] == "like" and word_minus1[0] == "something":
             features_dict["hedges_047"] += 1
+            #I don't really like how we're handling hedges here, it feels like there has to be a better way
+            #Maybe they could be handled in the full sentence, pretagged function if they just need surface forms
+            #Any other ideas? (KM)
+        if word_minus1[0] == "kind" or word_minus1[0] == "sort": 
+            pass #What was meant here? (KM)
         if index > 1: 
             word_minus2 = tagged_sentence[index - 2]
-            #if tuple_minus1[0] == "kind" or tuple_minus1[0] == "sort": -- empty if-statement 
             if word_minus2[1] not in ["DT", "JJ", "JJR", "JJS", "PRP", "WP"]:
                 features_dict["hedges_047"] += 1
-    except:
-        pass
 
     try:
         word_plus1 = tagged_sentence[index + 1]
@@ -383,18 +389,22 @@ def analyze_preposition(index, tagged_sentence, features_dict):
             features_dict["strandprep_061"] += 1
         elif word_tuple[0] == "at" and word_plus1[0] == "about":
             features_dict["hedges_047"] += 1
-        elif word_tuple[0] == "in": 
-            if word_plus1[0] in ["comparison", "contrast", "particular", "addition", "conclusion", "consequence", "sum", "summary"]:
-                features_dict["conjuncts_045"] += 1
-            elif word_plus1[0] == "any" and word_plus2[0] in ["event", "case"]:
-                features_dict["conjuncts_045"] += 1
-            elif word_plus1[0] == "other" and word_plus2[0] == "words":
-                features_dict["conjuncts_045"] += 1
         elif word_tuple[0] == "for" and word_plus1 in ["example", "instance"]:
             features_dict["conjuncts_045"] += 1
         elif word_tuple[0] == "by" and word_plus1 in ["contrast", "comparison"]:
             features_dict["conjuncts_045"] += 1
-    except: 
+        elif word_tuple[0] == "in": 
+            try: 
+                word_plus2 = tagged_sentence[index + 2]
+                if word_plus1[0] in ["comparison", "contrast", "particular", "addition", "conclusion", "consequence", "sum", "summary"]:
+                    features_dict["conjuncts_045"] += 1
+                elif word_plus1[0] == "any" and word_plus2[0] in ["event", "case"]:
+                    features_dict["conjuncts_045"] += 1
+                elif word_plus1[0] == "other" and word_plus2[0] == "words":
+                    features_dict["conjuncts_045"] += 1
+            except IndexError:
+                pass
+    except IndexError: 
         pass
 
     try:
@@ -409,9 +419,9 @@ def analyze_preposition(index, tagged_sentence, features_dict):
                     word_plus3 = tagged_sentence[index + 3]
                     if word_plus3 == "hand":
                         features_dict["conjuncts_045"] += 1
-                except:
+                except IndexError:
                     pass
-    except:
+    except IndexError:
         pass
   
     
@@ -453,43 +463,39 @@ def analyze_conjunction(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "hedges_047", "coordphras_064", "coordnonp_065".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    if index < (len(tagged_sentence)-1):
-        word_plus1 = tagged_sentence[index + 1]
-    elif index == (len(tagged_sentence)-1):
-        word_plus1 = ("NA", "NA")
-    elif index == (len(tagged_sentence)-2):
-        word_plus2 = tagged_sentence[index + 2]
-    if index < 0:
-        word_minus1 = tagged_sentence[index - 1]
-    else:
-        word_minus1 = ("NA", "NA")
-    if word_tuple[0] == "and":
-        if word_minus1[1].startswith("NN") and word_plus1[1].startswith("NN"):
-            features_dict["coordphras_064"] += 1
-        elif word_minus1[1].startswith("RB") and word_plus1[1].startswith("RB"):
-            features_dict["coordphras_064"] += 1
-        elif word_minus1[1].startswith("JJ") and word_plus1[1].startswith("JJ"):
-            features_dict["coordphras_064"] += 1
-        elif word_minus1[1].startswith("VB") and word_plus1[1].startswith("VB"):
-            features_dict["coordphras_064"] += 1
-        elif word_minus1[0] == ",":
-            if word_plus1[0] == "it" or word_plus1[0] == "so" or word_plus1[0] == "you" or word_plus1[0] == "then":
-                features_dict["coordnonp_065"] += 1
-            elif word_plus1[1] in subjpro or word_plus1[1] in DEM: # So far, this identification of demonstrative pronoun is likely to be too crude. Maybe re-use function for feature 10?
-                features_dict["coordnonp_065"] += 1
-            elif word_plus1[0] == "there" and word_plus2[0] in belist:
-                features_dict["coordnonp_065"] += 1
-        elif word_minus1[0] in punct_final: 
-            features_dict["coordnonp_065"] += 1
-        elif word_plus1[0] in WHP or word_plus1[0] in WHO or word_plus1[0] in discpart:
-            features_dict["coordnonp_065"] += 1
-        elif word_plus1[0] : #adverbial subordinator (nos. 35-8)
-            features_dict["coordnonp_065"] += 1
-        elif word_plus1[0] : #conjunct (no. 45)
-            features_dict["coordnonp_065"] += 1
-    elif word_tuple[0] == "or":
-        if word_minus1[0] == "more" and word_plus1[0] == "less":
-            features_dict["hedges_047"] += 1
+    try:
+        if index > 0:
+            word_minus1 = word_tuple[index - 1]
+            word_plus1 = word_tuple[index + 1]
+            if word_tuple[0] == "and": 
+                if word_minus1[1].startswith("NN") and word_plus1[1].startswith("NN"):
+                    features_dict["coordphras_064"] += 1
+                elif word_minus1[1].startswith("RB") and word_plus1[1].startswith("RB"):
+                    features_dict["coordphras_064"] += 1
+                elif word_minus1[1].startswith("JJ") and word_plus1[1].startswith("JJ"):
+                    features_dict["coordphras_064"] += 1
+                elif word_minus1[1].startswith("VB") and word_plus1[1].startswith("VB"):
+                    features_dict["coordphras_064"] += 1
+                elif word_minus1[0] == ",": #commas taken out? (KM)
+                    if word_plus1[0] in ["it", "so", "you", "then"]:
+                        features_dict["coordnonp_065"] += 1
+                    elif word_plus1[1] in subjpro or word_plus1[1] in DEM: # So far, this identification of demonstrative pronoun is likely to be too crude. Maybe re-use function for feature 10?
+                        features_dict["coordnonp_065"] += 1
+                    elif word_plus1[0] == "there" and word_plus2[0] in belist:
+                        features_dict["coordnonp_065"] += 1
+                elif word_minus1[0] in punct_final: 
+                    features_dict["coordnonp_065"] += 1
+                elif word_plus1[0] in WHP or word_plus1[0] in WHO or word_plus1[0] in discpart:
+                    features_dict["coordnonp_065"] += 1
+                elif word_plus1[0] : #adverbial subordinator (nos. 35-8)
+                    features_dict["coordnonp_065"] += 1
+                elif word_plus1[0] : #conjunct (no. 45)
+                    features_dict["coordnonp_065"] += 1
+            elif word_tuple[0] == "or":
+                if word_minus1[0] == "more" and word_plus1[0] == "less":
+                    features_dict["hedges_047"] += 1
+    except IndexError:
+        pass
     # still missing: "coordnonp_065" (only for 'and' followed by adverbial subordinator or conjunct, depend on other features)
 
 
@@ -497,62 +503,75 @@ def analyze_determiner(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "demonstr_051", "negsyn_066".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    if index < (len(tagged_sentence)-1):
-        word_plus1 = tagged_sentence[index + 1]
-    elif index == (len(tagged_sentence)-1):
-        word_plus1 = ("NA", "NA")
+
     if word_tuple[0] in DEM:
         features_dict["demonstr_051"] += 1
     elif word_tuple[0] == "neither" or word_tuple[0] == "nor":
         features_dict["negsyn_066"] += 1
     elif word_tuple[0] == "no":
-        if word_plus1[1].startswith("NN") or word_plus1[1].startswith("JJ"):
-            features_dict["negsyn_066"] += 1
-        elif word_plus1[0] in QUAN:
-            features_dict["negsyn_066"] += 1
+        try: 
+            word_plus1  = word_tuple[index + 1]
+            if word_plus1[1].startswith("NN") or word_plus1[1].startswith("JJ"):
+                features_dict["negsyn_066"] += 1
+            elif word_plus1[0] in QUAN:
+                features_dict["negsyn_066"] += 1
+        except IndexError:
+            pass
      
 def analyze_wh_word(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "whquest_013", "thatvcom_021", "thatacom_022", "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032", 
     "whrepied_033", "sentencere_034", "conjuncts_045".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    if index < (len(tagged_sentence)-1):
-        word_plus1 = tagged_sentence[index + 1]
-    elif index == (len(tagged_sentence)-1):
-        word_plus1 = ("NA", "NA")
-    if index < (len(tagged_sentence)-2):
-        word_plus2 = tagged_sentence[index + 2]
-    elif index >= (len(tagged_sentence)-2):
-        word_plus2 = ("NA", "NA")
-    #tuple_minus2 = tagged_sentence[index - 2] # this still needs adjustments for index < 2 (start of sentence)
-    if index < 0:
-        word_minus1 = tagged_sentence[index - 1]
-    else:
-        word_minus1 = ("NA", "NA")
+   
     if word_tuple[0] in WHP:
-        if word_minus1[1] == "IN":
-            features_dict["whrepied_033"] += 1
-            #commented out below because it was throwing a syntax error (KM)
-        #elif not tuple_plus1[1].startswith("RB") and not tuple_plus1[1].startswith("MD") and not tuple_plus1[1].startswith("VB"):
-           # if not tuple_minus2[0] in asktelllist:
-                #features_dict["whreobj_032"] += 1
-    elif word_tuple[0] == "which" and word_minus1[0] == ",":
-        features_dict["sentencere_034"] += 1 # edited manually by Biber
+        if index > 0:
+            try:
+                word_minus1 = word_tuple[index - 1]
+                if word_minus1[1] == "IN":
+                    features_dict["whrepied_033"] += 1
+                    if word_tuple[0] == "which" and word_minus1[0] == ",": #won't commas be removed? (KM)
+                        features_dict["sentencere_034"] += 1 # edited manually by Biber
+                    try: #revisit this! (KM)
+                        tuple_plus1 = word_tuple[index + 1]
+                        if not tuple_plus1[1].startswith("RB") and not tuple_plus1[1].startswith("MD") and not tuple_plus1[1].startswith("VB"):
+                            #again using not statements (KM)
+                            pass #condition forgotten? (KM)
+                        if not tuple_minus2[0] in asktelllist:
+                            #again the not statement, I don't see why (KM)
+                            features_dict["whreobj_032"] += 1
+                    except IndexError:
+                        pass
+            except IndexError:
+                pass
+           
+    #REVISIT THIS ! (KM)
     elif word_tuple[0] == "that":
-        if word_minus1[1].startswith("JJ"):
-            features_dict["thatacom_022"] += 1
-        elif index == 0 and word_plus1[0] == "is" and word_plus2[0] == ",":
-            features_dict["conjuncts_045"] += 1
-        elif word_minus1[1].startswith("NN"):
-            if word_plus1[1].startswith("RB"):
-                if word_plus2[1].startswith("VB") or word_plus2[1].startswith("MD"):
-                    features_dict["thatresub_029"] += 1
-            elif word_plus1[1].startswith("VB") or word_plus1[1].startswith("MD"):
-                features_dict["thatresub_029"] += 1
-            elif word_plus1[1].startswith("DT") or word_plus1[1].startswith("JJ") or word_plus1[1] == "NNS" or word_plus1[1].startswith("NNP"):
-                features_dict["thatreobj_030"] += 1
-            elif word_plus1[0] == "it" or word_plus1[0] in subjpro or word_plus1[0] in posspro:
-                features_dict["thatreobj_030"] += 1
+        if index > 0:
+            try:
+                word_minus1 = word_tuple[index - 1]
+                if word_minus1[1].startswith("JJ"):
+                    features_dict["thatacom_022"] += 1
+                try:
+                    word_plus1 = word_tuple[index + 1]
+                    word_plus2 = word_tuple[index + 2] 
+                    if word_minus1[1].startswith("NN"):
+                        if word_plus1[1].startswith("RB"):
+                            pass #forgotten condition (KM)
+                        if word_plus2[1].startswith("VB") or word_plus2[1].startswith("MD"):
+                            features_dict["thatresub_029"] += 1
+                    elif word_plus1[1].startswith("VB") or word_plus1[1].startswith("MD"):
+                        features_dict["thatresub_029"] += 1
+                    elif word_plus1[1].startswith("DT") or word_plus1[1].startswith("JJ") or word_plus1[1] == "NNS" or word_plus1[1].startswith("NNP"):
+                        features_dict["thatreobj_030"] += 1
+                    elif word_plus1[0] == "it" or word_plus1[0] in subjpro or word_plus1[0] in posspro:
+                        features_dict["thatreobj_030"] += 1
+                    elif word_plus1[0] == "is" and word_plus2[0] == ",": #comma (KM)
+                        features_dict["conjuncts_045"] += 1
+                except IndexError:
+                    pass
+            except IndexError:
+                pass
         # 21
     #elif 
     # still missing: "whquest_013", "thatvcom_021", "whresub_031"
@@ -566,16 +585,14 @@ def analyze_particle(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "discpart_050".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    if index < (len(tagged_sentence)-1):
-        word_plus1 = tagged_sentence[index + 1]
-    elif index == (len(tagged_sentence)-1):
-        word_plus1 = ("NA", "NA")
-    if index < 0:
-        word_minus1 = tagged_sentence[index - 1]
-    else:
-        word_minus1 = ("NA", "NA")
-    if word_tuple[0] in discpart and word_minus1[0] in punct_final:
-        features_dict["discpart_050"] += 1
+    
+    if index > 0:
+        try:
+            word_minus1 = tagged_sentence[index - 1]
+            if word_tuple[0] in discpart and word_minus1[0] in punct_final:
+                features_dict["discpart_050"] += 1
+        except IndexError:
+            pass
     
 ## still missing: the two features that run on the whole sentence: 43 type/token ratio and 44 word length
     
