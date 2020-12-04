@@ -22,7 +22,7 @@ import time
 from datetime import timedelta
 start_time = time.time()
 
-path = "/Users/kylamcconnell/Documents/Github/Reddit_MDA/sample_data/json"
+path = "~/Reddit_MDA/sample_data/json"
 
 # Preprocessing functions
 

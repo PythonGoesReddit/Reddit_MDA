@@ -4,13 +4,14 @@ import praw
 import pprint
 from requests import Session
 
-path = "/Users/gusta/Desktop/Python/Codes reddit/"
+path = "~/Reddit_MDA/"
+#path = "/Users/gusta/Desktop/Python/Codes reddit/"
 
 # Creates empty lists for the authors
 fullauthors = []
 authors = []
 
-with open('RC_2005-12.json', 'r') as obj:
+with open('sample_data/json/RC_2015-02.json', 'r') as obj:
     data = obj.read()
 
 # Appends the author names to a list
@@ -44,14 +45,19 @@ print(reddit.read_only)
 
 blacklist = []
 
-redditor = reddit.redditor(cleanedlist2[10])
-for item in cleanedlist2:
-    if hasattr(redditor, 'fullname'):
-        print ("alive")
-    elif hasattr(redditor, 'is_suspended'):
-        blacklist.append
-    else:
-        blacklist.append
+#redditor = reddit.redditor(cleanedlist2[10])
+user_list = [reddit.redditor(x) for x in cleanedlist2 if x != "[deleted]"]
+for redditor in user_list:
+    try: 
+        if hasattr(redditor, 'fullname'):
+            print(redditor, "alive")
+        elif hasattr(redditor, 'is_suspended'):
+            blacklist.append(redditor)
+            print(redditor, "blacklist")
+        else:
+            print("ERROR", redditor)
+    except:
+        print(redditor)
 
 # Writes list items into a new txt.file        
 
