@@ -244,7 +244,7 @@ def analyze_modal(index, tagged_sentence, features_dict):
     "pverbdo_012", "passagentl_017", "passby_018","mainvbe_019",
     "emphatics_049", "modalsposs_052", "modalsness_053", "modalspred_054", "contractions_059", 
     "vimperative_205".'''
-    word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    #word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
 
     # still missing: "pverbdo_012", "passagentl_017", "passby_018","mainvbe_019", "emphatics_049", "modalsposs_052", "modalsness_053",
     # "modalspred_054", "contractions_059", vimperative_205".
@@ -323,6 +323,7 @@ def analyze_adjective(index, tagged_sentence, features_dict):
                 elif not word_plus1[1].startswith("RB"): 
                     #using not seems a little risky to me, what if theres a tagging error? (KM)
                     #also I'm not totally sure this logic is correct for what you're trying to catch (KM)
+                    # see p.238 - I don't know how else to do this if not with a not-statement
                     features_dict["adjpred_041"] += 1
                 else:
                     try:
@@ -376,8 +377,12 @@ def analyze_preposition(index, tagged_sentence, features_dict):
             #I don't really like how we're handling hedges here, it feels like there has to be a better way
             #Maybe they could be handled in the full sentence, pretagged function if they just need surface forms
             #Any other ideas? (KM)
-        if word_minus1[0] == "kind" or word_minus1[0] == "sort": 
+            # I agree that this way of looking for the hedges is tedious, but I can't think of a better way to do it.
+        if word_minus1[0] == "kind" or word_minus1[0] == "sort":
             pass #What was meant here? (KM)
+            # Is it possible that the code maybe got slightly mixed up through the restructuring into the "try"-layout?
+            # I thought that this if-statemtn was followed or preceded by a condition wordtuple[0]=="of" and word_minus2[1]!=DET/ADJ/POSSPRO/WHO
+            # in order to look for "kind of" and "sort of" (p.240) (HM)
         if index > 1: 
             word_minus2 = tagged_sentence[index - 2]
             if word_minus2[1] not in ["DT", "JJ", "JJR", "JJS", "PRP", "WP"]:
@@ -539,6 +544,8 @@ def analyze_wh_word(index, tagged_sentence, features_dict):
                             pass #condition forgotten? (KM)
                         if not tuple_minus2[0] in asktelllist:
                             #again the not statement, I don't see why (KM)
+                            # I don't know how to do this without a not-statement. For feature 032 Biber (p.235) only counts WHP-words that
+                            # do not have ask/tell on the third position to its left.
                             features_dict["whreobj_032"] += 1
                     except IndexError:
                         pass
