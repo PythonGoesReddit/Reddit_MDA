@@ -11,6 +11,13 @@ path = "~/Reddit_MDA/"
 fullauthors = []
 authors = []
 
+# Potential code for looping over all files
+# for filename in os.listdir(folder_path):
+#         if os.path.splitext(filename)[1] == ".json":
+#             with open(os.path.join(path, filename), "r", errors="replace") as data:
+                #author = json.loads(line.strip())["author"]
+                #fullauthors.append(author)
+
 with open('sample_data/json/RC_2015-02.json', 'r') as obj:
     data = obj.read()
 

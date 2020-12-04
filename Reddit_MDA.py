@@ -1,14 +1,5 @@
-### Notes for Dec meeting (KM)
-# Lots of raw code here but it all is untested -- need to start testing and stop writing new stuff to avoid overlooking major issues
-# Changed to handling lookaheads with try-except loops that pass over IndexErrors, to avoid having to define empty lookaheads
-# ^ However, this looks a little complicated in some places -- I thought it might be efficient but would like feedback here
-# ^ Main problem to avoid is IndexErrors, i.e. looking ahead when there is nothing there (past end of sent)
-# I see some pretty big issues in some of the ways we look for certain features, ex: hedges, but also others
-# Still missing bot handling, emoji counting and removal, community specific slang -- Gustavo?
-# Still missing cleaning steps -- spelling etc. 
-# We probably need some lemmatization (instead of defining lists of surface forms)
-# We'll have to restructure when we have a new tagger esp if it has more levels / is more specific -- maybe this can also help get rid of some of our global lists like place names
-# I think relying on 'not' statements is too risky.. ex line 280
+
+# ? need some lemmatization (instead of defining lists of surface forms)
 # relying on commas in functions for feature identification -- I think these will be removed by the tagger
 
 #All packages:
@@ -90,11 +81,6 @@ def open_reddit_json(folder_path):
                 print("Total lines skipped = " + str(errors))
             return prepped_json
 
-## NEEDED: function to remove comments posted by bots (how can we reliably identify them?) - Gustavo
-    ## BotDefense/BotBust scrape -> divided by year, checked against usernames
-    ## usernames that literally include the word bot
-    ## Gustavo --> this can come in the file read above I think (KM)
-
 ## Question: What about quoted material from previous comments/posts? Should we exclude it, and if yes, how?
 
 
@@ -146,7 +132,7 @@ def analyze_raw_words(preprocessed_json):
 def clean_sentence(sentence):
     '''Takes a sentence and returns it in all lowercase, with deviant/creative spelling normalized, 
     with punctuation removed, and emojis removed.'''
-    ## NEEDED: normalize deviant and creative spelling - Axel
+    ## look into what might or might not be necessary here
     sentence = sentence.strip(string.punctuation).lower()
     ## NEEDED: remove emojis - Gustavo
     return sentence
@@ -295,18 +281,7 @@ def analyze_adjective(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "adjattr_040", "adjpred_041", "emphatics_049", "comparatives_212", "superlatives_213".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    # if index < (len(tagged_sentence)-1):
-    #     word_plus1 = tagged_sentence[index + 1]
-    # elif index == (len(tagged_sentence)-1):
-    #     word_plus1 = ("NA", "NA")
-    # if index < (len(tagged_sentence)-2):
-    #     word_plus2 = tagged_sentence[index + 2]
-    # elif index >= (len(tagged_sentence)-2):
-    #     word_plus2 = ("NA", "NA")
-    # if index < 0:
-    #     word_minus1 = tagged_sentence[index - 1]
-    # else:
-    #     word_minus1 = ("NA", "NA")
+   
     if word_tuple[1] == "JJR":
         features_dict["comparatives_212"] += 1
     elif word_tuple[1] == "JJS":
@@ -333,6 +308,7 @@ def analyze_adjective(index, tagged_sentence, features_dict):
                     except IndexError:
                         pass  
             except IndexError:
+                #predictative adjective?
                 pass
 
 
@@ -344,23 +320,7 @@ def analyze_preposition(index, tagged_sentence, features_dict):
     "conjuncts_045", "hedges_047", "strandprep_061".'''
     features_dict["prepositions_039"] += 1 
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    # if index < (len(tagged_sentence)-1):
-    #     word_plus1 = tagged_sentence[index + 1]
-    # elif index == (len(tagged_sentence)-1):
-    #     word_plus1 = ("NA", "NA")
-    # if index < 0:
-    #     word_minus1 = tagged_sentence[index - 1]
-    # else:
-    #     word_minus1 = ("NA", "NA")
-    # if index < (len(tagged_sentence)-2):
-    #     word_plus2 = tagged_sentence[index + 2]
-    # elif index >= (len(tagged_sentence)-2):
-    #     word_plus2 = ("NA", "NA")   
-    # if index < (len(tagged_sentence)-2):
-    #     word_plus2 = tagged_sentence[index + 2]
-    # elif index >= (len(tagged_sentence)-2):
-    #     word_plus2 = ("NA", "NA")
-    # word_minus2 = tagged_sentence[index - 2] # this still needs adjustments for index < 2 (start of sentence)
+   
     if word_tuple[0] == "because":
         features_dict["advsubcause_035"] += 1
     elif word_tuple[0] == "although" or word_tuple[0] == "though" or word_tuple[0] == "tho":
