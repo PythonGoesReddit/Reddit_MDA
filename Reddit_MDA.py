@@ -151,12 +151,12 @@ placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "aroun
                  "downstairs", "downstream", "east", "far", "hereabouts", "indoors", "inland", "inshore",
                  "inside", "locally", "near", "nearby", "north", "nowhere", "outdoors", "outside", 
                  "overboard", "overland", "overseas", "south", "underfoot", "underground", "underneath",
-                 "uphill", "upstairs", "upstream", "west"]
+                 "uphill", "upstairs", "upstream", "west"] ## some others that could be included: apart, back, here, out, there (HM)
 timelist = ["afterwards", "again", "earlier", "early", "eventually", "formerly",
                 "immediately", "initially", "instantly", "late", "lately", "later", "momentarily", 
                 "now", "nowadays", "once", "originally", "presently", "previously", "recently", 
                 "shortly", "simultaneously", "soon", "subsequently", "today", "tomorrow", "tonight",
-                "yesterday"]
+                "yesterday"] # some others that could be included: then, always (HM)
 firstpersonlist = ["i", "me", "we", "us", "my", "our", "myself", "ourselves"]
 secondpersonlist = ["you", "yourself", "your", "yourselves"]
 thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "himself","herself", "themselves"]
@@ -183,7 +183,7 @@ asktelllist = ["ask", "asked", "asking", "asks", "tell", "telling", "tells", "to
 
 
 #POS-functions
-def analyze_verb(index, tagged_sentence, features_dict): 
+def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: "vpast_001", "vperfect_002", "vpresent_003", 
     "whclause_023", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
     "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
@@ -225,7 +225,7 @@ def analyze_verb(index, tagged_sentence, features_dict):
     #
     # "vpublic_055", "vprivate_056", "vsuasive_057", "contractions_059", "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".
 
-def analyze_modal(index, tagged_sentence, features_dict):
+def analyze_modal(index, tagged_sentence, features_dict): ## Axel
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "pverbdo_012", "passagentl_017", "passby_018","mainvbe_019",
     "emphatics_049", "modalsposs_052", "modalsness_053", "modalspred_054", "contractions_059", 
@@ -235,7 +235,7 @@ def analyze_modal(index, tagged_sentence, features_dict):
     # still missing: "pverbdo_012", "passagentl_017", "passby_018","mainvbe_019", "emphatics_049", "modalsposs_052", "modalsness_053",
     # "modalspred_054", "contractions_059", vimperative_205".
 
-def analyze_adverb(index, tagged_sentence, features_dict):
+def analyze_adverb(index, tagged_sentence, features_dict): ## Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "advplace_004", "advtime_005", "advsubcause_035", "advsubconc_036", "advsubcond_037", "advsubother_038", "adverbs_042", "conjuncts_045",
     "downtoners_046", "hedges_047", "amplifiers_048", "discpart_050", "negana_067".'''
@@ -249,9 +249,9 @@ def analyze_adverb(index, tagged_sentence, features_dict):
         features_dict["advsubcond_037"] += 1
     elif word_tuple[0] == "not":
         features_dict["negana_067"] += 1
-    elif word_tuple[0] in placelist:
+    elif word_tuple[0] in placelist: ## added some more ideas to the list above (HM)
         features_dict["advplace_004"] += 1
-    elif word_tuple[0] in timelist:
+    elif word_tuple[0] in timelist: ## added some more ideas to the list above (HM)
         features_dict["advtime_005"] += 1
     elif word_tuple[0] in downtonerlist:
         features_dict["downtoners_046"] += 1
@@ -277,7 +277,7 @@ def analyze_adverb(index, tagged_sentence, features_dict):
         pass
     # still missing: "advsubother_038", "discpart_050"
  
-def analyze_adjective(index, tagged_sentence, features_dict):
+def analyze_adjective(index, tagged_sentence, features_dict): ## Kyla
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "adjattr_040", "adjpred_041", "emphatics_049", "comparatives_212", "superlatives_213".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
@@ -314,7 +314,7 @@ def analyze_adjective(index, tagged_sentence, features_dict):
 
     # still missing: "emphatics_049"
       
-def analyze_preposition(index, tagged_sentence, features_dict):
+def analyze_preposition(index, tagged_sentence, features_dict): ## Gustavo
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "advsubcause_035", "advsubconc_036", "advsubcond_037", "advsubother_038", "prepositions_039", 
     "conjuncts_045", "hedges_047", "strandprep_061".'''
@@ -392,7 +392,7 @@ def analyze_preposition(index, tagged_sentence, features_dict):
     
     # still missing: "advsubother_038"
     
-def analyze_noun(index, tagged_sentence, features_dict):
+def analyze_noun(index, tagged_sentence, features_dict): ## Rafaela
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "nominalis_014", "gerund_015", "nouns_016".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
@@ -404,7 +404,7 @@ def analyze_noun(index, tagged_sentence, features_dict):
         else: 
             features_dict["nouns_016"] += 1
         
-def analyze_pronoun(index, tagged_sentence, features_dict):
+def analyze_pronoun(index, tagged_sentence, features_dict): ## Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "profirpers_006", "prosecpers_007", "prothirper_008", "proit_009", "prodemons_010", "proindef_011", "contractions_059".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
@@ -424,7 +424,7 @@ def analyze_pronoun(index, tagged_sentence, features_dict):
         features_dict["proindef_011"] += 1    
     # still missing: "prodemons_010", "contractions_059"
 
-def analyze_conjunction(index, tagged_sentence, features_dict):
+def analyze_conjunction(index, tagged_sentence, features_dict): ## Gustavo
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "hedges_047", "coordphras_064", "coordnonp_065".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
@@ -464,7 +464,7 @@ def analyze_conjunction(index, tagged_sentence, features_dict):
     # still missing: "coordnonp_065" (only for 'and' followed by adverbial subordinator or conjunct, depend on other features)
 
 
-def analyze_determiner(index, tagged_sentence, features_dict):
+def analyze_determiner(index, tagged_sentence, features_dict): ## Rafaela
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "demonstr_051", "negsyn_066".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
@@ -483,7 +483,7 @@ def analyze_determiner(index, tagged_sentence, features_dict):
         except IndexError:
             pass
      
-def analyze_wh_word(index, tagged_sentence, features_dict):
+def analyze_wh_word(index, tagged_sentence, features_dict): ## Kyla
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "whquest_013", "thatvcom_021", "thatacom_022", "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032", 
     "whrepied_033", "sentencere_034", "conjuncts_045".'''
@@ -543,12 +543,12 @@ def analyze_wh_word(index, tagged_sentence, features_dict):
     #elif 
     # still missing: "whquest_013", "thatvcom_021", "whresub_031"
 
-def analyze_there(index, tagged_sentence, features_dict):
+def analyze_there(index, tagged_sentence, features_dict): ## noone...
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "exthere_020".'''
     features_dict["exthere_020"] += 1
     
-def analyze_particle(index, tagged_sentence, features_dict):
+def analyze_particle(index, tagged_sentence, features_dict): ## Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "discpart_050".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
