@@ -235,6 +235,9 @@ def analyze_modal(index, tagged_sentence, features_dict): ## Axel
 
     # still missing: "pverbdo_012", "passagentl_017", "passby_018","mainvbe_019", "emphatics_049", "modalsposs_052", "modalsness_053",
     # "modalspred_054", "contractions_059", vimperative_205".
+    
+    ## originally I thought it might make sense to look for contractions (feature 59) within the pronoun-section as well, but it is probably
+    ## sufficient to look for them here, isn't it? (HM)
 
 def analyze_adverb(index, tagged_sentence, features_dict): ## Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
@@ -403,12 +406,8 @@ def analyze_noun(index, tagged_sentence, features_dict): ## Rafaela
         
 def analyze_pronoun(index, tagged_sentence, features_dict): ## Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
-    "profirpers_006", "prosecpers_007", "prothirper_008", "proit_009", "prodemons_010", "proindef_011", "contractions_059".'''
+    "profirpers_006", "prosecpers_007", "prothirper_008", "proit_009", "prodemons_010", "proindef_011".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    if index < 0:
-        word_minus1 = tagged_sentence[index - 1]
-    else:
-        word_minus1 = ("NA", "NA")
     if word_tuple[0] == "it":
         features_dict["proit_009"] += 1
     elif word_tuple[0] in firstpersonlist:
@@ -418,8 +417,22 @@ def analyze_pronoun(index, tagged_sentence, features_dict): ## Hanna
     elif word_tuple[0] in thirdpersonlist:
         features_dict["prothirdper_008"] += 1
     elif word_tuple[0] in indefpronounlist:
-        features_dict["proindef_011"] += 1    
-    # still missing: "prodemons_010", "contractions_059"
+        features_dict["proindef_011"] += 1  
+    elif word_tuple[0] == "that" and index == 0: ## this was edited by hand by Biber
+        features_dict["prodemons_010"] += 1
+    try:
+        word_plus1 = tagged_sentence[index + 1]
+        if word_tuple[0] in DEM:
+            if word_plus1[0] == "and":
+                features_dict["prodemons_010"] += 1
+            elif word_plus1[1] in ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "MD", "WP"]:
+                features_dict["prodemons_010"] += 1
+            elif index == (len(tagged_sentence)-1):
+                features_dict["prodemons_010"] += 1
+        elif word_tuple[0] == "that" and word_plus1[0] == "'s": ## should this be 's or s ? Does the apostrophe get removed? 
+            features_dict["prodemons_010"] += 1
+    except IndexError: 
+        pass
 
 def analyze_conjunction(index, tagged_sentence, features_dict): ## Gustavo
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
