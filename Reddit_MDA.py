@@ -177,6 +177,7 @@ discpart = ["well", "now", "anyway", "anyhow", "anyways"]
 QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
 ALLP = [".", "!", "?", ":", ";", ","]  # here, Biber also includes the long dash -- , but I am unsure how this would be rendered
 downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "only", "partially", "partly", "practically", "scarcely", "slightly", "somewhat"]
+                # some others that could be included: a little, a bit, a tad (HM)
 amplifierlist = ["absolutely", "altogether", "completely", "enormously", "entirely", "extremely", "fully", "greatly", "highly", 
                  "intensely", "perfectly", "strongly", "thoroughly", "totally", "utterly", "very"]
 asktelllist = ["ask", "asked", "asking", "asks", "tell", "telling", "tells", "told"] #this could also be accomplished with .startswith("ask"), .startswith("tell") or == "told" (KM)
@@ -237,23 +238,17 @@ def analyze_modal(index, tagged_sentence, features_dict): ## Axel
 
 def analyze_adverb(index, tagged_sentence, features_dict): ## Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
-    "advplace_004", "advtime_005", "advsubcause_035", "advsubconc_036", "advsubcond_037", "advsubother_038", "adverbs_042", "conjuncts_045",
+    "advplace_004", "advtime_005", "adverbs_042", "conjuncts_045",
     "downtoners_046", "hedges_047", "amplifiers_048", "discpart_050", "negana_067".'''
     features_dict["adverbs_042"] += 1
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    if word_tuple[0] == "because":
-        features_dict["advsubcause_035"] += 1
-    elif word_tuple[0] == "although" or word_tuple[0] == "though" or word_tuple[0] == "tho":
-        features_dict["advsubconc_036"] += 1
-    elif word_tuple[0] == "if" or word_tuple[0] == "unless": ## this probably needs to be within the preposition function (IN)
-        features_dict["advsubcond_037"] += 1
-    elif word_tuple[0] == "not":
+    if word_tuple[0] == "not" or word_tuple[0] == "n't":
         features_dict["negana_067"] += 1
     elif word_tuple[0] in placelist: ## added some more ideas to the list above (HM)
         features_dict["advplace_004"] += 1
     elif word_tuple[0] in timelist: ## added some more ideas to the list above (HM)
         features_dict["advtime_005"] += 1
-    elif word_tuple[0] in downtonerlist:
+    elif word_tuple[0] in downtonerlist: ## added some more ideas to the list above (HM)
         features_dict["downtoners_046"] += 1
     elif word_tuple[0] in amplifierlist:
         features_dict["amplifiers_048"] += 1 
@@ -261,21 +256,24 @@ def analyze_adverb(index, tagged_sentence, features_dict): ## Hanna
         features_dict["hedges_047"] += 1
     elif word_tuple[0] in conjunctslist:
         features_dict["conjuncts_045"] += 1 # so far, this list only includes "eg" not "e.g.", since that would probably be split by the tagger?
-    #Revisit below (KM)
+    elif index == 0 and word_tuple[0] in discpart:
+        features_dict["discpart_050"] += 1
+    ## we also look for particles in the particle-section, this is to make sure that
+    ## we actually catch all of them in case they are tagged differently (HM)
     try: 
         word_plus1 = tagged_sentence[index + 1] 
         if word_tuple[0] == "rather" and index == 0:
-            if word_plus1[0] == ",": #punctuation will be removed already, right? (KM)
+            if word_plus1[0] == ",": #punctuation will be removed already, right? (KM) then how do we find this without the comma? (HM)
                 features_dict["conjuncts_045"] += 1
-            elif word_plus1[1] not in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS"]:
-                features_dict["conjuncts_045"] += 1 #can this be reframed as in instead of a not-statement? (KM)
+            elif word_plus1[1] in ["CC", "CD", "DT", "EX", "IN", "LS", "MD", "NN", "NNS", "NNP", "NNPS", "PDT", "PRP", "PRP$", "RP", "TO", "UH", "VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "WDT", "WP", "WP$", "WRB"]:
+                features_dict["conjuncts_045"] += 1 
         elif word_tuple[0] == "else" and index == 0 and word_plus1[0] == ",": #again, commas (KM)
                 features_dict["conjuncts_045"] += 1
         elif word_tuple[0] == "altogether" and index == 0 and word_plus1 == ",":
                 features_dict["conjuncts_045"] += 1
     except IndexError:
         pass
-    # still missing: "advsubother_038", "discpart_050"
+    
  
 def analyze_adjective(index, tagged_sentence, features_dict): ## Kyla
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
@@ -311,7 +309,6 @@ def analyze_adjective(index, tagged_sentence, features_dict): ## Kyla
                 #predictative adjective?
                 pass
 
-
     # still missing: "emphatics_049"
       
 def analyze_preposition(index, tagged_sentence, features_dict): ## Gustavo
@@ -320,7 +317,7 @@ def analyze_preposition(index, tagged_sentence, features_dict): ## Gustavo
     "conjuncts_045", "hedges_047", "strandprep_061".'''
     features_dict["prepositions_039"] += 1 
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-   
+
     if word_tuple[0] == "because":
         features_dict["advsubcause_035"] += 1
     elif word_tuple[0] == "although" or word_tuple[0] == "though" or word_tuple[0] == "tho":
@@ -552,14 +549,12 @@ def analyze_particle(index, tagged_sentence, features_dict): ## Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "discpart_050".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    
-    if index > 0:
-        try:
-            word_minus1 = tagged_sentence[index - 1]
-            if word_tuple[0] in discpart and word_minus1[0] in punct_final:
-                features_dict["discpart_050"] += 1
-        except IndexError:
-            pass
+    ## we also look for particles in the adverb-section, this is to make sure that
+    ## we actually catch all of them in case they are tagged differently (HM)
+    if index == 0 and word_tuple[0] in discpart:
+        features_dict["discpart_050"] += 1
+    else:
+        pass
     
 ## still missing: the two features that run on the whole sentence: 43 type/token ratio and 44 word length
     
