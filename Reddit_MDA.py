@@ -110,7 +110,7 @@ def analyze_sentence(preprocessed_json):
         s["conjuncts_045"] = sentence.count("that is,") #Will only catch sentences with proper punctuation but it's a start
 
         for emphatic in ["for sure", "a lot", "such a", "such an", "just", "really", "most", "more"]: 
-            s["emphatics_049"] += sentence.count("emphatic")
+            s["emphatics_049"] += sentence.count(emphatic)
 
         s["lenchar_210"] = len(sentence) 
         s["lenword_211"] = len(sentence.split(" ")) 
@@ -568,13 +568,36 @@ def analyze_wh_word(index, tagged_sentence, features_dict): ## Kyla
                         elif word_plus1[0] == "it" or word_plus1[0] in subjpro or word_plus1[0] in posspro:
                             features_dict["thatreobj_030"] += 1
 
+                        # if word_minus1[0] in ["and", "nor", "but", "or", "also"] or word_minus1[0] in punct_final or word_minus1[0] == ",":
+                        # start to 021, tbc
+
+                    if index > 2:
+                        try:
+                            word_minus3 = word_tuple[index - 3]
+
+                            #31. WH relative clauses on subject position (e.g., the man who likes popcorn) xxx + yyy + N + WHP + (ADV) + AUX/V (where xxx is NOT any form of the verbs ASK or TELL; to exclude indirect WH questions like Tom asked the man who went to the store)
+                            if word_minus1[1].startswith("N") and word_plus1[1].startswith("R") and (word_plus2[1].startswith("V") or word_plus2[1].startswith("MD")):
+                                features_dict["whresub_031"] += 1
+                                print("TEST")
+                                #BUG: Doesn't get here on my file
+                            elif word_minus1[1].startswith("N") and (word_plus1[1].startswith("V") or word_plus1[1].startswith("MD")):
+                                features_dict["whresub_031"] += 1
+                                print("TEST")
+                                #BUG: Doesn't get here on my file
+
+                        except IndexError:
+                            pass
+
                 except IndexError:
                     pass
                 
             except IndexError:
                 pass
 
-    # still missing: "whquest_013", "thatvcom_021", "whresub_031" -> 45 to full sentence 
+            #TO ADD:
+            #13. direct WH-questions CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)
+            #21 21. that verb complements (e.g., / said that he went) (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/^^e/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions) (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/TJf/anrf){that-c\a\ises as complements to verbs which are not included in the above verb classes are not counted - see Quirk et al. 1985:1179ff.) (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)(This algorithm allows an intervening prepositional phrase between a verb and its complement.)(d) Tt + that
+            
 
 def analyze_there(index, tagged_sentence, features_dict): ## noone...
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
