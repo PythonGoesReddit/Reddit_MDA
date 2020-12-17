@@ -94,24 +94,23 @@ def open_reddit_json(folder_path):
 # Untagged feature extraction functions
 def analyze_sentence(preprocessed_json):
     '''Takes the preprocessed json and adds to the features sub-dictionary the following keys and counts (values): "hashtag_201": no. of hashtags,
-    "question_208": no. of question marks, "exclamation_209": no of exclamation marks, "lenchar_210": len of sentence in char, "lenword_211": len of sentence in words'''
+    "question_208": no. of question marks, "exclamation_209": no of exclamation marks, "lenchar_210": len of sentence in char, "lenword_211": len of sentence in words, "conjuncts_045"'''
 
     for id in preprocessed_json: 
         sentence_dict = preprocessed_json.get(id)
         sentence = sentence_dict["body"] 
         s = sentence_dict["features"]
 
-        hashtag_counter = sentence.count("#")
-        s["hashtag_201"] = hashtag_counter
+        s["hashtag_201"] = sentence.count("#")
 
-        question_counter = sentence.count("?")
-        s["question_208"] = question_counter
+        s["question_208"] = sentence.count("?")
 
-        exclamation_counter = sentence.count("!")
-        s["exclamation_209"] = exclamation_counter 
+        s["exclamation_209"] = sentence.count("!")
+ 
+        s["conjuncts_045"] = sentence.count("that is,") #Will only catch sentences with proper punctuation but it's a start
 
-        if "that is," in sentence: #Will only catch sentences with proper punctuation but it's a start
-            s["conjuncts_045"] += 1
+        for emphatic in ["for sure", "a lot", "such a", "such an", "just", "really", "most", "more"]: 
+            s["emphatics_049"] += sentence.count("emphatic")
 
         s["lenchar_210"] = len(sentence) 
         s["lenword_211"] = len(sentence.split(" ")) 
@@ -298,31 +297,32 @@ def analyze_adjective(index, tagged_sentence, features_dict): ## Kyla
     elif word_tuple[1] == "JJS":
         features_dict["superlatives_213"] += 1
     
-    #We need to revist this (KM)
     if index > 0:
-        word_minus1 = tagged_sentence [index - 1]
+        word_minus1 = tagged_sentence[index - 1]
         if word_minus1[0] in belist:
             try:
                 word_plus1 = tagged_sentence[index + 1]
                 if word_plus1[1].startswith("JJ") or word_plus1[1].startswith("NN"):
                     features_dict["adjattr_040"] += 1
-                elif not word_plus1[1].startswith("RB"): 
-                    #using not seems a little risky to me, what if theres a tagging error? (KM)
-                    #also I'm not totally sure this logic is correct for what you're trying to catch (KM)
-                    # see p.238 - I don't know how else to do this if not with a not-statement
-                    features_dict["adjpred_041"] += 1
-                else:
-                    try:
-                        word_plus2 = tagged_sentence[index + 2]
-                        if word_plus1[1].startswith("JJ") and not word_plus2[1].startswith("JJ") and not word_plus2[1].startswith("NN"):
-                            features_dict["adjpred_041"] += 1
-                    except IndexError:
-                        pass  
-            except IndexError:
-                #predictative adjective?
-                pass
 
-    # still missing: "emphatics_049"
+                elif not word_plus1[1].startswith("RB"): 
+                    features_dict["adjpred_041"] += 1
+
+                try:
+                    word_plus2 = tagged_sentence[index + 2]
+                    if word_plus1[1].startswith("JJ") and not word_plus2[1].startswith("JJ") and not word_plus2[1].startswith("NN"): #Would it not be okay to have JJ in position +1 and +2?
+                        features_dict["adjpred_041"] += 1
+
+                except IndexError:
+                    pass  
+
+            except IndexError:
+                pass
+            
+            #49. emphatics: for sure/a lot/such a/real + ADJ/so + ADJ/DO + VIjust/reallyImost /more
+        elif word_minus1[0] in ["real", "so"] and word_tuple[1] == "JJ":
+            #BUG: This is catching so much junk, I don't understand why (so I comes up a lot ) KM
+            features_dict["emphatics_049"] += 1
       
 def analyze_preposition(index, tagged_sentence, features_dict): ## Gustavo
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
@@ -508,7 +508,7 @@ def analyze_wh_word(index, tagged_sentence, features_dict): ## Kyla
     # Check: Ft 22 (catches unintended phrases)
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "whquest_013", "thatvcom_021", "thatacom_022", "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032", 
-    "whrepied_033", "sentencere_034", "conjuncts_045".'''
+    "whrepied_033", "sentencere_034".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
    
     if word_tuple[0] in WHP: #["who", "whom", "whose", "which"]
