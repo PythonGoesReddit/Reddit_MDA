@@ -1,0 +1,381 @@
+Feature: whrepied_033
+
+#pied-piping relative clauses (e.g., the manner in which he was told) PREP + WHP in relative clauses
+
+
+
+
+in which // force a reload on multiplayer , in which the game stops looking at the mod directory
+
+at which // i found that out a bit later , at which point i was more concerned about not being concerned about it to find out what it was *really* called , if that makes sense
+
+on who // depending on who 's on
+
+after which // after which , when she `` accidentally '' spilled v8 on you , she would not be allowed back on board that airline for her return flight
+
+that who // cho gets a 1000+ true damage ult that has like a 30s cd when you kill monsters , the difference being that who 's is his ulti and thus can do the damage instantly
+
+of who // but that is just a symptom of who she is more generally - thoughtless , not intelligent , nonproductive , and absolutely convinced that she is correct and above criticism/assessment by others
+
+that who // there are rare cases where mw/fn knives are a really pure green on them that i know there are people that who will overpay because of that , but in most cases the green is regarded as a defect
+
+at which // at which point it was already too late for flareon
+
+of whom // he gave them to cirdan and elrond , both of whom were very old elves born in the first age , and were in the west around gil-galad anyway
+
+in which // there is no body in which you could extract a cell to clone
+
+on who // yeah those are the two names i see around here the most , honestly i follow the jets really closely but could n't really weigh in on who had the best comeback
+
+in which // i also am inside a lot in an environment in which i 'm surrounded by high-calorie food that i would never buy myself
+
+of who // the genders of the people he attacked were a function of who was on the street at the time , nothing more
+
+in which // in which case geometry ( 9th grade ) would be the last time you did anything with it
+
+of which // but a grown man who makes a living doing kids birthday parties as a clown ... that 's unsettling , for so many reasons , the least of which is the clown outfit
+
+at which // i do n't think those times will work i 'm 7 hours behind gmt which if i am doing the math correctly means i 'll still be at which ad that is 12:30 pm for me
+
+of which // i had 12 eggs , 8 of which were mature , so only 8 could have fertilized
+
+on who // i normally play through my first time on the easiest difficulty and choose my party based on who seems the most fun to bring along ... but could n't do that for that last fight
+
+on who // none of those opponents were nearly as dangerous and as fast paced as ronda so dont you think shes going into the fight with some sort of prior knowledge on who the fuck shes fighting for the belt
+
+about which // gt ; however , the fact that a centralized group ( in this case a group of core developers who , btw , i have much more faith in than current political and economic leaders ) will have the ability to switch the reward mechanism from pow to pos ( or something else yet again ) as well as make value decisions about which daos to reward with new currency issuance kind of takes away from the ideal of a truly decentralized autonomous network
+
+on who // and since the ethereum devs could do the same thing with their system , you now have to compete with each other on who can offer the better pay to poach the devs
+
+for which // but then i do n't think the purposes for which god *did* make the world could possibly be realized
+
+at which // the point at which the drunkenness and hangover is gone , is when i do n't mind being around kids ( about 5 or 6
+
+of which // centuries of imperialism and colonialism follow , which went very very poorly for every country that was n't europe , and the effects of which are still noticeable today
+
+of whom // the same is true for libertarians , many of whom have no knowledge of the philosophical backing or implications of their own proclaimed political outlook
+
+
+
+
+----
+
+
+
+
+Feature: sentencere_034
+
+ #34. sentence relatives (e.g., Bob likes fried mangoes, which is the most disgusting thing I've ever heard of) Biber: (These forms are edited by hand to exclude non-restrictive relative clauses.)
+
+
+
+
+, which // i 'm in a one year master 's program , which is basically like a post-bac pre-med program
+
+, which // which makes me think that they do n't have one or use one , which is simply appaling giving a program with the revenue of mtgo
+
+, which // we are quite grateful to live in america , which unfortunately some folks take for granted
+
+, which // gt ; it is a pretty important choice , which is why precisely no one is arguing that the decision should be made for anyone by the government
+
+, which // it 's always more than i thought , which is good
+
+, which // i rubbed near my eyes , which had dried tears on them
+
+, which // sometimes i 'll get a walnut milk latte , which are heavenly
+
+, which // it 's only the right thing to do if demand drops , which it is n't going to do in london any time soon
+
+, which // ned seemed to have his reservations , but he deferred to her thoughts on the matter , which was a mistake , as we all found out
+
+, which // the realm is weakened , and when a dragon inevitably returns , he 's stuck in the middle of that , as he 'll either be hand or regent ( unless he 's dead , which , yeah
+
+, which // she removed the replies to her comment as well , which is pretty standard
+
+, which // but i 'm thinking it would help if you could post a link or 2 to a few specific shoes on amazon or wherever , which would work for you
+
+, which // if you want to make something portable , you need to use bourne shell , which is quite a bit more restricted
+
+, which // it helped with the shame and self-loathing , which made it quite worthwhile , but i think depression and anxiety are often organic
+
+, which // of course not , i think they elected them in the hopes that they would stand for the values that they claimed they stood for , which apparently takes priority over making a president look bad for things he is not responsible for ( instead of pointing out the real bullshit he does , like defending the nsa , betraying his promise to deal with guantanamo , or appointing wheeler fo the fcc
+
+, which // amp ; nbsp ; if you 're the former then i highly suggest you 're trying to make a new account where you 'd purposely lose every single game , which will land you on a hellish pub level and experience the moment where you `` ca n't rely on your teammates '' in a solo queue matchmaking
+
+, which // i would also agree that there is a lack of detail , which really tones down the suspense and fear that i would feel from a truly horrific scene
+
+, which // it seems to flow a lot faster now , which is great
+
+, which // they sure do , which is why i specified the movies
+
+, which // but instead , they just roll along with the shitty system they have , which punishes more innocent people than legitimate griefers
+
+, which // so i won , which never happens , and just as if it could n't get any worse for my poor sport friends when we looked at the tallies that determined the minigame coins earned , i was ahead of daisy by 2 coins
+
+, which // i understand the real person kyle 's ptsd could have stemmed from numerous things , but i think there was a clear thematic intent of this film , which is why they scaled down the more dramatic and overt ptsd symptoms described in the book
+
+, which // there are good examples too ' does n't discredit her point , which i think is what this counterpoint is meant to be doing
+
+, which // for me if i halved my height i would be just shy of three feet , which would be horrible , but at least i could shower , get around in cars , trains , airplanes , drink from cups , eat without bankrupting myself , buy clothes instead of making them all , fit on beds , fall in love with and marry a pedophile
+
+, which // we had to rewrite them because we needed the sheets to break everything down by class for us automatically , which they do now , beautifully i might add
+
+, which // you should read warbreaker , also by sanderson , which could possibly expand on the second book a little if you reread it
+
+, which // i had my own router and old comcast modem , which they wanted me to replace
+
+, which // it means that you 've collaborated with other students on projects , which is important when working with a team
+
+, which // the tests i used previously were a comparison to outdoor air to indoor air , which is n't too helpful in a prevention or repair standpoint
+
+, which // tl ; dr : if two outcomes both have an infinite probability of happening , but only one can , which does
+
+, which // what you seem to be driving at is that the cdc is in cahoots with big corporations , which influences their evaluation of health risks when it comes to mold
+
+, which // legalization of prostitution puts that place on the map , which draws more clients there
+
+, which // without counterspell backup your deck folds to any form of removal , which most tier-one decks run
+
+, which // nobody even got the options i was giving partial credit on , which accounted for errors such as counting newfoundland and laborador as two separate ; or as counting the territories
+
+, which // just a quick thing , which is completely personal , but the rock to the right is quite distracting to me
+
+, which // vca own the copyright for all of their students work and also act as executive producers for the projects , which can cause problems when you may want to go in one direction and they push you in another
+
+, which // unless you know someone who can sponsor you over there while you work your way up through the ranks , which would be nearly impossible for a writer/director , or go do a film course over in america , your best bet is to pick a good film course here and make a name for yourself
+
+, which // important : ** however , if you have already set up your flair recently , it might take a while before it shows up and the bot recognizes it , which might take anywhere from 5 minutes to a couple hours or more
+
+, which // this appears to be using using raw ethernet socket , which would still cause the same overhead as using pf_inet
+
+, which // i do actually know those but i 've never heard them called chocolatines , which is interesting
+
+, which // though somehow , there is n't a good bakery near my apartment , which is a travesty
+
+, which // i think some of them just expect valve to do this , which i doubt will happen
+
+, which // additionaly , there 's the whole issue of cla , which makes it pretty much a no-go for any serious developer unaffiliated to canonical
+
+, which // mint inherits from a distribution called ubuntu , which in turn is compatible with software for debian
+
+, which // or he 's going to do something morally unacceptable , which i get the feeling
+
+, which // i can only get a lot of pleasure out of clit stimulation when i really tense up my pelvic muscles , which is n't conducive to being penetrated
+
+, which // in theory , this would increase innovation , as they would no longer be able to sit back and collect cheques from their investments and would be forced to keep their high standard of living through hard work and good ideas , which would stimulate the economy
+
+, which // he 's a wonderfully eloquent writer , which i 'm sure benefited him , and he 's great at getting to the point/explaining himself
+
+, which // maybe she likes his music , which is actually really fucking good if you 've actually listened to it
+
+, which // edit : actually , apparently it works with spark core , arduino , netduino , and rasppi main takeaway is , he uses a white ping pong ball to defuse the led , which looks pretty nice
+
+, which // will just delete it for now , and maybe remake if they wont help , which i doubt
+
+, which // the term anecdotal evidence is often used in contrast to scientific evidence , such as evidence-based medicine , which are types of formal accounts
+
+, which // on top of the fact that it 's an **18xx** game , which are complex enough , this one adds another way to start companies , the ability to merge two companies , train insurance , three train types and their requisite licenses
+
+, which // if you use it 30 times a month , you are getting 3x points on gas , which by almost any valuation would be worth at least $ .05
+
+, which // you 're getting older and most women you date will have had sexual experience , which is a good thing
+
+, which // it means she 'll be more secure in her desires , which it sounds like she already is , since she 's told you you guys are having the best sex of her life
+
+, which // on top of better police forces and a larger population , you have gangs , which makes invading/taking nearly impossible
+
+, which // the thing about dark net market is that most vendors base their prices on us dollars , which sucks for me because canadian dollars went down a lot recently
+
+, which // i think what gets me about this rock , is that it looks ( obviously i can only see the foliation plane and not the full 3d structure ) like it is more l-tectonite than s-tectonite , which makes me want to not call it a gneiss or a schist and assign it a more genetic term like an amphibolite facies ( i 'm guessing here ) l-s tectonite
+
+, which // he 's been and continues to be an excellent manager who is not at fault for any of the real problems city have faced this season , which include the injury problems , the yaya off-season drama which led to his slow start , the completely mish-mashed pre-season due to the world cup and then the lack of fitness of those players when the season began
+
+, which // it shows that they have a very primitive form of empathy , which helps us pinpoint where empathy began to evolve in humans
+
+, which // dude has n't posted for a week , which is roughly when his first court date was
+
+, which // in poly , we were exposed to project work and deadlines , which polys try to assimilate the working world
+
+, which // i guess my point is , there is still a large market for humor that effectively challenges political correctness and social norms , which is what i think he is basically getting at
+
+, which // you very obviously stated that you would like to kick my ass and shoot me to `` get shit across much faster '' , which it will not
+
+, which // i do have the m750 , which i love
+
+, which // they do give opiates , which is related , but much less addictive , and people still get addicted to them , all the fucking time
+
+, which // you can make the argument that some pirates would buy it , which is probably true
+
+, which // oh , and the second game of that , cs : source , yeah , it also had a shit ton of mods too , which kept it relevant and alive
+
+, which // on the other hand , anger seems to be encouraged , which is disheartening
+
+, which // girls expect guys to not act like that because it 's seen as sleazy , which to a degree is understandable
+
+, which // this is seen as sexist towards women/homophobic ( and rightly so—it is ) , but nobody cares that they 're being told that they 're not `` manly '' enough , which is an issue i think we 'll have to deal with in the near future
+
+, which // gt ; snip snip & gt ; reversible unless you were referring to the drug , and if i remember properly , that involved injecting female hormones , which 'd definitely need reccomendations , etc
+
+, which // here is an important series of events worth considering though : - europe in the 1500 's had no access to the silk road , which connected the very wealthy nations of asia , the middle east , and africa and excluded an impoverished europe
+
+, which // centuries of imperialism and colonialism follow , which went very very poorly for every country that was n't europe , and the effects of which are still noticeable today
+
+, which // valve servers that connect to the game/vpn as a spectators , which is the server people `` in game '' with tickets view the match on local `` streaming computers '' connect to the game/vpn as spectators for twitch streams ( edit : or any other streaming site ... ) this way , unless the vpn or the valve servers that stream the in-game viewing get compromised no one can ddos and their ping should be 0ish for all the players / casters
+
+, which // i feel like a lot of the argument against narratology in games criticism as an equally valid approach to games stems from a belief that good art must be accessible to the point of intuitive , without being shallow , which is certainly a valid interpretation of art theory , but i do n't think it is the only one and i do n't think it is enough to steamroll over narratological arguments
+
+
+
+-----
+
+
+
+
+Feature: whreobj_032
+
+#32. WH relative clauses on object positions (e.g., the man who Sally likes) xxx + yyy + N + WHP + zzz (where xxx is NOT any form of the verbs ASK or TELL, to exclude indirect WH questions, and zzz is not ADV, AUX or V, to exclude relativization on subject position)
+
+
+
+
+
+
+was who these // was wondering who these random people were
+
+council which of // here is where the council decides which of the two , when they have come of age , is more suited to live in aragasia
+
+to which one // parents , family , friends , all coming to see which one of us would die
+
+bed whose name // it was meant to be '' says the priest sitting next to my bed , whose name is apparently myself
+
+, which the // force a reload on multiplayer , in which the game stops looking at the mod directory
+
+, which point // i found that out a bit later , at which point i was more concerned about not being concerned about it to find out what it was *really* called , if that makes sense
+
+drops which it // it 's only the right thing to do if demand drops , which it is n't going to do in london any time soon
+
+of who like // played `` life is strange '' just today , i think those of you who like games would like it a lot
+
+dead which , // the realm is weakened , and when a dragon inevitably returns , he 's stuck in the middle of that , as he 'll either be hand or regent ( unless he 's dead , which , yeah
+
+him which we // if she was clearly a threat to him ( which we can clearly see she was n't ) , he could had cuffed her the many times he had her pinned down
+
+shows who the // the only music i use from that is the music they play at the end of a round when it shows you who the mvp is ( which is literally like 3-4 seconds before the round ends
+
+symptom who she // but that is just a symptom of who she is more generally - thoughtless , not intelligent , nonproductive , and absolutely convinced that she is correct and above criticism/assessment by others
+
+n't who but // i do n't remember who but someone landed on a bowser square and got revolution splitting all the coins equally
+
+not which one // 9 and 13 are medium format film backs for a camera , not sure which one offhand but if there are big square cameras he also left you then it might be 1 ( 2
+
+sexist which she // why is she saying games are sexist ( which she is n't ) , where there 's all these positive examples
+
+in which i // i have seen people suggest that some of the examples ( the dragon age one in particular which i was told ) lack context which explain things
+
+automatically which they // we had to rewrite them because we needed the sheets to break everything down by class for us automatically , which they do now , beautifully i might add
+
+modem which they // i had my own router and old comcast modem , which they wanted me to replace
+
+body which you // there is no body in which you could extract a cell to clone
+
+clarification which section // i 'm open to clarification however which section am i looking at
+
+sums who he // sums up who he is really
+
+part which one // im debating between the 0201 and the 0206 's , and a big part is which one fades more to my tastes
+
+removal which most // without counterspell backup your deck folds to any form of removal , which most tier-one decks run
+
+any who the // do you have any idea who the third guy is
+
+flamingo which he // i had a customer and bought a pink lawn flamingo ... which he said he would name after me
+
+accolades who you // lots of hard work but this industry is all about your accolades and who you know
+
+a whose girlfriend // many people work they ass off and they just want to do something silly after work also : '' wow these retards enjoy x show , such losers '' - dude watching another stupid show `` wow these retards are such virgins , i can get laid whenever i can '' - a virgin whose girlfriend is in png format
+
+ubuntu which in // mint inherits from a distribution called ubuntu , which in turn is compatible with software for debian
+
+an which story // edit : btw , shippuden is indeed much better , altho i must admit they are filling and stretching the story a lot while it 's coming down to an end , kind of a bitter taste for an anime which story i definetly enjoyed
+
+enough which many // but if you got paid well enough ( which many models really do n't ) , you might even be willing to be unhealthily skinny
+
+love who the // you just would have to travel throughout the world for love but who the hell does that
+
+) who to // excluding karl ) general who to level and evolve
+
+gas which by // if you use it 30 times a month , you are getting 3x points on gas , which by almost any valuation would be worth at least $ .05
+
+desires which it // it means she 'll be more secure in her desires , which it sounds like she already is , since she 's told you you guys are having the best sex of her life
+
+behind which if // i do n't think those times will work i 'm 7 hours behind gmt which if i am doing the math correctly means i 'll still be at which ad that is 12:30 pm for me
+
+be which ad // i do n't think those times will work i 'm 7 hours behind gmt which if i am doing the math correctly means i 'll still be at which ad that is 12:30 pm for me
+
+link which ones // can you link to which ones on there
+
+knowledge who the // none of those opponents were nearly as dangerous and as fast paced as ronda so dont you think shes going into the fight with some sort of prior knowledge on who the fuck shes fighting for the belt
+
+watch who all // i would watch doctor who all day and every time it would be new
+
+your which you // honestly if you are asking this question you probably have apps hindering your performance which you could do without
+
+core who , // gt ; however , the fact that a centralized group ( in this case a group of core developers who , btw , i have much more faith in than current political and economic leaders ) will have the ability to switch the reward mechanism from pow to pos ( or something else yet again ) as well as make value decisions about which daos to reward with new currency issuance kind of takes away from the ideal of a truly decentralized autonomous network
+
+decisions which daos // gt ; however , the fact that a centralized group ( in this case a group of core developers who , btw , i have much more faith in than current political and economic leaders ) will have the ability to switch the reward mechanism from pow to pos ( or something else yet again ) as well as make value decisions about which daos to reward with new currency issuance kind of takes away from the ideal of a truly decentralized autonomous network
+
+changes who to // to make the system into a truly decentralized autonomous network , it needs to get some network effect and market cap , it needs to have mechanisms to allow the stakeholders to vote on important features of the dao ( hard fork changes , who to pay via coin issuance and how much to pay them to improve the system ) , and the code needs to be accessible enough so that the stakeholders are n't dependent on a small group of devs who are the only ones who understand the system and can work on it ( so that the stakeholders have leverage in the negotiations rather than the founding ethereum devs by being willing to replace the devs with other outside devs who can quickly get used to the codebase and start improving it
+
+purposes which god // but then i do n't think the purposes for which god *did* make the world could possibly be realized
+
+'' which it // you very obviously stated that you would like to kick my ass and shoot me to `` get shit across much faster '' , which it will not
+
+device which your // the regulation they cite states `` explosive device '' which your vape is most certainly not
+
+sleazy which to // girls expect guys to not act like that because it 's seen as sleazy , which to a degree is understandable
+
+point which the // the point at which the drunkenness and hangover is gone , is when i do n't mind being around kids ( about 5 or 6
+
+properly which games // like i 've said , i do n't properly remember which games had that issue
+
+you which h81 // but do you know which h81 he was referring to
+
+n't which h81 // i do n't know which h81 to use
+
+----
+
+
+Feature thatacom_022
+
+that adjective complements (e.g., I'm glad that you like it) ADJ + (T#) + that
+(complements across intonation boundaries were edited by hand)
+
+
+
+sure that // i 'm pretty sure that 's the packaging for a car lighter
+
+zippy that // i have a freelancer dur for doing most of my exploration ( and small trades ) alone or with a couple of buddies but i grabbed the mustang beta specifically for something zippy that works pure solo
+
+worst that // send fried requests on facebook , the worst that can happen is a no
+
+good that // there 's nothing good that can come of it , really
+
+few that // if you 're one of the few that ca n't afford to spend the money , you should n't have the game , because that 's the requirement the creators ask for in exchange for their work
+
+
+----
+
+Feature thatresub_029
+
+#29. that relative clauses on subject position (e.g., the dog that bit me) N -p (T#) + that + (ADV) + AUX/V {that relatives across intonation boundaries are identified by hand.)
+
+NONE 
+
+
+-----
+
+Feature thatreobj_030
+
+#30. that relative clauses on object position (e.g., the dog that I saw) N + (T#) + that + DET / SUBJPRO / POSSPRO / it / ADJ / plural noun/ proper noun / possessive noun / TITLE
+
+NONE

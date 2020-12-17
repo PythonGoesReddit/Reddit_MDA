@@ -1,6 +1,12 @@
 
-# ? need some lemmatization (instead of defining lists of surface forms)
-# relying on commas in functions for feature identification -- I think these will be removed by the tagger
+# Open Q: Will commas be removed by the tagger?
+
+#BUG: I accidentally did some lookaheads using word_tuple instead of tagged_sentence... sorry! (KM)
+
+# Code for easily checking output (adapt word positions for given feature)
+    # sentence = [word[0] for word in tagged_sentence]
+    # print(word_minus1[0], word_tuple[0], "//", " ".join(sentence))
+    # print()
 
 #All packages:
 import json
@@ -13,7 +19,8 @@ import time
 from datetime import timedelta
 start_time = time.time()
 
-path = "~/Reddit_MDA/sample_data/json"
+dirname = os.path.dirname(__file__)
+path = os.path.join(dirname, 'sample_data')
 
 # Preprocessing functions
 
@@ -102,6 +109,9 @@ def analyze_sentence(preprocessed_json):
 
         exclamation_counter = sentence.count("!")
         s["exclamation_209"] = exclamation_counter 
+
+        if "that is," in sentence: #Will only catch sentences with proper punctuation but it's a start
+            s["conjuncts_045"] += 1
 
         s["lenchar_210"] = len(sentence) 
         s["lenword_211"] = len(sentence.split(" ")) 
@@ -494,64 +504,77 @@ def analyze_determiner(index, tagged_sentence, features_dict): ## Rafaela
             pass
      
 def analyze_wh_word(index, tagged_sentence, features_dict): ## Kyla
+    # Check: Ft 32 (Biber's way of finding this seems like it could be optimized)
+    # Check: Ft 22 (catches unintended phrases)
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "whquest_013", "thatvcom_021", "thatacom_022", "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032", 
     "whrepied_033", "sentencere_034", "conjuncts_045".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
    
-    if word_tuple[0] in WHP:
+    if word_tuple[0] in WHP: #["who", "whom", "whose", "which"]
         if index > 0:
             try:
-                word_minus1 = word_tuple[index - 1]
+                word_minus1 = tagged_sentence[index - 1]
                 if word_minus1[1] == "IN":
-                    features_dict["whrepied_033"] += 1
-                    if word_tuple[0] == "which" and word_minus1[0] == ",": #won't commas be removed? (KM)
-                        features_dict["sentencere_034"] += 1 # edited manually by Biber
-                    try: #revisit this! (KM)
-                        tuple_plus1 = word_tuple[index + 1]
-                        if not tuple_plus1[1].startswith("RB") and not tuple_plus1[1].startswith("MD") and not tuple_plus1[1].startswith("VB"):
-                            #again using not statements (KM)
-                            pass #condition forgotten? (KM)
-                        if not tuple_minus2[0] in asktelllist:
-                            #again the not statement, I don't see why (KM)
-                            # I don't know how to do this without a not-statement. For feature 032 Biber (p.235) only counts WHP-words that
-                            # do not have ask/tell on the third position to its left.
-                            features_dict["whreobj_032"] += 1
-                    except IndexError:
-                        pass
+                    features_dict["whrepied_033"] += 1 #pied-piping relative clauses (e.g., the manner in which he was told) PREP + WHP in relative clauses
+
+                if word_tuple[0] == "which" and word_minus1[0] == ",": #34. sentence relatives (e.g., Bob likesfried mangoes, which is the most disgusting thing I've ever heard of) Biber: (These forms are edited by hand to exclude non-restrictive relative clauses.)
+                    features_dict["sentencere_034"] += 1 
+
             except IndexError:
                 pass
-           
-    #REVISIT THIS ! (KM)
+
+            if index > 1:
+                try: #right now, only wh-words at least two words from the front and 2 from the end will be caught here (KM) -> won't catch ex "boys who Sally likes" (is that grammatically acceptable??) also won't catch passives, ex "the men who are liked by Sally" (kind of awkward tbh) (KM)
+                    word_minus2 = tagged_sentence[index - 2]
+                    word_plus1 = tagged_sentence[index + 1]
+
+                    if not word_minus2[0].startswith("ask") and not word_minus2[0].startswith("tell") and not word_minus2[0] == "told": 
+                        if not word_plus1[1].startswith("R") and not word_plus1[1].startswith("V") and not word_plus1[1].startswith("MD"):
+                            
+                            features_dict["whreobj_032"] += 1 #32. WH relative clauses on object positions (e.g., the man who Sally likes) xxx + yyy + N + WHP + zzz (where xxx is NOT any form of the verbs ASK or TELL, to exclude indirect WH questions, and zzz is not ADV, AUX or V, to exclude relativization on subject position)
+
+                except IndexError:
+                    pass
+
     elif word_tuple[0] == "that":
         if index > 0:
             try:
-                word_minus1 = word_tuple[index - 1]
-                if word_minus1[1].startswith("JJ"):
-                    features_dict["thatacom_022"] += 1
+                word_minus1 = tagged_sentence[index - 1]
+                if word_minus1[1].startswith("J"): #This catches things like I'm sure that's a, there's nothing good that can come out of it, etc. Biber keeps mentioning tone boundaries but I dont understand how you could do that computationally (he refers to it as T#)
+                    features_dict["thatacom_022"] += 1 #that adjective complements (e.g., I'm glad that yo like it) ADJ + (T#) + that (complements across intonation boundaries were edited by hand)
+
                 try:
                     word_plus1 = word_tuple[index + 1]
                     word_plus2 = word_tuple[index + 2] 
+                    
+                    print("TEST")
+                    #BUG: never reaches this point? print statements here ignored? or does my sample just not have any examples? (KM)
+
+                    #29. that relative clauses on subject position (e.g., the dog that bit me) N -p (T#) + that + (ADV) + AUX/V {that relatives across intonation boundaries are identified by hand.)
+                    #30. that relative clauses on object position (e.g., the dog that I saw) N + (T#) + that + DET / SUBJPRO / POSSPRO / it / ADJ / plural noun/ proper noun / possessive noun / TITLE
                     if word_minus1[1].startswith("NN"):
-                        if word_plus1[1].startswith("RB"):
-                            pass #forgotten condition (KM)
-                        if word_plus2[1].startswith("VB") or word_plus2[1].startswith("MD"):
+                        if word_plus1[1].startswith("RB") and (word_plus2[1].startswith("V") or word_plus2[1].startswith("MD")):
+                            features_dict["thatresub_029"] += 1 
+                            sentence = [word[0] for word in tagged_sentence]
+
+                        elif word_plus1[1].startswith("VB") or word_plus1[1].startswith("MD"):
                             features_dict["thatresub_029"] += 1
-                    elif word_plus1[1].startswith("VB") or word_plus1[1].startswith("MD"):
-                        features_dict["thatresub_029"] += 1
-                    elif word_plus1[1].startswith("DT") or word_plus1[1].startswith("JJ") or word_plus1[1] == "NNS" or word_plus1[1].startswith("NNP"):
-                        features_dict["thatreobj_030"] += 1
-                    elif word_plus1[0] == "it" or word_plus1[0] in subjpro or word_plus1[0] in posspro:
-                        features_dict["thatreobj_030"] += 1
-                    elif word_plus1[0] == "is" and word_plus2[0] == ",": #comma (KM)
-                        features_dict["conjuncts_045"] += 1
+                            sentence = [word[0] for word in tagged_sentence]
+
+                        elif word_plus1[1].startswith("DT") or word_plus1[1].startswith("JJ") or word_plus1[1] == "NNS" or word_plus1[1].startswith("NNP"):
+                            features_dict["thatreobj_030"] += 1
+
+                        elif word_plus1[0] == "it" or word_plus1[0] in subjpro or word_plus1[0] in posspro:
+                            features_dict["thatreobj_030"] += 1
+
                 except IndexError:
                     pass
+                
             except IndexError:
                 pass
-        # 21
-    #elif 
-    # still missing: "whquest_013", "thatvcom_021", "whresub_031"
+
+    # still missing: "whquest_013", "thatvcom_021", "whresub_031" -> 45 to full sentence 
 
 def analyze_there(index, tagged_sentence, features_dict): ## noone...
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
