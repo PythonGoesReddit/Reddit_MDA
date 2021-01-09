@@ -342,6 +342,9 @@ def analyze_preposition(index, tagged_sentence, features_dict): ## Gustavo
     
     if index > 0:
         word_minus1 = tagged_sentence[index - 1]
+        #Gustavo, I moved this up here (KM)
+        if word_tuple[0] == "that" and word_minus1 in ["such", "so"] and not word_plus1[1] in ["JJ", "JJR", "JJS", "NN", "NNS", "NNP", "NNPS"]:
+            features_dict["advsubother_038"] += 1 # Using not statement here again. There is also an overlap with the "such that" construction in Biber's original features. (GK)
         if word_tuple[0] == "like" and word_minus1[0] == "something":
             features_dict["hedges_047"] += 1
             #I don't really like how we're handling hedges here, it feels like there has to be a better way
@@ -353,6 +356,8 @@ def analyze_preposition(index, tagged_sentence, features_dict): ## Gustavo
             # Is it possible that the code maybe got slightly mixed up through the restructuring into the "try"-layout?
             # I thought that this if-statemtn was followed or preceded by a condition wordtuple[0]=="of" and word_minus2[1]!=DET/ADJ/POSSPRO/WHO
             # in order to look for "kind of" and "sort of" (p.240) (HM)
+            # Ok sorry I broke that :D maybe we can move this to the whole sentence analyzer function? And just look for the phrases "kind of" and "sort of" (and kinda/sorta)
+            #Same goes for below, in as much as, etc. (KM)
         if index > 1: 
             word_minus2 = tagged_sentence[index - 2]
             if word_minus2[1] not in ["DT", "JJ", "JJR", "JJS", "PRP", "WP"]:
@@ -389,33 +394,23 @@ def analyze_preposition(index, tagged_sentence, features_dict): ## Gustavo
         elif word_tuple[0] == "on" and word_plus1[0] == "the":
             if word_plus2[0] == "contrary":
                 features_dict["conjuncts_045"] += 1
-            elif word_plus2[0] == "other":
-                try: 
-                    word_plus3 = tagged_sentence[index + 3]
-                    if word_plus3 == "hand":
-                        features_dict["conjuncts_045"] += 1
-                except IndexError:
-                    pass
-    except IndexError:
-        pass
-    
-    try:
-        if word_tuple[0] in ["since","while", "whilst", "whereupon", "whereas", "whereby"]:
-            features_dict["advsubother_038"] += 1 
-    
-    try:
-        word_plus2 = tagged_sentence[index + 2]
-        if word_tuple[0] in ["inasmuch", "forasmuch", "insofar", "insomuch"] and word_plus1 == "as":
+        #Gustavo, I moved your features up here so that it doesn't have to assign word_plus2 twice (KM)
+        #But I think these features maybe can go in the whole sentence section (and kind of / sort of / kinda / sorta, see comments above)
+        elif word_tuple[0] in ["inasmuch", "forasmuch", "insofar", "insomuch"] and word_plus1 == "as":
             features_dict["advsubother_038"] += 1
         elif word_tuple[0] == "as" and word_plus1[0] in ["long", "soon"] and word_plus2[0] == "as":
             features_dict["advsubother_038"] += 1
+        elif word_plus2[0] == "other":
+            try: 
+                word_plus3 = tagged_sentence[index + 3]
+                if word_plus3 == "hand":
+                    features_dict["conjuncts_045"] += 1
+            except IndexError:
+                pass
+    except IndexError:
+        pass
 
-    try:
-        word_minus1 = tagged_sentence[index - 1]
-        if word_tuple[0] == "that" and word_minus1 in ["such", "so"] and not word_plus1[1] in ["JJ", "JJR", "JJS", "NN", "NNS", "NNP", "NNPS"] 
-            features_dict["advsubother_038"] += 1 # Using not statement here again. There is also an overlap with the "such that" construction in Biber's original features. (GK)
-            
-            
+
     
     # still missing: "advsubother_038"
     
@@ -505,6 +500,8 @@ def analyze_conjunction(index, tagged_sentence, features_dict): ## Gustavo
             features_dict["coordnonp_065"] += 1 
         elif word_tuple == "and" and word_plus1 in ["because", "although", "though", "if", "unless", "since", "while", "whilst", "whereas", "whereby"]:
             features_dict["coordnonp_065"] += 1 
+    except IndexError: 
+        pass
     
     # still missing: "coordnonp_065" (only for 'and' followed by adverbial subordinator or conjunct, depend on other features)
 
