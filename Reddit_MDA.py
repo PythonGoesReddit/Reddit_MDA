@@ -328,6 +328,11 @@ def analyze_preposition(index, tagged_sentence, features_dict): ## Gustavo
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "advsubcause_035", "advsubconc_036", "advsubcond_037", "advsubother_038", "prepositions_039", 
     "conjuncts_045", "hedges_047", "strandprep_061".'''
+    ## There are several features in here that I think would be better in the analyze_sentence function becuase they are just looking for surface forms
+    ## For example, instead of looking for the word proceeding 'as' or 'of', we could just count in the full, untagged sentence (before it is separated into words)
+    ## for "kind of" and "inasmuch as" -- kind of like what we're doing with emphatics in analyze_sentence()
+    ## I'd be happy to do this as my next task if we think its best (KM)
+    ## Other candidates would also be things like "on the other hand", etc.
     features_dict["prepositions_039"] += 1 
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
 
