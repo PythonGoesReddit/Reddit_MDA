@@ -8,6 +8,11 @@
     # print(word_minus1[0], word_tuple[0], "//", " ".join(sentence))
     # print()
 
+# Kylas questions for next meeting:
+# Dealing with set phrases (saw a couple of these in the preposition section), like kind of, sort of etc. -> use the analyze_sentence function?
+# Dealing with uncertain number of words in between (ex ft 21c) --> preposition earlier in sentence, then any number of interceding items then NOT then wh-word
+# Could feed it the whole sentence but then it would be untagged right?
+
 #All packages:
 import json
 import os
@@ -638,7 +643,6 @@ def analyze_wh_word(index, tagged_sentence, features_dict): ## Kyla
 
             #TO ADD:
             #21 21. that verb complements (e.g., / said that he went) 
-            # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/^^e/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions) 
             # (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/TJf/anrf){that-c\a\ises as complements to verbs which are not included in the above verb classes are not counted - see Quirk et al. 1985:1179ff.) 
             # (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)(This algorithm allows an intervening prepositional phrase between a verb and its complement.)
             
