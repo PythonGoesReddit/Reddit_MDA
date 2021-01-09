@@ -175,7 +175,8 @@ conjunctslist = ["alternatively", "altogether", "consequently", "conversely", "e
                  "nonetheless", "notwithstanding", "otherwise", "rather", "similarly", "therefore", "thus", "viz"]
 punct_final = [".", "!", "?", ":", ";"] # here, Biber also includes the long dash -- , but I am unsure how this would be rendered
 belist = ["be", "am", "are", "is", "was", "were", "been", "being"] 
-# we could probably lemmatize instead of using a manual list for forms of verbs (KM)
+havelist = ["have", "has", "had", "having"]
+dolist = ["do", "does", "doing", "did", "done"]
 subjpro = ["i", "we", "he", "she", "they"]
 posspro = ["my", "our", "your", "his", "their", "its"]
 DEM = ["that", "this", "these", "those"]
@@ -190,6 +191,7 @@ downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "on
 amplifierlist = ["absolutely", "altogether", "completely", "enormously", "entirely", "extremely", "fully", "greatly", "highly", 
                  "intensely", "perfectly", "strongly", "thoroughly", "totally", "utterly", "very"]
 asktelllist = ["ask", "asked", "asking", "asks", "tell", "telling", "tells", "told"] #this could also be accomplished with .startswith("ask"), .startswith("tell") or == "told" (KM)
+titlelist = ["mr", "ms", "mrs", "prof", "professor", "dr", "sir"] #??????? (KM)
 
 
 #POS-functions
@@ -538,92 +540,107 @@ def analyze_wh_word(index, tagged_sentence, features_dict): ## Kyla
     "whrepied_033", "sentencere_034".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
    
-    if word_tuple[0] in WHP: #["who", "whom", "whose", "which"]
-        if index > 0:
-            try:
-                word_minus1 = tagged_sentence[index - 1]
+
+    if index > 0:
+        try:
+            word_minus1 = tagged_sentence[index - 1]
+            if word_tuple[0] in WHP: #["who", "whom", "whose", "which"]
                 if word_minus1[1] == "IN":
                     features_dict["whrepied_033"] += 1 #pied-piping relative clauses (e.g., the manner in which he was told) PREP + WHP in relative clauses
 
                 if word_tuple[0] == "which" and word_minus1[0] == ",": #34. sentence relatives (e.g., Bob likesfried mangoes, which is the most disgusting thing I've ever heard of) Biber: (These forms are edited by hand to exclude non-restrictive relative clauses.)
                     features_dict["sentencere_034"] += 1 
 
-            except IndexError:
-                pass
-
-            if index > 1:
-                try: #right now, only wh-words at least two words from the front and 2 from the end will be caught here (KM) -> won't catch ex "boys who Sally likes" (is that grammatically acceptable??) also won't catch passives, ex "the men who are liked by Sally" (kind of awkward tbh) (KM)
-                    word_minus2 = tagged_sentence[index - 2]
-                    word_plus1 = tagged_sentence[index + 1]
-
-                    if not word_minus2[0].startswith("ask") and not word_minus2[0].startswith("tell") and not word_minus2[0] == "told": 
-                        if not word_plus1[1].startswith("R") and not word_plus1[1].startswith("V") and not word_plus1[1].startswith("MD"):
-                            
-                            features_dict["whreobj_032"] += 1 #32. WH relative clauses on object positions (e.g., the man who Sally likes) xxx + yyy + N + WHP + zzz (where xxx is NOT any form of the verbs ASK or TELL, to exclude indirect WH questions, and zzz is not ADV, AUX or V, to exclude relativization on subject position)
-
-                except IndexError:
-                    pass
-
-    elif word_tuple[0] == "that":
-        if index > 0:
-            try:
-                word_minus1 = tagged_sentence[index - 1]
-                if word_minus1[1].startswith("J"): #This catches things like I'm sure that's a, there's nothing good that can come out of it, etc. Biber keeps mentioning tone boundaries but I dont understand how you could do that computationally (he refers to it as T#)
+                elif word_tuple[0] == "that" and word_minus1[1].startswith("J"): #This catches things like I'm sure that's a, there's nothing good that can come out of it, etc. Biber keeps mentioning tone boundaries but I dont understand how you could do that computationally (he refers to it as T#)
                     features_dict["thatacom_022"] += 1 #that adjective complements (e.g., I'm glad that yo like it) ADJ + (T#) + that (complements across intonation boundaries were edited by hand)
 
                 try:
-                    word_plus1 = word_tuple[index + 1]
-                    word_plus2 = word_tuple[index + 2] 
+                    word_plus1 = tagged_sentence[index + 1]
+
+                    #13. direct WH-questions CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)
+                    if word_minus1 in punct_final and word in WHO:
+                        if word_plus1[1] == "MD":
+                            featuresdict["whquest_013"] += 1 
+                        elif word_plus1[1].startwith("V"):
+                            if word_plus1[0] in belist or word_plus1[0] in havelist or word_plus1[0] in dolist:
+                                featuresdict["whquest_013"] += 1
                     
-                    print("TEST")
-                    #BUG: never reaches this point? print statements here ignored? or does my sample just not have any examples? (KM)
+                     #21 21. that verb complements (e.g., / said that he went) 
+                    # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions) 
+                    if word_tuple[1] == "that":
+                        if word_minus1[1].startswith("I") or word_minus1[0] in ["and", "nor", "but", "or", "who"]: #does this first part of this catch Bibers ALL-P?
+                            if word_plus1[1].startswith("D") or word_plus1[1].startswith("PR") or word_plus1[0] == "there" or word_plus1[1].startswith("NNP") or word_plus1[1].startswith("NNS") or titlelist in word_plus1[0]:
+                                featuresdict["thatvcom_021"] += 1
+                    
+                    try: 
+                        word_plus2 = word_tuple[index + 2] 
+                        
+                        print("TEST")
+                        #BUG: never reaches this point? print statements here ignored? or does my sample just not have any examples? (KM)
 
-                    #29. that relative clauses on subject position (e.g., the dog that bit me) N -p (T#) + that + (ADV) + AUX/V {that relatives across intonation boundaries are identified by hand.)
-                    #30. that relative clauses on object position (e.g., the dog that I saw) N + (T#) + that + DET / SUBJPRO / POSSPRO / it / ADJ / plural noun/ proper noun / possessive noun / TITLE
-                    if word_minus1[1].startswith("NN"):
-                        if word_plus1[1].startswith("RB") and (word_plus2[1].startswith("V") or word_plus2[1].startswith("MD")):
-                            features_dict["thatresub_029"] += 1 
-                            sentence = [word[0] for word in tagged_sentence]
+                        #29. that relative clauses on subject position (e.g., the dog that bit me) N -p (T#) + that + (ADV) + AUX/V {that relatives across intonation boundaries are identified by hand.)
+                        #30. that relative clauses on object position (e.g., the dog that I saw) N + (T#) + that + DET / SUBJPRO / POSSPRO / it / ADJ / plural noun/ proper noun / possessive noun / TITLE
+                        if word_minus1[1].startswith("NN"):
+                            if word_plus1[1].startswith("RB") and (word_plus2[1].startswith("V") or word_plus2[1].startswith("MD")):
+                                features_dict["thatresub_029"] += 1 
+                                sentence = [word[0] for word in tagged_sentence]
 
-                        elif word_plus1[1].startswith("VB") or word_plus1[1].startswith("MD"):
-                            features_dict["thatresub_029"] += 1
-                            sentence = [word[0] for word in tagged_sentence]
+                            elif word_plus1[1].startswith("VB") or word_plus1[1].startswith("MD"):
+                                features_dict["thatresub_029"] += 1
+                                sentence = [word[0] for word in tagged_sentence]
 
-                        elif word_plus1[1].startswith("DT") or word_plus1[1].startswith("JJ") or word_plus1[1] == "NNS" or word_plus1[1].startswith("NNP"):
-                            features_dict["thatreobj_030"] += 1
+                            elif word_plus1[1].startswith("DT") or word_plus1[1].startswith("JJ") or word_plus1[1] == "NNS" or word_plus1[1].startswith("NNP"):
+                                features_dict["thatreobj_030"] += 1
 
-                        elif word_plus1[0] == "it" or word_plus1[0] in subjpro or word_plus1[0] in posspro:
-                            features_dict["thatreobj_030"] += 1
+                            elif word_plus1[0] == "it" or word_plus1[0] in subjpro or word_plus1[0] in posspro:
+                                features_dict["thatreobj_030"] += 1
 
-                        # if word_minus1[0] in ["and", "nor", "but", "or", "also"] or word_minus1[0] in punct_final or word_minus1[0] == ",":
-                        # start to 021, tbc
+                            # if word_minus1[0] in ["and", "nor", "but", "or", "also"] or word_minus1[0] in punct_final or word_minus1[0] == ",":
+                            # start to 021, tbc
 
-                    if index > 2:
-                        try:
-                            word_minus3 = word_tuple[index - 3]
+                        if index > 1:
+                            try: #right now, only wh-words at least two words from the front and 2 from the end will be caught here (KM) -> won't catch ex "boys who Sally likes" (is that grammatically acceptable??) also won't catch passives, ex "the men who are liked by Sally" (kind of awkward tbh) (KM)
+                                word_minus2 = tagged_sentence[index - 2]
+                                word_plus1 = tagged_sentence[index + 1]
 
-                            #31. WH relative clauses on subject position (e.g., the man who likes popcorn) xxx + yyy + N + WHP + (ADV) + AUX/V (where xxx is NOT any form of the verbs ASK or TELL; to exclude indirect WH questions like Tom asked the man who went to the store)
-                            if word_minus1[1].startswith("N") and word_plus1[1].startswith("R") and (word_plus2[1].startswith("V") or word_plus2[1].startswith("MD")):
-                                features_dict["whresub_031"] += 1
-                                print("TEST")
-                                #BUG: Doesn't get here on my file
-                            elif word_minus1[1].startswith("N") and (word_plus1[1].startswith("V") or word_plus1[1].startswith("MD")):
-                                features_dict["whresub_031"] += 1
-                                print("TEST")
-                                #BUG: Doesn't get here on my file
+                                if not word_minus2[0].startswith("ask") and not word_minus2[0].startswith("tell") and not word_minus2[0] == "told": 
+                                    if not word_plus1[1].startswith("R") and not word_plus1[1].startswith("V") and not word_plus1[1].startswith("MD"):
+                                        features_dict["whreobj_032"] += 1 #32. WH relative clauses on object positions (e.g., the man who Sally likes) xxx + yyy + N + WHP + zzz (where xxx is NOT any form of the verbs ASK or TELL, to exclude indirect WH questions, and zzz is not ADV, AUX or V, to exclude relativization on subject position)
+                            
+                            except IndexError:
+                                pass
 
-                        except IndexError:
-                            pass
+                        if index > 2:
+                            try:
+                                word_minus3 = word_tuple[index - 3]
+
+                                #31. WH relative clauses on subject position (e.g., the man who likes popcorn) xxx + yyy + N + WHP + (ADV) + AUX/V (where xxx is NOT any form of the verbs ASK or TELL; to exclude indirect WH questions like Tom asked the man who went to the store)
+                                if word_minus1[1].startswith("N") and word_plus1[1].startswith("R") and (word_plus2[1].startswith("V") or word_plus2[1].startswith("MD")):
+                                    features_dict["whresub_031"] += 1
+                                    print("TEST")
+                                    #BUG: Doesn't get here on my file (KM)
+                                elif word_minus1[1].startswith("N") and (word_plus1[1].startswith("V") or word_plus1[1].startswith("MD")):
+                                    features_dict["whresub_031"] += 1
+                                    print("TEST")
+                                    #BUG: Doesn't get here on my file (KM)
+                            
+                            except IndexError:
+                                pass
+
+                    except IndexError:
+                        pass
 
                 except IndexError:
                     pass
                 
-            except IndexError:
-                pass
+        except IndexError:
+            pass
 
             #TO ADD:
-            #13. direct WH-questions CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)
-            #21 21. that verb complements (e.g., / said that he went) (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/^^e/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions) (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/TJf/anrf){that-c\a\ises as complements to verbs which are not included in the above verb classes are not counted - see Quirk et al. 1985:1179ff.) (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)(This algorithm allows an intervening prepositional phrase between a verb and its complement.)(d) Tt + that
+            #21 21. that verb complements (e.g., / said that he went) 
+            # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/^^e/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions) 
+            # (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/TJf/anrf){that-c\a\ises as complements to verbs which are not included in the above verb classes are not counted - see Quirk et al. 1985:1179ff.) 
+            # (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)(This algorithm allows an intervening prepositional phrase between a verb and its complement.)
             
 
 def analyze_there(index, tagged_sentence, features_dict): ## noone...
