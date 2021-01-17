@@ -163,7 +163,7 @@ def tag_sentence(sentence):
     tagged_sentence = nltk.pos_tag(tokens)
     return tagged_sentence
 
-def look_behind(index, tagged_sentence):
+def look_behind(index, tagged_sentence): # AB: I love these functions, but one suggestion: instead of none, can we choose an appropriate string tuple for out-of-range items? We will typically want to look for items of the type ("word","POS") in our look_behind/ahead expressions, and ("$x$x", "$x$x") or some such can be addressed within that same condition, whereas a nonetype will again require downstream error handling.
     word_tuple = tagged_sentence[index]
 
     if index > 0:
@@ -253,18 +253,18 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
     "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
     "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''    
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-
+    lookbehind = look_behind(index, tagged_sentence)
+    lookahead = look_ahead(index, tagged_sentence)
     if word_tuple[1] == "VBD":
         features_dict["vpast_001"] += 1
-    elif word_tuple[1] == "VVI": 
+    elif word_tuple[1] == "VB":
         features_dict["vinfinitive_024"] += 1
-    elif word_tuple[1] == "VBG": #gerund or present participle.. is this ok? or do we have to separate these
+    elif word_tuple[1] == "VBG" and (lookbehind[0] == None or lookbehind[0][0] in ".!?;:,-") and lookahead[0] in ["IN", "DT", "RB", "WP","PRP"]: #gerund or present participle.. is this ok? or do we have to separate these # AB: In Biber, this is in fact only for present participlial clauses, a fairly narrow range of ING-forms. I implement it accordingly and would suggest a separate class of features for progressives (which Biber really does not seem to have considered in the 80s)
         features_dict["vpresentpart_025"] += 1
-    elif word_tuple[1] == "VBN":
+    elif word_tuple[1] == "VBN" and (lookbehind[0] == None or lookbehind[0][0] in ".!?;:,-") and lookahead[0][:2] in ["IN", "RB"]: # Again, in Biber this is present participial clauses only. Biber (1988:233) notes for both that "these forms were edited by hand." So we may consider scrapping them, if automated accuracy is not sufficient.
         features_dict["vpastpart_026"] += 1
-    elif word_tuple[1] in ["VBP", "VBZ"]:
+    elif word_tuple[1] in ["VBP","VBZ"]:
         features_dict["vpresent_003"] += 1
-    
     if word_tuple[0].startswith("seem") or word_tuple[0].startswith("appear"):
         features_dict["vseemappear_058"] += 1
     
