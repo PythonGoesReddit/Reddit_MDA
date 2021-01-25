@@ -1,21 +1,17 @@
 
 # Open Q: Will commas be removed by the tagger?
 
-#BUG: I accidentally did some lookaheads using word_tuple instead of tagged_sentence... sorry! (KM)
-
 # Code for easily checking output (adapt word positions for given feature)
     # sentence = [word[0] for word in tagged_sentence]
-    # print(word_minus1[0], word_tuple[0], "//", " ".join(sentence))
+    # print(tagged_sentence[index-1][0], word_tuple[0], "//", " ".join(sentence))
     # print()
 
 # Kylas questions for next meeting:
 # Dealing with set phrases (saw a couple of these in the preposition section), like kind of, sort of etc. -> use the analyze_sentence function?
 # Dealing with uncertain number of words in between (ex ft 21c) --> preposition earlier in sentence, then any number of interceding items then NOT then wh-word
-# Could feed it the whole sentence but then it would be untagged right?
-# Also started look_behind and look_ahead functions, return tuples of three words behind/ahead, otherwise returns Noneobject
-# So you can check if its possible to look ahead with if word_plus1: for example
-# Hopefully this makes some of the more complicated POS funtions less of a mess
-# But up for discussion ofc
+
+# 25_01
+# Should we transform all 'word_tuple's into 'tagged_sentence[index]'? Or does it improve readability?
 
 #All packages:
 import json
@@ -157,54 +153,14 @@ def clean_sentence(sentence):
 
 def tag_sentence(sentence):
     '''Takes a sentence, cleans it with clean_sentence, and tags it using the NLTK averaged_perceptron_tagger. 
+    Adds a look ahead/behind buffer of three items of type ("X", "X") to prevent negative indices and IndexErrors
     Returns a list of tuples of (word, pos_tag).'''
     cleaned_sentence = clean_sentence(sentence)
     tokens = nltk.word_tokenize(cleaned_sentence)
     tagged_sentence = nltk.pos_tag(tokens)
+    empty_look = [("X", "X"), ("X", "X"), ("X", "X")]
+    tagged_sentence = empty_look + tagged_sentence + empty_look 
     return tagged_sentence
-
-def look_behind(index, tagged_sentence): # AB: I love these functions, but one suggestion: instead of none, can we choose an appropriate string tuple for out-of-range items? We will typically want to look for items of the type ("word","POS") in our look_behind/ahead expressions, and ("$x$x", "$x$x") or some such can be addressed within that same condition, whereas a nonetype will again require downstream error handling.
-    word_tuple = tagged_sentence[index]
-
-    if index > 0:
-        word_minus1 = tagged_sentence[index - 1]
-    else:
-        word_minus1 = None
-
-    if index > 1:
-        word_minus2 = tagged_sentence[index - 2]
-    else:
-        word_minus2 = None
-
-    if index > 2:
-        word_minus3 = tagged_sentence[index - 3]
-    else:
-        word_minus3 = None
-    
-    lookbehind = (word_minus1, word_minus2, word_minus3)
-    return lookbehind 
-
-def look_ahead(index, tagged_sentence):
-    word_tuple = tagged_sentence[index]
-
-    try:
-        word_plus1 = tagged_sentence[index + 1]
-    except IndexError:
-        word_plus1 = None
-    
-    try:
-        word_plus2 = tagged_sentence[index + 2]
-    except IndexError:
-        word_plus2 = None
-        
-    try:
-        word_plus3 = tagged_sentence[index + 3]
-    except IndexError:
-        word_plus3 = None
-    
-    lookahead = (word_plus1, word_plus2, word_plus3)
-    return lookahead
-
 
 ## Definition of stopword lists and checkword lists for following POS-functions
 placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "around", 
@@ -237,7 +193,7 @@ WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", 
        "whenever", "whatever", "however"] # can this be accomplished with tag WDT? (KM)
 discpart = ["well", "now", "anyway", "anyhow", "anyways"]
 QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
-ALLP = [".", "!", "?", ":", ";", ","]  # here, Biber also includes the long dash -- , but I am unsure how this would be rendered
+ALLP = [".", "!", "?", ":", ";", ","]  # here, Biber also includes the long dash -- , but I am unsure how this would be rendered 
 downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "only", "partially", "partly", "practically", "scarcely", "slightly", "somewhat"]
                 # some others that could be included: a little, a bit, a tad (HM)
 amplifierlist = ["absolutely", "altogether", "completely", "enormously", "entirely", "extremely", "fully", "greatly", "highly", 
@@ -252,29 +208,24 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
     "whclause_023", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
     "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
     "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''    
-    word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    lookbehind = look_behind(index, tagged_sentence)
-    lookahead = look_ahead(index, tagged_sentence)
-    if word_tuple[1] == "VBD":
+    word_tuple = tagged_sentence[index]
+
+    if tagged_sentence[index][1] == "VBD":
         features_dict["vpast_001"] += 1
     elif word_tuple[1] == "VB":
         features_dict["vinfinitive_024"] += 1
-    elif word_tuple[1] == "VBG" and (lookbehind[0] == None or lookbehind[0][0] in ".!?;:,-") and lookahead[0] in ["IN", "DT", "RB", "WP","PRP"]: #gerund or present participle.. is this ok? or do we have to separate these # AB: In Biber, this is in fact only for present participlial clauses, a fairly narrow range of ING-forms. I implement it accordingly and would suggest a separate class of features for progressives (which Biber really does not seem to have considered in the 80s)
+    elif word_tuple[1] == "VBG" and (tagged_sentence[index-1][0] == "X" or tagged_sentence[index-1][0] in ".!?;:,-") and tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP"]: #gerund or present participle.. is this ok? or do we have to separate these # AB: In Biber, this is in fact only for present participlial clauses, a fairly narrow range of ING-forms. I implement it accordingly and would suggest a separate class of features for progressives (which Biber really does not seem to have considered in the 80s)
         features_dict["vpresentpart_025"] += 1
-    elif word_tuple[1] == "VBN" and (lookbehind[0] == None or lookbehind[0][0] in ".!?;:,-") and lookahead[0][:2] in ["IN", "RB"]: # Again, in Biber this is present participial clauses only. Biber (1988:233) notes for both that "these forms were edited by hand." So we may consider scrapping them, if automated accuracy is not sufficient.
+    elif word_tuple[1] == "VBN" and (tagged_sentence[index-1][0] == "X" or tagged_sentence[index-1][0] in ".!?;:,-") and tagged_sentence[index+1][1] in ["IN", "RB"]: # Again, in Biber this is present participial clauses only. Biber (1988:233) notes for both that "these forms were edited by hand." So we may consider scrapping them, if automated accuracy is not sufficient.
         features_dict["vpastpart_026"] += 1
     elif word_tuple[1] in ["VBP","VBZ"]:
         features_dict["vpresent_003"] += 1
+
     if word_tuple[0].startswith("seem") or word_tuple[0].startswith("appear"):
         features_dict["vseemappear_058"] += 1
-    
-    try:
-        word_plus1 = tagged_sentence[index + 1]
-        word_plus2 = tagged_sentence[index + 2]
-        if word_plus1[1] == "WDT" and word_plus2[1] == "PRP":
-            features_dict["whclause_023"] += 1
-    except IndexError:
-        pass
+
+    if tagged_sentence[index + 1][1] == "WDT" and tagged_sentence[index + 2][1] == "PRP":
+        features_dict["whclause_023"] += 1
         
     #"vperfect_002" -> how many places should it lookahead for a form of have?
     #if word_tuple[0].startswith():
@@ -308,6 +259,7 @@ def analyze_adverb(index, tagged_sentence, features_dict): ## Hanna
     "downtoners_046", "hedges_047", "amplifiers_048", "discpart_050", "negana_067".'''
     features_dict["adverbs_042"] += 1
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+
     if word_tuple[0] == "not" or word_tuple[0] == "n't":
         features_dict["negana_067"] += 1
     elif word_tuple[0] in placelist: ## added some more ideas to the list above (HM)
@@ -326,51 +278,44 @@ def analyze_adverb(index, tagged_sentence, features_dict): ## Hanna
         features_dict["discpart_050"] += 1
     ## we also look for particles in the particle-section, this is to make sure that
     ## we actually catch all of them in case they are tagged differently (HM)
-    try: 
-        word_plus1 = tagged_sentence[index + 1] 
-        if word_tuple[0] == "rather" and index == 0:
-            if word_plus1[0] == ",": #punctuation will be removed already, right? (KM) then how do we find this without the comma? (HM)
-                features_dict["conjuncts_045"] += 1
-            elif word_plus1[1] in ["CC", "CD", "DT", "EX", "IN", "LS", "MD", "NN", "NNS", "NNP", "NNPS", "PDT", "PRP", "PRP$", "RP", "TO", "UH", "VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "WDT", "WP", "WP$", "WRB"]:
-                features_dict["conjuncts_045"] += 1 
-        elif word_tuple[0] == "else" and index == 0 and word_plus1[0] == ",": #again, commas (KM)
-                features_dict["conjuncts_045"] += 1
-        elif word_tuple[0] == "altogether" and index == 0 and word_plus1 == ",":
-                features_dict["conjuncts_045"] += 1
-    except IndexError:
-        pass
-    
+
+
+# 01_25 Maybe the stuff below can go in the analyze_sentence function? Not sure, just on first glance looks like it might be a candidate at least for the stuff that doesn't require tags (KM)
+    if word_tuple[0] == "rather" and index == 0:
+        if tagged_sentence[index+1][0] == ",": #punctuation will be removed already, right? (KM) then how do we find this without the comma? (HM)
+            features_dict["conjuncts_045"] += 1
+        elif tagged_sentence[index+1][1] in ["CC", "CD", "DT", "EX", "IN", "LS", "MD", "NN", "NNS", "NNP", "NNPS", "PDT", "PRP", "PRP$", "RP", "TO", "UH", "VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "WDT", "WP", "WP$", "WRB"]:
+            features_dict["conjuncts_045"] += 1 
+    elif word_tuple[0] == "else" and index == 0 and tagged_sentence[index+1][0] == ",": #again, commas (KM)
+            features_dict["conjuncts_045"] += 1
+    elif word_tuple[0] == "altogether" and index == 0 and tagged_sentence[index+1] == ",":
+            features_dict["conjuncts_045"] += 1
+
  
 def analyze_adjective(index, tagged_sentence, features_dict): ## Kyla
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "adjattr_040", "adjpred_041", "emphatics_049", "comparatives_212", "superlatives_213".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    lookbehind = look_behind(index, tagged_sentence)
-    lookahead = look_ahead(index, tagged_sentence)
    
     if word_tuple[1] == "JJR":
         features_dict["comparatives_212"] += 1
     elif word_tuple[1] == "JJS":
         features_dict["superlatives_213"] += 1
     
-    if lookbehind[0]:
-        word_minus1 = lookbehind[0]
-        if word_minus1[0] in belist and lookahead[0]:
-            word_plus1 = lookahead[0]
-            if word_plus1[1].startswith("JJ") or word_plus1[1].startswith("NN"):
-                features_dict["adjattr_040"] += 1
+    if tagged_sentence[index-1][0] in belist:
+        if tagged_sentence[index+1][1].startswith("JJ") or tagged_sentence[index+1][1].startswith("NN"):
+            features_dict["adjattr_040"] += 1
 
-            elif not word_plus1[1].startswith("RB"): 
-                features_dict["adjpred_041"] += 1
+        elif not tagged_sentence[index+1][1].startswith("RB"): ##!!! Check not-statement (KM)
+            features_dict["adjpred_041"] += 1
 
-            if lookahead[1]:
-                word_plus2 = lookahead[1]
-                if word_plus1[1].startswith("JJ") and not word_plus2[1].startswith("JJ") and not word_plus2[1].startswith("NN"): #Would it not be okay to have JJ in position +1 and +2?
-                    features_dict["adjpred_041"] += 1
+        if tagged_sentence[index+1][1].startswith("JJ") and not tagged_sentence[index+2][1].startswith("JJ") and not tagged_sentence[index+2][1].startswith("NN"): #Would it not be okay to have JJ in position +1 and +2?
+            ##!!! Check not-statement (KM)
+            features_dict["adjpred_041"] += 1
             
-        elif word_minus1[0] in ["real", "so"] and word_tuple[1] == "JJ":
-            #BUG: This is catching so much junk, I don't understand why ('so I' comes up a lot ) KM
-            features_dict["emphatics_049"] += 1
+    elif tagged_sentence[index-1][0] in ["real", "so"] and word_tuple[1] == "JJ":
+        #BUG: This is catching so much junk, I don't understand why ('so I' comes up a lot ) KM
+        features_dict["emphatics_049"] += 1
       
 def analyze_preposition(index, tagged_sentence, features_dict): ## Gustavo
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
@@ -393,96 +338,73 @@ def analyze_preposition(index, tagged_sentence, features_dict): ## Gustavo
     elif word_tuple[0] == "of": 
        pass #What was meant here? (KM)
     
-    if index > 0:
-        word_minus1 = tagged_sentence[index - 1]
-        #Gustavo, I moved this up here (KM)
-        if word_tuple[0] == "that" and word_minus1 in ["such", "so"] and not word_plus1[1] in ["JJ", "JJR", "JJS", "NN", "NNS", "NNP", "NNPS"]:
-            features_dict["advsubother_038"] += 1 # Using not statement here again. There is also an overlap with the "such that" construction in Biber's original features. (GK)
-        if word_tuple[0] == "like" and word_minus1[0] == "something":
-            features_dict["hedges_047"] += 1
-            #I don't really like how we're handling hedges here, it feels like there has to be a better way
-            #Maybe they could be handled in the full sentence, pretagged function if they just need surface forms
-            #Any other ideas? (KM)
-            # I agree that this way of looking for the hedges is tedious, but I can't think of a better way to do it.
-        if word_minus1[0] == "kind" or word_minus1[0] == "sort":
-            pass #What was meant here? (KM)
-            # Is it possible that the code maybe got slightly mixed up through the restructuring into the "try"-layout?
-            # I thought that this if-statemtn was followed or preceded by a condition wordtuple[0]=="of" and word_minus2[1]!=DET/ADJ/POSSPRO/WHO
-            # in order to look for "kind of" and "sort of" (p.240) (HM)
-            # Ok sorry I broke that :D maybe we can move this to the whole sentence analyzer function? And just look for the phrases "kind of" and "sort of" (and kinda/sorta)
-            #Same goes for below, in as much as, etc. (KM)
-        if index > 1: 
-            word_minus2 = tagged_sentence[index - 2]
-            if word_minus2[1] not in ["DT", "JJ", "JJR", "JJS", "PRP", "WP"]:
-                features_dict["hedges_047"] += 1
 
-    try:
-        word_plus1 = tagged_sentence[index + 1]
-        if word_plus1[0] in ALLP:
-            features_dict["strandprep_061"] += 1
-        elif word_tuple[0] == "at" and word_plus1[0] == "about":
-            features_dict["hedges_047"] += 1
-        elif word_tuple[0] == "for" and word_plus1 in ["example", "instance"]:
+    if word_tuple[0] == "that" and tagged_sentence[index-1][0] in ["such", "so"] and not tagged_sentence[index+1][1] in ["JJ", "JJR", "JJS", "NN", "NNS", "NNP", "NNPS"]:
+        features_dict["advsubother_038"] += 1 # Using not statement here again. There is also an overlap with the "such that" construction in Biber's original features. (GK)
+    if word_tuple[0] == "like" and tagged_sentence[index-1][0] == "something":
+        features_dict["hedges_047"] += 1
+        #Maybe they could be handled in the full sentence, pretagged function if they just need surface forms
+        #Any other ideas? (KM)
+        # I agree that this way of looking for the hedges is tedious, but I can't think of a better way to do it.
+    if tagged_sentence[index-1][0] == "kind" or tagged_sentence[index-1][0] == "sort":
+        pass 
+        # Ok sorry I broke that :D maybe we can move this to the whole sentence analyzer function? And just look for the phrases "kind of" and "sort of" (and kinda/sorta)
+        #Same goes for below, in as much as, etc. (KM)
+
+    if tagged_sentence[index-2][1] not in ["DT", "JJ", "JJR", "JJS", "PRP", "WP"]:
+        features_dict["hedges_047"] += 1
+
+
+    if tagged_sentence[index+1][0] in ALLP:
+        features_dict["strandprep_061"] += 1
+    elif word_tuple[0] == "at" and tagged_sentence[index+1][0] == "about":
+        features_dict["hedges_047"] += 1
+    elif word_tuple[0] == "for" and tagged_sentence[index+1][0] in ["example", "instance"]:
+        features_dict["conjuncts_045"] += 1
+    elif word_tuple[0] == "by" and tagged_sentence[index+1][0] in ["contrast", "comparison"]:
+        features_dict["conjuncts_045"] += 1
+    #elif word_tuple[0] == "in": 
+
+    if tagged_sentence[index+1][0] in ["comparison", "contrast", "particular", "addition", "conclusion", "consequence", "sum", "summary"]:
+        features_dict["conjuncts_045"] += 1
+    elif tagged_sentence[index+1][0] == "any" and tagged_sentence[index+2][0] in ["event", "case"]:
+        features_dict["conjuncts_045"] += 1
+    elif tagged_sentence[index+1][0] == "other" and tagged_sentence[index+2][0] == "words":
+        features_dict["conjuncts_045"] += 1
+
+
+    if word_tuple[0] == "as" and tagged_sentence[index+1][0] == "a" and tagged_sentence[index+2][0] in ["result", "consequence"]:
+        features_dict["conjuncts_045"] += 1
+        
+    elif word_tuple[0] == "on" and tagged_sentence[index+1][0] == "the":
+        if tagged_sentence[index+2][0] == "contrary":
             features_dict["conjuncts_045"] += 1
-        elif word_tuple[0] == "by" and word_plus1 in ["contrast", "comparison"]:
-            features_dict["conjuncts_045"] += 1
-        elif word_tuple[0] == "in": 
-            try: 
-                word_plus2 = tagged_sentence[index + 2]
-                if word_plus1[0] in ["comparison", "contrast", "particular", "addition", "conclusion", "consequence", "sum", "summary"]:
-                    features_dict["conjuncts_045"] += 1
-                elif word_plus1[0] == "any" and word_plus2[0] in ["event", "case"]:
-                    features_dict["conjuncts_045"] += 1
-                elif word_plus1[0] == "other" and word_plus2[0] == "words":
-                    features_dict["conjuncts_045"] += 1
-            except IndexError:
-                pass
-    except IndexError: 
-        pass
+    #Gustavo, I moved your features up here so that it doesn't have to assign tagged_sentence[index+2] twice (KM)
+    #But I think these features maybe can go in the whole sentence section (and kind of / sort of / kinda / sorta, see comments above)
+    elif word_tuple[0] in ["inasmuch", "forasmuch", "insofar", "insomuch"] and tagged_sentence[index+1][0] == "as":
+        features_dict["advsubother_038"] += 1
+    elif word_tuple[0] == "as" and tagged_sentence[index+1][0] in ["long", "soon"] and tagged_sentence[index+2][0] == "as":
+        features_dict["advsubother_038"] += 1
+    elif tagged_sentence[index+2][0] == "other" and tagged_sentence[index+3][0] == "hand":
+        features_dict["conjuncts_045"] += 1
 
-    try:
-        word_plus2 = tagged_sentence[index + 2]
-        if word_tuple[0] == "as" and word_plus1[0] == "a" and word_plus2[0] in ["result", "consequence"]:
-            features_dict["conjuncts_045"] += 1
-        elif word_tuple[0] == "on" and word_plus1[0] == "the":
-            if word_plus2[0] == "contrary":
-                features_dict["conjuncts_045"] += 1
-        #Gustavo, I moved your features up here so that it doesn't have to assign word_plus2 twice (KM)
-        #But I think these features maybe can go in the whole sentence section (and kind of / sort of / kinda / sorta, see comments above)
-        elif word_tuple[0] in ["inasmuch", "forasmuch", "insofar", "insomuch"] and word_plus1 == "as":
-            features_dict["advsubother_038"] += 1
-        elif word_tuple[0] == "as" and word_plus1[0] in ["long", "soon"] and word_plus2[0] == "as":
-            features_dict["advsubother_038"] += 1
-        elif word_plus2[0] == "other":
-            try: 
-                word_plus3 = tagged_sentence[index + 3]
-                if word_plus3 == "hand":
-                    features_dict["conjuncts_045"] += 1
-            except IndexError:
-                pass
-    except IndexError:
-        pass
-
-
-    
-    # still missing: "advsubother_038"
-    
 def analyze_noun(index, tagged_sentence, features_dict): ## Rafaela
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "nominalis_014", "gerund_015", "nouns_016".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+
     if word_tuple[0].endswith("ing") or word_tuple[0].endswith("ings"):
         features_dict["gerund_015"] += 1 # this is edited manually by Biber
-    else:
-        if word_tuple[0].endswith("tions") or word_tuple[0].endswith("tion") or word_tuple[0].endswith("ments") or word_tuple[0].endswith("ment") or word_tuple[0].endswith("ness") or word_tuple[0].endswith("ity") or word_tuple[0].endswith("nesses") or word_tuple[0].endswith("ities"):
-            features_dict["nominalis_014"] += 1
-        else: 
-            features_dict["nouns_016"] += 1
+    elif word_tuple[0].endswith("tions") or word_tuple[0].endswith("tion") or word_tuple[0].endswith("ments") or word_tuple[0].endswith("ment") or word_tuple[0].endswith("ness") or word_tuple[0].endswith("ity") or word_tuple[0].endswith("nesses") or word_tuple[0].endswith("ities"):
+        features_dict["nominalis_014"] += 1
+    else: 
+        features_dict["nouns_016"] += 1
         
 def analyze_pronoun(index, tagged_sentence, features_dict): ## Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "profirpers_006", "prosecpers_007", "prothirper_008", "proit_009", "prodemons_010", "proindef_011".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+
     if word_tuple[0] == "it":
         features_dict["proit_009"] += 1
     elif word_tuple[0] in firstpersonlist:
@@ -495,66 +417,55 @@ def analyze_pronoun(index, tagged_sentence, features_dict): ## Hanna
         features_dict["proindef_011"] += 1  
     elif word_tuple[0] == "that" and index == 0: ## this was edited by hand by Biber
         features_dict["prodemons_010"] += 1
-    try:
-        word_plus1 = tagged_sentence[index + 1]
-        if word_tuple[0] in DEM:
-            if word_plus1[0] == "and":
-                features_dict["prodemons_010"] += 1
-            elif word_plus1[1] in ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "MD", "WP"]:
-                features_dict["prodemons_010"] += 1
-            elif index == (len(tagged_sentence)-1):
-                features_dict["prodemons_010"] += 1
-        elif word_tuple[0] == "that" and word_plus1[0] == "'s": ## should this be 's or s ? Does the apostrophe get removed? 
+
+    if word_tuple[0] in DEM:
+        if tagged_sentence[index+1][0] == "and":
             features_dict["prodemons_010"] += 1
-    except IndexError: 
-        pass
+        elif tagged_sentence[index+1][1] in ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "MD", "WP"]:
+            features_dict["prodemons_010"] += 1
+        elif index == (len(tagged_sentence)-1):
+            features_dict["prodemons_010"] += 1
+    elif word_tuple[0] == "that" and tagged_sentence[index+1][0] == "'s": ## should this be 's or s ? Does the apostrophe get removed? 
+        features_dict["prodemons_010"] += 1
 
 def analyze_conjunction(index, tagged_sentence, features_dict): ## Gustavo
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "hedges_047", "coordphras_064", "coordnonp_065".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    try:
-        if index > 0:
-            word_minus1 = word_tuple[index - 1]
-            word_plus1 = word_tuple[index + 1]
-            if word_tuple[0] == "and": 
-                if word_minus1[1].startswith("NN") and word_plus1[1].startswith("NN"):
-                    features_dict["coordphras_064"] += 1
-                elif word_minus1[1].startswith("RB") and word_plus1[1].startswith("RB"):
-                    features_dict["coordphras_064"] += 1
-                elif word_minus1[1].startswith("JJ") and word_plus1[1].startswith("JJ"):
-                    features_dict["coordphras_064"] += 1
-                elif word_minus1[1].startswith("VB") and word_plus1[1].startswith("VB"):
-                    features_dict["coordphras_064"] += 1
-                elif word_minus1[0] == ",": #commas taken out? (KM)
-                    if word_plus1[0] in ["it", "so", "you", "then"]:
-                        features_dict["coordnonp_065"] += 1
-                    elif word_plus1[1] in subjpro or word_plus1[1] in DEM: # So far, this identification of demonstrative pronoun is likely to be too crude. Maybe re-use function for feature 10?
-                        features_dict["coordnonp_065"] += 1
-                    elif word_plus1[0] == "there" and word_plus2[0] in belist:
-                        features_dict["coordnonp_065"] += 1
-                elif word_minus1[0] in punct_final: 
-                    features_dict["coordnonp_065"] += 1
-                elif word_plus1[0] in WHP or word_plus1[0] in WHO or word_plus1[0] in discpart:
-                    features_dict["coordnonp_065"] += 1
-                elif word_plus1[0] : #adverbial subordinator (nos. 35-8)
-                    features_dict["coordnonp_065"] += 1
-                elif word_plus1[0] : #conjunct (no. 45)
-                    features_dict["coordnonp_065"] += 1
-            elif word_tuple[0] == "or":
-                if word_minus1[0] == "more" and word_plus1[0] == "less":
-                    features_dict["hedges_047"] += 1
-    except IndexError:
-        pass
-    
-    try:
-        word_plus1 = word_tuple[index + 1]
-        if word_tuple == "and" and word_plus1 in WHP or word_plus1 in WHO:
-            features_dict["coordnonp_065"] += 1 
-        elif word_tuple == "and" and word_plus1 in ["because", "although", "though", "if", "unless", "since", "while", "whilst", "whereas", "whereby"]:
-            features_dict["coordnonp_065"] += 1 
-    except IndexError: 
-        pass
+
+    if word_tuple[0] == "and": 
+        if tagged_sentence[index-1][1].startswith("NN") and tagged_sentence[index+1][1].startswith("NN"):
+            features_dict["coordphras_064"] += 1
+        elif tagged_sentence[index-1][1].startswith("RB") and tagged_sentence[index+1][1].startswith("RB"):
+            features_dict["coordphras_064"] += 1
+        elif tagged_sentence[index-1][1].startswith("JJ") and tagged_sentence[index+1][1].startswith("JJ"):
+            features_dict["coordphras_064"] += 1
+        elif tagged_sentence[index-1][1].startswith("VB") and tagged_sentence[index+1][1].startswith("VB"):
+            features_dict["coordphras_064"] += 1
+        elif tagged_sentence[index-1][0] == ",": #commas taken out? (KM)
+            if tagged_sentence[index+1][0] in ["it", "so", "you", "then"]:
+                features_dict["coordnonp_065"] += 1
+            elif tagged_sentence[index+1][1] in subjpro or tagged_sentence[index+1][1] in DEM: # So far, this identification of demonstrative pronoun is likely to be too crude. Maybe re-use function for feature 10?
+                features_dict["coordnonp_065"] += 1
+            elif tagged_sentence[index+1][0] == "there" and tagged_sentence[index+2][0] in belist:
+                features_dict["coordnonp_065"] += 1
+        elif tagged_sentence[index-1][0] in punct_final: 
+            features_dict["coordnonp_065"] += 1
+        elif tagged_sentence[index+1][0] in WHP or tagged_sentence[index+1][0] in WHO or tagged_sentence[index+1][0] in discpart:
+            features_dict["coordnonp_065"] += 1
+        elif tagged_sentence[index+1][0] : #adverbial subordinator (nos. 35-8)
+            features_dict["coordnonp_065"] += 1
+        elif tagged_sentence[index+1][0] : #conjunct (no. 45)
+            features_dict["coordnonp_065"] += 1
+    elif word_tuple[0] == "or":
+        if tagged_sentence[index-1][0] == "more" and tagged_sentence[index+1][0] == "less":
+            features_dict["hedges_047"] += 1 ## Move to analyze_sentence (KM)
+
+
+    if word_tuple == "and" and tagged_sentence[index+1][0] in WHP or tagged_sentence[index+1][0] in WHO:
+        features_dict["coordnonp_065"] += 1 
+    elif word_tuple == "and" and tagged_sentence[index+1][0] in ["because", "although", "though", "if", "unless", "since", "while", "whilst", "whereas", "whereby"]:
+        features_dict["coordnonp_065"] += 1 
     
     # still missing: "coordnonp_065" (only for 'and' followed by adverbial subordinator or conjunct, depend on other features)
 
@@ -569,15 +480,11 @@ def analyze_determiner(index, tagged_sentence, features_dict): ## Rafaela
     elif word_tuple[0] == "neither" or word_tuple[0] == "nor":
         features_dict["negsyn_066"] += 1
     elif word_tuple[0] == "no":
-        try: 
-            word_plus1  = word_tuple[index + 1]
-            if word_plus1[1].startswith("NN") or word_plus1[1].startswith("JJ"):
-                features_dict["negsyn_066"] += 1
-            elif word_plus1[0] in QUAN:
-                features_dict["negsyn_066"] += 1
-        except IndexError:
-            pass
-     
+        if tagged_sentence[index+1][1].startswith("NN") or tagged_sentence[index+1][1].startswith("JJ"):
+            features_dict["negsyn_066"] += 1
+        elif tagged_sentence[index+1][0] in QUAN:
+            features_dict["negsyn_066"] += 1
+
 def analyze_wh_word(index, tagged_sentence, features_dict): ## Kyla
     # Check: Ft 32 (Biber's way of finding this seems like it could be optimized)
     # Check: Ft 22 (catches unintended phrases)
@@ -585,90 +492,68 @@ def analyze_wh_word(index, tagged_sentence, features_dict): ## Kyla
     "whquest_013", "thatvcom_021", "thatacom_022", "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032", 
     "whrepied_033", "sentencere_034".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    lookbehind = look_behind(index, tagged_sentence)
-    lookahead = look_ahead(index, tagged_sentence)
 
-    if lookbehind[0]:
-        word_minus1 = lookbehind[0]
-        if word_tuple[0] in WHP: #["who", "whom", "whose", "which"]
-            if word_minus1[1] == "IN":
-                features_dict["whrepied_033"] += 1 #pied-piping relative clauses (e.g., the manner in which he was told) PREP + WHP in relative clauses
+    if word_tuple[0] in WHP: #["who", "whom", "whose", "which"]
+        if tagged_sentence[index-1][1] == "IN":
+            features_dict["whrepied_033"] += 1 #pied-piping relative clauses (e.g., the manner in which he was told) PREP + WHP in relative clauses
 
-            if word_tuple[0] == "which" and word_minus1[0] == ",": #34. sentence relatives (e.g., Bob likesfried mangoes, which is the most disgusting thing I've ever heard of) Biber: (These forms are edited by hand to exclude non-restrictive relative clauses.)
-                features_dict["sentencere_034"] += 1 
+        if word_tuple[0] == "which" and tagged_sentence[index-1][0] == ",": #34. sentence relatives (e.g., Bob likesfried mangoes, which is the most disgusting thing I've ever heard of) Biber: (These forms are edited by hand to exclude non-restrictive relative clauses.)
+            features_dict["sentencere_034"] += 1 
 
-            elif word_tuple[0] == "that" and word_minus1[1].startswith("J"): #This catches things like I'm sure that's a, there's nothing good that can come out of it, etc. Biber keeps mentioning tone boundaries but I dont understand how you could do that computationally (he refers to it as T#)
-                features_dict["thatacom_022"] += 1 #that adjective complements (e.g., I'm glad that yo like it) ADJ + (T#) + that (complements across intonation boundaries were edited by hand)
+        elif word_tuple[0] == "that" and tagged_sentence[index-1][1].startswith("J"): #This catches things like I'm sure that's a, there's nothing good that can come out of it, etc. Biber keeps mentioning tone boundaries but I dont understand how you could do that computationally (he refers to it as T#)
+            features_dict["thatacom_022"] += 1 #that adjective complements (e.g., I'm glad that yo like it) ADJ + (T#) + that (complements across intonation boundaries were edited by hand)
 
-        if lookahead[0]:
-            word_plus1 = lookahead[0]
 
-            #13. direct WH-questions CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)
-            if word_minus1 in punct_final and word in WHO:
-                if word_plus1[1] == "MD":
-                    featuresdict["whquest_013"] += 1 
-                elif word_plus1[1].startwith("V"):
-                    if word_plus1[0] in belist or word_plus1[0] in havelist or word_plus1[0] in dolist:
-                        featuresdict["whquest_013"] += 1
-            
-            #21 21. that verb complements (e.g., / said that he went) 
-            # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions) 
-            if word_tuple[1] == "that":
-                if word_minus1[1].startswith("I") or word_minus1[0] in ["and", "nor", "but", "or", "who"]: #does this first part of this catch Bibers ALL-P?
-                    if word_plus1[1].startswith("D") or word_plus1[1].startswith("PR") or word_plus1[0] == "there" or word_plus1[1].startswith("NNP") or word_plus1[1].startswith("NNS") or titlelist in word_plus1[0]:
-                        featuresdict["thatvcom_021"] += 1
+    #13. direct WH-questions CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)
+    if tagged_sentence[index-1] in punct_final and word in WHO:
+        if tagged_sentence[index+1][1] == "MD":
+            featuresdict["whquest_013"] += 1 
+        elif tagged_sentence[index+1][1].startwith("V"):
+            if tagged_sentence[index+1][0] in belist or tagged_sentence[index+1][0] in havelist or tagged_sentence[index+1][0] in dolist:
+                featuresdict["whquest_013"] += 1
+    
+    #21 21. that verb complements (e.g., / said that he went) 
+    # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions) 
+    if word_tuple[1] == "that":
+        if tagged_sentence[index-1][1].startswith("I") or tagged_sentence[index-1][0] in ["and", "nor", "but", "or", "who"]: #does this first part of this catch Bibers ALL-P?
+            if tagged_sentence[index+1][1].startswith("D") or tagged_sentence[index+1][1].startswith("PR") or tagged_sentence[index+1][0] == "there" or tagged_sentence[index+1][1].startswith("NNP") or tagged_sentence[index+1][1].startswith("NNS") or titlelist in tagged_sentence[index+1][0]:
+                featuresdict["thatvcom_021"] += 1
 
-            if lookahead[1]:
-                word_plus2 = lookahead[1]
-            
-                #29. that relative clauses on subject position (e.g., the dog that bit me) N -p (T#) + that + (ADV) + AUX/V {that relatives across intonation boundaries are identified by hand.)
-                #30. that relative clauses on object position (e.g., the dog that I saw) N + (T#) + that + DET / SUBJPRO / POSSPRO / it / ADJ / plural noun/ proper noun / possessive noun / TITLE
-                if word_minus1[1].startswith("NN"):
-                    if word_plus1[1].startswith("RB") and (word_plus2[1].startswith("V") or word_plus2[1].startswith("MD")):
-                        features_dict["thatresub_029"] += 1 
-                        sentence = [word[0] for word in tagged_sentence]
+    
+        #29. that relative clauses on subject position (e.g., the dog that bit me) N -p (T#) + that + (ADV) + AUX/V {that relatives across intonation boundaries are identified by hand.)
+        #30. that relative clauses on object position (e.g., the dog that I saw) N + (T#) + that + DET / SUBJPRO / POSSPRO / it / ADJ / plural noun/ proper noun / possessive noun / TITLE
+    if tagged_sentence[index-1][1].startswith("NN"):
+        if tagged_sentence[index+1][1].startswith("RB") and (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
+            features_dict["thatresub_029"] += 1 
 
-                    elif word_plus1[1].startswith("VB") or word_plus1[1].startswith("MD"):
-                        features_dict["thatresub_029"] += 1
-                        sentence = [word[0] for word in tagged_sentence]
+        elif tagged_sentence[index+1][1].startswith("VB") or tagged_sentence[index+1][1].startswith("MD"):
+            features_dict["thatresub_029"] += 1
 
-                    elif word_plus1[1].startswith("DT") or word_plus1[1].startswith("JJ") or word_plus1[1] == "NNS" or word_plus1[1].startswith("NNP"):
-                        features_dict["thatreobj_030"] += 1
+        elif tagged_sentence[index+1][1].startswith("DT") or tagged_sentence[index+1][1].startswith("JJ") or tagged_sentence[index+1][1] == "NNS" or tagged_sentence[index+1][1].startswith("NNP"):
+            features_dict["thatreobj_030"] += 1
 
-                    elif word_plus1[0] == "it" or word_plus1[0] in subjpro or word_plus1[0] in posspro:
-                        features_dict["thatreobj_030"] += 1
+        elif tagged_sentence[index+1][0] == "it" or tagged_sentence[index+1][0] in subjpro or tagged_sentence[index+1][0] in posspro:
+            features_dict["thatreobj_030"] += 1
 
-                    # if word_minus1[0] in ["and", "nor", "but", "or", "also"] or word_minus1[0] in punct_final or word_minus1[0] == ",":
-                    # start to 021, tbc
+        # if tagged_sentence[index-1][0] in ["and", "nor", "but", "or", "also"] or tagged_sentence[index-1][0] in punct_final or tagged_sentence[index-1][0] == ",":
+        # start to 021, tbc
 
-                if lookbehind[1] and lookahead[0]:
-                #right now, only wh-words at least two words from the front and 2 from the end will be caught here (KM) -> won't catch ex "boys who Sally likes" (is that grammatically acceptable??) also won't catch passives, ex "the men who are liked by Sally" (kind of awkward tbh) (KM)
-                    word_minus2 = lookbehind[1]
-                    word_plus1 = lookahead[0]
+    #right now, only wh-words at least two words from the front and 2 from the end will be caught here (KM) -> won't catch ex "boys who Sally likes" (is that grammatically acceptable??) also won't catch passives, ex "the men who are liked by Sally" (kind of awkward tbh) (KM)
+    if not tagged_sentence[index-2][0].startswith("ask") and not tagged_sentence[index-2][0].startswith("tell") and not tagged_sentence[index-2][0] == "told": 
+        if not tagged_sentence[index+1][1].startswith("R") and not tagged_sentence[index+1][1].startswith("V") and not tagged_sentence[index+1][1].startswith("MD"):
+            features_dict["whreobj_032"] += 1 #32. WH relative clauses on object positions (e.g., the man who Sally likes) xxx + yyy + N + WHP + zzz (where xxx is NOT any form of the verbs ASK or TELL, to exclude indirect WH questions, and zzz is not ADV, AUX or V, to exclude relativization on subject position)
 
-                    if not word_minus2[0].startswith("ask") and not word_minus2[0].startswith("tell") and not word_minus2[0] == "told": 
-                        if not word_plus1[1].startswith("R") and not word_plus1[1].startswith("V") and not word_plus1[1].startswith("MD"):
-                            features_dict["whreobj_032"] += 1 #32. WH relative clauses on object positions (e.g., the man who Sally likes) xxx + yyy + N + WHP + zzz (where xxx is NOT any form of the verbs ASK or TELL, to exclude indirect WH questions, and zzz is not ADV, AUX or V, to exclude relativization on subject position)
+    #31. WH relative clauses on subject position (e.g., the man who likes popcorn) xxx + yyy + N + WHP + (ADV) + AUX/V (where xxx is NOT any form of the verbs ASK or TELL; to exclude indirect WH questions like Tom asked the man who went to the store)
+    if tagged_sentence[index-1][1].startswith("N") and tagged_sentence[index+1][1].startswith("R") and (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
+        features_dict["whresub_031"] += 1
 
-                if lookbehind[2]:
-                    word_minus3 = lookbehind[2]
-
-                    #31. WH relative clauses on subject position (e.g., the man who likes popcorn) xxx + yyy + N + WHP + (ADV) + AUX/V (where xxx is NOT any form of the verbs ASK or TELL; to exclude indirect WH questions like Tom asked the man who went to the store)
-                    if word_minus1[1].startswith("N") and word_plus1[1].startswith("R") and (word_plus2[1].startswith("V") or word_plus2[1].startswith("MD")):
-                        features_dict["whresub_031"] += 1
-
-                    elif word_minus1[1].startswith("N") and (word_plus1[1].startswith("V") or word_plus1[1].startswith("MD")):
-                        features_dict["whresub_031"] += 1
-                    
-            #TO ADD:
-            #21 21. that verb complements (e.g., / said that he went) 
-            # (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/TJf/anrf){that-c\a\ises as complements to verbs which are not included in the above verb classes are not counted - see Quirk et al. 1985:1179ff.) 
-            # (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)(This algorithm allows an intervening prepositional phrase between a verb and its complement.)
-            
-
+    elif tagged_sentence[index-1][1].startswith("N") and (tagged_sentence[index+1][1].startswith("V") or tagged_sentence[index+1][1].startswith("MD")):
+        features_dict["whresub_031"] += 1
         
- 
-
+#TO ADD:
+#21 21. that verb complements (e.g., / said that he went) 
+# (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/TJf/anrf){that-c\a\ises as complements to verbs which are not included in the above verb classes are not counted - see Quirk et al. 1985:1179ff.) 
+# (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)(This algorithm allows an intervening prepositional phrase between a verb and its complement.)
 
 
 def analyze_there(index, tagged_sentence, features_dict): ## noone...
@@ -707,8 +592,9 @@ for id in preprocessed_file: #loops through all individual sentences in the file
      sentence = sentence_dict["body"] #retrieves sentence only (str)) 
      features_dict = sentence_dict["features"] #retrieves s for the given sentence
      tagged_sentence = tag_sentence(sentence) #tags sentence, returning list of tuples with (word, pos)
-     
-     for index in range(0, len(tagged_sentence)): #based on POS, apply different function, each of which updates s
+
+    #change to index 2 to len -3
+     for index in range(2, len(tagged_sentence)-3): #based on POS, apply different function
          current_tag = tagged_sentence[index][1]
          if current_tag.startswith("V"):
              analyze_verb(index, tagged_sentence, features_dict)
