@@ -593,8 +593,7 @@ for id in preprocessed_file: #loops through all individual sentences in the file
      features_dict = sentence_dict["features"] #retrieves s for the given sentence
      tagged_sentence = tag_sentence(sentence) #tags sentence, returning list of tuples with (word, pos)
 
-    #change to index 2 to len -3
-     for index in range(2, len(tagged_sentence)-3): #based on POS, apply different function
+     for index in range(3, len(tagged_sentence)-3): #based on POS, apply different function
          current_tag = tagged_sentence[index][1]
          if current_tag.startswith("V"):
              analyze_verb(index, tagged_sentence, features_dict)
