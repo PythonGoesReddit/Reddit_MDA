@@ -1,5 +1,8 @@
 
 # Open Q: Will commas be removed by the tagger?
+# Open Q (HM): What about quoted material from previous comments/posts? Should we exclude it, and if yes, how?
+# Open Q (HM): In several functions we check what the index position of a word within the sentence is to get the start of the sentence only (index == 0).
+#              Does this need to be altered (to index == 3) now that we added empty tuples at the beginning of each sentence?
 
 # Code for easily checking output (adapt word positions for given feature)
     # sentence = [word[0] for word in tagged_sentence]
@@ -93,8 +96,6 @@ def open_reddit_json(folder_path):
                 print("Total lines skipped = " + str(errors))
             return prepped_json
 
-## Question: What about quoted material from previous comments/posts? Should we exclude it, and if yes, how?
-
 
 # Untagged feature extraction functions
 def analyze_sentence(preprocessed_json):
@@ -147,6 +148,7 @@ def clean_sentence(sentence):
     '''Takes a sentence and returns it in all lowercase, with deviant/creative spelling normalized, 
     with punctuation removed, and emojis removed.'''
     ## look into what might or might not be necessary here
+    ## replace emojis and emoticons (with what?)
     sentence = sentence.strip(string.punctuation).lower()
     ## NEEDED: remove emojis - Gustavo
     return sentence
@@ -276,14 +278,12 @@ def analyze_adverb(index, tagged_sentence, features_dict): ## Hanna
         features_dict["conjuncts_045"] += 1 # so far, this list only includes "eg" not "e.g.", since that would probably be split by the tagger?
     elif index == 0 and word_tuple[0] in discpart:
         features_dict["discpart_050"] += 1
-    ## we also look for particles in the particle-section, this is to make sure that
+    ## we also look for discourse particles (feature 050) in the particle-section, this is to make sure that
     ## we actually catch all of them in case they are tagged differently (HM)
-
-
-# 01_25 Maybe the stuff below can go in the analyze_sentence function? Not sure, just on first glance looks like it might be a candidate at least for the stuff that doesn't require tags (KM)
+    
     if word_tuple[0] == "rather" and index == 0:
         if tagged_sentence[index+1][0] == ",": #punctuation will be removed already, right? (KM) then how do we find this without the comma? (HM)
-            features_dict["conjuncts_045"] += 1
+            features_dict["conjuncts_045"] += 1  ## we could try it simply without the comma and see how messy the output is
         elif tagged_sentence[index+1][1] in ["CC", "CD", "DT", "EX", "IN", "LS", "MD", "NN", "NNS", "NNP", "NNPS", "PDT", "PRP", "PRP$", "RP", "TO", "UH", "VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "WDT", "WP", "WP$", "WRB"]:
             features_dict["conjuncts_045"] += 1 
     elif word_tuple[0] == "else" and index == 0 and tagged_sentence[index+1][0] == ",": #again, commas (KM)
@@ -360,7 +360,7 @@ def analyze_preposition(index, tagged_sentence, features_dict): ## Gustavo
     elif word_tuple[0] == "at" and tagged_sentence[index+1][0] == "about":
         features_dict["hedges_047"] += 1
     elif word_tuple[0] == "for" and tagged_sentence[index+1][0] in ["example", "instance"]:
-        features_dict["conjuncts_045"] += 1
+        features_dict["conjuncts_045"] += 1 ## the other elements within feature 45 are checked in the adverb-function, just so you know (HM)
     elif word_tuple[0] == "by" and tagged_sentence[index+1][0] in ["contrast", "comparison"]:
         features_dict["conjuncts_045"] += 1
     #elif word_tuple[0] == "in": 
@@ -416,6 +416,7 @@ def analyze_pronoun(index, tagged_sentence, features_dict): ## Hanna
     elif word_tuple[0] in indefpronounlist:
         features_dict["proindef_011"] += 1  
     elif word_tuple[0] == "that" and index == 0: ## this was edited by hand by Biber
+        ## we might be able to simply drop the one above, I think the other criteria for feature 10 might already capture most instances (HM)
         features_dict["prodemons_010"] += 1
 
     if word_tuple[0] in DEM:
@@ -425,7 +426,7 @@ def analyze_pronoun(index, tagged_sentence, features_dict): ## Hanna
             features_dict["prodemons_010"] += 1
         elif index == (len(tagged_sentence)-1):
             features_dict["prodemons_010"] += 1
-    elif word_tuple[0] == "that" and tagged_sentence[index+1][0] == "'s": ## should this be 's or s ? Does the apostrophe get removed? 
+    elif word_tuple[0] == "that" and tagged_sentence[index+1][0] == "'s": ## should this be 's or s ? Does the apostrophe get removed? (HM)
         features_dict["prodemons_010"] += 1
 
 def analyze_conjunction(index, tagged_sentence, features_dict): ## Gustavo
