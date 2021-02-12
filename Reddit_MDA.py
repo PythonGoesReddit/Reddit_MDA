@@ -76,7 +76,7 @@ def open_reddit_json(folder_path):
                         for sentence in nltk.tokenize.sent_tokenize(body): #separates into sentences
                             sentence_counter +=1 #keep track of which sentence it is (1st, 2nd, etc.)
                             sentence_dict = {"body": sentence, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}
-                            s = {"vpast_001": 0, "vperfect_002": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0, 
+                            s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0, 
                             "prothirdper_008": 0, "proit_009": 0, "prodemons_010": 0, "proindef_011": 0, "pverbdo_012": 0, "whquest_013": 0, "nominalis_014": 0, "gerund_015": 0,
                             "nouns_016": 0, "passagentl_017": 0, "passby_018": 0, "mainvbe_019": 0, "exthere_020": 0, "thatvcom_021": 0, "thatacom_022": 0, "whclause_023": 0,
                             "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0, "thatresub_029": 0, "thatreobj_030": 0,
@@ -116,7 +116,7 @@ def analyze_sentence(preprocessed_json):
         s["conjuncts_045"] = sentence.count("that is,") #Will only catch sentences with proper punctuation but it's a start
 
         for emphatic in ["for sure", "a lot", "such a", "such an", "just", "really", "most", "more"]: 
-            s["emphatics_049"] += sentence.count(emphatic)
+            s["emphatics_049"] += sentence.count(emphatic) # AB: would it make sense to only count "a lot" if NOT folowed by "of"?
 
         s["lenchar_210"] = len(sentence) 
         s["lenword_211"] = len(sentence.split(" ")) 
@@ -192,7 +192,7 @@ posspro = ["my", "our", "your", "his", "their", "its"]
 DEM = ["that", "this", "these", "those"]
 WHP = ["who", "whom", "whose", "which"]
 WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", "whichever", 
-       "whenever", "whatever", "however"] # can this be accomplished with tag WDT? (KM)
+       "whenever", "whatever", "however"] # can this be accomplished with tag WDT? (KM) # Tag WDT comprises Biber's WHP and WHO plus relativizer "that" afaict. (AB)
 discpart = ["well", "now", "anyway", "anyhow", "anyways"]
 QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
 ALLP = [".", "!", "?", ":", ";", ","]  # here, Biber also includes the long dash -- , but I am unsure how this would be rendered 
@@ -212,22 +212,64 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
     "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''    
     word_tuple = tagged_sentence[index]
 
-    if tagged_sentence[index][1] == "VBD":
+    if word_tuple[1] == "VBD":
         features_dict["vpast_001"] += 1
     elif word_tuple[1] == "VB":
-        features_dict["vinfinitive_024"] += 1
-    elif word_tuple[1] == "VBG" and (tagged_sentence[index-1][0] == "X" or tagged_sentence[index-1][0] in ".!?;:,-") and tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP"]: #gerund or present participle.. is this ok? or do we have to separate these # AB: In Biber, this is in fact only for present participlial clauses, a fairly narrow range of ING-forms. I implement it accordingly and would suggest a separate class of features for progressives (which Biber really does not seem to have considered in the 80s)
-        features_dict["vpresentpart_025"] += 1
-    elif word_tuple[1] == "VBN" and (tagged_sentence[index-1][0] == "X" or tagged_sentence[index-1][0] in ".!?;:,-") and tagged_sentence[index+1][1] in ["IN", "RB"]: # Again, in Biber this is present participial clauses only. Biber (1988:233) notes for both that "these forms were edited by hand." So we may consider scrapping them, if automated accuracy is not sufficient.
-        features_dict["vpastpart_026"] += 1
+        features_dict["vinfinitive_024"] += 1 # Note that "VB" - at least in the GUM data - is also used for imperative forms
+        if tagged_sentence[index-1][1].startswith("RB"):
+            move_on = True
+            x = index-1
+            while move_on == True:
+                x -= 1
+                if tagged_sentence[x][0] == "to":
+                    move_on = False
+                    features_dict["vsplitaux_063"] += 1
+                elif not tagged_sentence[x][0].startswith("RB"):
+                    move_on = False
+    elif word_tuple[1] == "VBG":
+        if (tagged_sentence[index-1][0] == "X" or tagged_sentence[index-1][0] in ".!?;:,-") and tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]: #gerund or present participle.. is this ok? or do we have to separate these # AB: In Biber, this is in fact only for present participial clauses, a fairly narrow range of ING-forms. I implement it accordingly and would suggest a separate class of features for progressives (which Biber really does not seem to have considered in the 80s)
+            features_dict["vpresentpart_025"] += 1
+        elif tagged_sentence[index-1][1] == "NN":
+            features_dict["vpresentwhiz_028"] += 1 # Iffy, because catches things like "with prices going up", which is not a case of WHIZ deletion (AB)
+    elif word_tuple[1] == "VBN":
+        if (tagged_sentence[index-1][0] == "X" or tagged_sentence[index-1][0] in ".!?;:,-") and tagged_sentence[index+1][1] in ["IN", "RB", "TO"]: # Again, in Biber this is present participial clauses only. Biber (1988:233) notes for both that "these forms were edited by hand." So we may consider scrapping them, if automated accuracy is not sufficient.
+            features_dict["vpastpart_026"] += 1
+        elif tagged_sentence[index-1][1] in ["NN", "NNP", "CD"] and (tagged_sentence[index+1][1] in ["IN", "RBR", "RB", "RBS"] or tagged_sentence[index+1][0] in belist):
+            features_dict["vpastwhiz_027"] += 1 # This reproduces the search strategy from Biber, but strikes me as extremely iffy. Needs further quality control.
     elif word_tuple[1] in ["VBP","VBZ"]:
         features_dict["vpresent_003"] += 1
-
     if word_tuple[0].startswith("seem") or word_tuple[0].startswith("appear"):
         features_dict["vseemappear_058"] += 1
-
-    if tagged_sentence[index + 1][1] == "WDT" and tagged_sentence[index + 2][1] == "PRP":
+    if tagged_sentence[index + 1][1] == "WDT" and tagged_sentence[index + 1][0] != "that" and tagged_sentence[index + 2][1] == "PRP":
         features_dict["whclause_023"] += 1
+    if word_tuple[0] in ["had", "'d"]: # Centering the lookup for perfect forms on the HAVE means counting only once for, e.g. "has considered, debated, but ultimately rejected a different search strategy". Let's discuss whether this is desirable. (AB)
+        nom = False
+        paspart = False
+        x = index
+        while nom == False and paspart == False and x < len(tagged_sentence): # These while-statements are an attempt to get around the question of how much intervening material to allow by instead setting conditions for when to stop looking on (either because an instance of the feature has been found or an impermissible context has been encountered) (AB)
+            x += 1
+            if tagged_sentence[x][1] == "VBN":
+                paspart = True
+                features_dict["vpastperfect_002b"] += 1
+            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"): # Currently, questions, in which the subject is between HAVE and the past participle. (AB)
+                nom = True
+    elif word_tuple[0] in ["have", "'ve", "has"]: # "'s" excluded because I see no reliable way to separate between IS and HAS contractions - unless we lemmatize (AB)
+        nom = False
+        paspart = False
+        x = index
+        while nom == False and paspart == False and x < len(tagged_sentence):
+            x += 1
+            if tagged_sentence[x][1] == "VBN":
+                paspart = True
+                features_dict["vpresperfect_002a"] += 1
+            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"):
+                nom = True
+    if word_tuple[0].startswith("'"):
+        features_dict["contractions_059"] += 1
+
+    #if word_tuple in private/public/suasive: Leaving this undefined until we have decided about lemmatization, because it will be so much easier with lemma info.
+    #     Checking this individual classes will be easy enough
+    #     Biber also checks for that-deletion, which is probably bad in terms of precision and recall. I currently have strong reservations against implementing his search, but have not come up with a better one yet. (AB)
         
     #"vperfect_002" -> how many places should it lookahead for a form of have?
     #if word_tuple[0].startswith():
