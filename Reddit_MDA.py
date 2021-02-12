@@ -118,6 +118,15 @@ def analyze_sentence(preprocessed_json):
         for emphatic in ["for sure", "a lot", "such a", "such an", "just", "really", "most", "more"]: 
             s["emphatics_049"] += sentence.count(emphatic)
 
+        for hedge in ["at about", "something like", "more or less"]:
+            features_dict["hedges_047"] += 1
+
+        for conjunct in ["on the contrary", "on the other hand","for example", "for instance", "by contrast", "by comparison", "in comparison", "in contrast", "in particular", "in addition", "in conclusion", "in consequence", "in sum", "in summary", "in any event", "in any case", "in other words", "as a result", "as a consequence"]
+            features_dict["conjuncts_045"] += 1
+
+        for advsub in ["inasmuch as", "forasmuch as", "insofar as", "insomuch as", "as long as", "as soon as"]
+            features_dict["advsubother_038"] += 1
+
         s["lenchar_210"] = len(sentence) 
         s["lenword_211"] = len(sentence.split(" ")) 
 
@@ -348,44 +357,41 @@ def analyze_preposition(index, tagged_sentence, features_dict): ## Gustavo
         # I agree that this way of looking for the hedges is tedious, but I can't think of a better way to do it.
     if tagged_sentence[index-1][0] == "kind" or tagged_sentence[index-1][0] == "sort":
         pass 
+    if word_tuple[0] == "of" and tagged_sentence[index-1][0] in ["kind", "sort"] and not tagged_sentence[index-2][1] in ["JJ", "JJR", "JJS", "DT", "PRP", "WP"]:
+        features_dict["hedges_047"] += 1 
         # Ok sorry I broke that :D maybe we can move this to the whole sentence analyzer function? And just look for the phrases "kind of" and "sort of" (and kinda/sorta)
         #Same goes for below, in as much as, etc. (KM)
 
-    if tagged_sentence[index-2][1] not in ["DT", "JJ", "JJR", "JJS", "PRP", "WP"]:
-        features_dict["hedges_047"] += 1
-
-
     if tagged_sentence[index+1][0] in ALLP:
         features_dict["strandprep_061"] += 1
-    elif word_tuple[0] == "at" and tagged_sentence[index+1][0] == "about":
-        features_dict["hedges_047"] += 1
-    elif word_tuple[0] == "for" and tagged_sentence[index+1][0] in ["example", "instance"]:
-        features_dict["conjuncts_045"] += 1 ## the other elements within feature 45 are checked in the adverb-function, just so you know (HM)
-    elif word_tuple[0] == "by" and tagged_sentence[index+1][0] in ["contrast", "comparison"]:
-        features_dict["conjuncts_045"] += 1
+    #elif word_tuple[0] == "at" and tagged_sentence[index+1][0] == "about":
+        #features_dict["hedges_047"] += 1
+    #elif word_tuple[0] == "for" and tagged_sentence[index+1][0] in ["example", "instance"]:
+        #features_dict["conjuncts_045"] += 1 ## the other elements within feature 45 are checked in the adverb-function, just so you know (HM)
+    #elif word_tuple[0] == "by" and tagged_sentence[index+1][0] in ["contrast", "comparison"]:
+        #features_dict["conjuncts_045"] += 1
     #elif word_tuple[0] == "in": 
+    #if tagged_sentence[index+1][0] in ["comparison", "contrast", "particular", "addition", "conclusion", "consequence", "sum", "summary"]:
+        #features_dict["conjuncts_045"] += 1
+    #elif tagged_sentence[index+1][0] == "any" and tagged_sentence[index+2][0] in ["event", "case"]:
+        #features_dict["conjuncts_045"] += 1
+    #elif tagged_sentence[index+1][0] == "other" and tagged_sentence[index+2][0] == "words":
+        #features_dict["conjuncts_045"] += 1
 
-    if tagged_sentence[index+1][0] in ["comparison", "contrast", "particular", "addition", "conclusion", "consequence", "sum", "summary"]:
-        features_dict["conjuncts_045"] += 1
-    elif tagged_sentence[index+1][0] == "any" and tagged_sentence[index+2][0] in ["event", "case"]:
-        features_dict["conjuncts_045"] += 1
-    elif tagged_sentence[index+1][0] == "other" and tagged_sentence[index+2][0] == "words":
-        features_dict["conjuncts_045"] += 1
 
-
-    if word_tuple[0] == "as" and tagged_sentence[index+1][0] == "a" and tagged_sentence[index+2][0] in ["result", "consequence"]:
-        features_dict["conjuncts_045"] += 1
+    #if word_tuple[0] == "as" and tagged_sentence[index+1][0] == "a" and tagged_sentence[index+2][0] in ["result", "consequence"]:
+        #features_dict["conjuncts_045"] += 1
         
-    elif word_tuple[0] == "on" and tagged_sentence[index+1][0] == "the":
-        if tagged_sentence[index+2][0] == "contrary":
-            features_dict["conjuncts_045"] += 1
+    #elif word_tuple[0] == "on" and tagged_sentence[index+1][0] == "the":
+        #if tagged_sentence[index+2][0] == "contrary":
+            #features_dict["conjuncts_045"] += 1
     #Gustavo, I moved your features up here so that it doesn't have to assign tagged_sentence[index+2] twice (KM)
     #But I think these features maybe can go in the whole sentence section (and kind of / sort of / kinda / sorta, see comments above)
-    elif word_tuple[0] in ["inasmuch", "forasmuch", "insofar", "insomuch"] and tagged_sentence[index+1][0] == "as":
-        features_dict["advsubother_038"] += 1
-    elif word_tuple[0] == "as" and tagged_sentence[index+1][0] in ["long", "soon"] and tagged_sentence[index+2][0] == "as":
-        features_dict["advsubother_038"] += 1
-    elif tagged_sentence[index+2][0] == "other" and tagged_sentence[index+3][0] == "hand":
+    #elif word_tuple[0] in ["inasmuch", "forasmuch", "insofar", "insomuch"] and tagged_sentence[index+1][0] == "as":
+        #features_dict["advsubother_038"] += 1
+    #elif word_tuple[0] == "as" and tagged_sentence[index+1][0] in ["long", "soon"] and tagged_sentence[index+2][0] == "as":
+        #features_dict["advsubother_038"] += 1
+    #elif tagged_sentence[index+2][0] == "other" and tagged_sentence[index+3][0] == "hand":
         features_dict["conjuncts_045"] += 1
 
 def analyze_noun(index, tagged_sentence, features_dict): ## Rafaela
@@ -447,7 +453,13 @@ def analyze_conjunction(index, tagged_sentence, features_dict): ## Gustavo
             if tagged_sentence[index+1][0] in ["it", "so", "you", "then"]:
                 features_dict["coordnonp_065"] += 1
             elif tagged_sentence[index+1][1] in subjpro or tagged_sentence[index+1][1] in DEM: # So far, this identification of demonstrative pronoun is likely to be too crude. Maybe re-use function for feature 10?
-                features_dict["coordnonp_065"] += 1
+                #I've added the function from feature 10 here. (GK)
+                if tagged_sentence[index+1][0] == "and":
+                    features_dict["coordnonp_065"] += 1
+                elif tagged_sentence[index+1][1] in ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "MD", "WP"]:
+                    features_dict["coordnonp_065"] += 1
+                elif index == (len(tagged_sentence)-1):
+                    features_dict["coordnonp_065"] += 1                            
             elif tagged_sentence[index+1][0] == "there" and tagged_sentence[index+2][0] in belist:
                 features_dict["coordnonp_065"] += 1
         elif tagged_sentence[index-1][0] in punct_final: 
@@ -467,7 +479,12 @@ def analyze_conjunction(index, tagged_sentence, features_dict): ## Gustavo
         features_dict["coordnonp_065"] += 1 
     elif word_tuple == "and" and tagged_sentence[index+1][0] in ["because", "although", "though", "if", "unless", "since", "while", "whilst", "whereas", "whereby"]:
         features_dict["coordnonp_065"] += 1 
-    
+    elif word_tuple == "and" and tagged_sentence[index+1][0] in discpart:
+        features_dict["coordnonp_065"] += 1
+    elif word_tuple == "and" and tagged_sentence[index+1][0] in conjunctslist:
+        features_dict["coordnonp_065"] += 1
+
+     
     # still missing: "coordnonp_065" (only for 'and' followed by adverbial subordinator or conjunct, depend on other features)
 
 
