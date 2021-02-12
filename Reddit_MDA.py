@@ -119,13 +119,13 @@ def analyze_sentence(preprocessed_json):
             s["emphatics_049"] += sentence.count(emphatic)
 
         for hedge in ["at about", "something like", "more or less"]:
-            features_dict["hedges_047"] += 1
+            s["hedges_047"] += sentence.count(hedge)
 
         for conjunct in ["on the contrary", "on the other hand","for example", "for instance", "by contrast", "by comparison", "in comparison", "in contrast", "in particular", "in addition", "in conclusion", "in consequence", "in sum", "in summary", "in any event", "in any case", "in other words", "as a result", "as a consequence"]
-            features_dict["conjuncts_045"] += 1
+            s["conjuncts_045"] += sentence.count(conjunct)
 
         for advsub in ["inasmuch as", "forasmuch as", "insofar as", "insomuch as", "as long as", "as soon as"]
-            features_dict["advsubother_038"] += 1
+            s["advsubother_038"] += sentence.count(advsub)
 
         s["lenchar_210"] = len(sentence) 
         s["lenword_211"] = len(sentence.split(" ")) 
@@ -475,13 +475,13 @@ def analyze_conjunction(index, tagged_sentence, features_dict): ## Gustavo
             features_dict["hedges_047"] += 1 ## Move to analyze_sentence (KM)
 
 
-    if word_tuple == "and" and tagged_sentence[index+1][0] in WHP or tagged_sentence[index+1][0] in WHO:
+    if word_tuple[0] == "and" and tagged_sentence[index+1][0] in WHP or tagged_sentence[index+1][0] in WHO:
         features_dict["coordnonp_065"] += 1 
-    elif word_tuple == "and" and tagged_sentence[index+1][0] in ["because", "although", "though", "if", "unless", "since", "while", "whilst", "whereas", "whereby"]:
+    elif word_tuple[0] == "and" and tagged_sentence[index+1][0] in ["because", "although", "though", "if", "unless", "since", "while", "whilst", "whereas", "whereby"]:
         features_dict["coordnonp_065"] += 1 
-    elif word_tuple == "and" and tagged_sentence[index+1][0] in discpart:
+    elif word_tuple[0] == "and" and tagged_sentence[index+1][0] in discpart:
         features_dict["coordnonp_065"] += 1
-    elif word_tuple == "and" and tagged_sentence[index+1][0] in conjunctslist:
+    elif word_tuple[0] == "and" and tagged_sentence[index+1][0] in conjunctslist:
         features_dict["coordnonp_065"] += 1
 
      
