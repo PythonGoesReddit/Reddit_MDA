@@ -193,7 +193,7 @@ conjunctslist = ["alternatively", "altogether", "consequently", "conversely", "e
                  "hence", "however", "ie", "instead", "likewise", "moreover", "namely", "nevertheless",
                  "nonetheless", "notwithstanding", "otherwise", "rather", "similarly", "therefore", "thus", "viz"]
 punct_final = [".", "!", "?", ":", ";"] # here, Biber also includes the long dash -- , but I am unsure how this would be rendered
-belist = ["be", "am", "are", "is", "was", "were", "been", "being"] 
+belist = ["be", "am", "are", "is", "was", "were", "been", "being", "'m", "'re",] # I have added the contracted forms of am and are (AB)
 havelist = ["have", "has", "had", "having"]
 dolist = ["do", "does", "doing", "did", "done"]
 subjpro = ["i", "we", "he", "she", "they"]
@@ -220,7 +220,6 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
     "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
     "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''    
     word_tuple = tagged_sentence[index]
-
     if word_tuple[1] == "VBD":
         features_dict["vpast_001"] += 1
     elif word_tuple[1] == "VB":
@@ -232,7 +231,10 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
                 x -= 1
                 if tagged_sentence[x][0] == "to":
                     move_on = False
-                    features_dict["vsplitaux_063"] += 1
+                    features_dict["vsplitinf_062"] += 1
+                elif tagged_sentence[x][0] in belist:
+                    move_on = False
+                    features_dict["vsplitaux_063"] += 1 # This implements Biber's abstract representation of Feature 63, which however is not in line with the example he gives. Need to discuss this.
                 elif not tagged_sentence[x][0].startswith("RB"):
                     move_on = False
     elif word_tuple[1] == "VBG":
@@ -261,7 +263,7 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
                 paspart = True
                 features_dict["vpastperfect_002b"] += 1
             elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"): # Currently, questions, in which the subject is between HAVE and the past participle. (AB)
-                nom = True
+                nom = True 
     elif word_tuple[0] in ["have", "'ve", "has"]: # "'s" excluded because I see no reliable way to separate between IS and HAS contractions - unless we lemmatize (AB)
         nom = False
         paspart = False
@@ -273,6 +275,50 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
                 features_dict["vpresperfect_002a"] += 1
             elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"):
                 nom = True
+    elif word_tuple[0] in belist:
+        if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]: # Biber also includes prepositions, but this seems to me to allow for too many false positives (AB)
+            features_dict["mainvbe_019"] += 1
+        else:
+            move_on = True
+            x = index
+            while move_on == True:
+                x += 1
+                if tagged_sentence[x][1] == "VBN":
+                    move_on = False
+                    if tagged_sentence[x+1][0] == "by":
+                        features_dict["passby_018"] += 1
+                    elif tagged_sentence[x+1][1] == "IN":
+                        x += 1
+                        move_on2 = True
+                        while move_on2:
+                            x += 1
+                            if tagged_sentence[x+1][1].startswith("N") or tagged_sentence[x+1][1].startswith("DT"):
+                                pass
+                            elif tagged_sentence[x+1][0] == "by":
+                                features_dict["passby_018"] += 1
+                                move_on2 = False
+                            else:
+                                features_dict["passagentl_017"] += 1
+                                move_on2 = False
+                    else:
+                        features_dict["passagentl_017"] += 1           
+                elif tagged_sentence[x][1].startswith("RB"):
+                    pass
+                else:
+                    move_on = False
+    elif word_tuple[0] in dolist:
+        move_on = True
+        x = index
+        while move_on:
+            x += 1
+            if tagged_sentence[x][1].startswith("V"):
+                features_dict["emphatics_049"] += 1
+            elif tagged_sentence[x][1].startswith("J"):
+                pass
+            else:
+                move_on = False
+                if not (tagged_sentence[index-1][0] in WHP+WHO and tagged_sentence[index-2][0] == "X"):
+                    features_dict["pverbdo_012"] += 1 # This follows the criteria in Biber, but seems too broad. Do we want things like "do someone a favor" "do the boogie" etc. here? (AB)
     if word_tuple[0].startswith("'"):
         features_dict["contractions_059"] += 1
 
@@ -298,13 +344,21 @@ def analyze_modal(index, tagged_sentence, features_dict): ## Axel
     "pverbdo_012", "passagentl_017", "passby_018","mainvbe_019",
     "emphatics_049", "modalsposs_052", "modalsness_053", "modalspred_054", "contractions_059", 
     "vimperative_205".'''
-    #word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-
-    # still missing: "pverbdo_012", "passagentl_017", "passby_018","mainvbe_019", "emphatics_049", "modalsposs_052", "modalsness_053",
-    # "modalspred_054", "contractions_059", vimperative_205".
+    word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    if word_tuple[0] in ["can","may","might","could"]:
+        features_dict["modalsposs_052"] += 1
+    elif word_tuple[0] in ["ought","should","must"]:
+        features_dict["modalsness_053"] += 1
+    elif word_tuple[0] in ["will","would","shall","'ll","'d"]:
+        features_dict["modalspred_054"] += 1
+    if word_tuple[0].startswith("'"):
+        features_dict["contractions_059"] += 1
+    
+    # still missing: vimperative_205". There is no separate tag for this in our tagset.
+    # Perhaps imperatives can be identified by looking for bare verbs at the very beginning of sentences (and following commas, provided there is no preceding verb in the sentence)?
     
     ## originally I thought it might make sense to look for contractions (feature 59) within the pronoun-section as well, but it is probably
-    ## sufficient to look for them here, isn't it? (HM)
+    ## sufficient to look for them here, isn't it? (HM) -> afaik, the tagger will represent "he's" as "he" + "'s", etc., so no need to look in the pronoun section (AB).
 
 def analyze_adverb(index, tagged_sentence, features_dict): ## Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
@@ -313,7 +367,7 @@ def analyze_adverb(index, tagged_sentence, features_dict): ## Hanna
     features_dict["adverbs_042"] += 1
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
 
-    if word_tuple[0] == "not" or word_tuple[0] == "n't":
+    if word_tuple[0] == "not" or word_tuple[0] == "n't": # Suggestion: do separate conditions for "not" and "n't", and for the latter also update the contractions count? (AB)
         features_dict["negana_067"] += 1
     elif word_tuple[0] in placelist: ## added some more ideas to the list above (HM)
         features_dict["advplace_004"] += 1
