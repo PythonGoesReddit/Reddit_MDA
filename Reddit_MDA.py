@@ -253,28 +253,30 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
         features_dict["vseemappear_058"] += 1
     if tagged_sentence[index + 1][1] == "WDT" and tagged_sentence[index + 1][0] != "that" and tagged_sentence[index + 2][1] == "PRP":
         features_dict["whclause_023"] += 1
-    if word_tuple[0] in ["had", "'d"]: # Centering the lookup for perfect forms on the HAVE means counting only once for, e.g. "has considered, debated, but ultimately rejected a different search strategy". Let's discuss whether this is desirable. (AB)
-        nom = False
-        paspart = False
-        x = index
-        while nom == False and paspart == False and x < len(tagged_sentence): # These while-statements are an attempt to get around the question of how much intervening material to allow by instead setting conditions for when to stop looking on (either because an instance of the feature has been found or an impermissible context has been encountered) (AB)
-            x += 1
-            if tagged_sentence[x][1] == "VBN":
-                paspart = True
-                features_dict["vpastperfect_002b"] += 1
-            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"): # Currently, questions, in which the subject is between HAVE and the past participle. (AB)
-                nom = True 
-    elif word_tuple[0] in ["have", "'ve", "has"]: # "'s" excluded because I see no reliable way to separate between IS and HAS contractions - unless we lemmatize (AB)
-        nom = False
-        paspart = False
-        x = index
-        while nom == False and paspart == False and x < len(tagged_sentence):
-            x += 1
-            if tagged_sentence[x][1] == "VBN":
-                paspart = True
-                features_dict["vpresperfect_002a"] += 1
-            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"):
-                nom = True
+        
+    #Toggled out temporarily -- index error, out of range (KM)
+    # if word_tuple[0] in ["had", "'d"]: # Centering the lookup for perfect forms on the HAVE means counting only once for, e.g. "has considered, debated, but ultimately rejected a different search strategy". Let's discuss whether this is desirable. (AB)
+    #     nom = False
+    #     paspart = False
+    #     x = index
+    #     while nom == False and paspart == False and x < len(tagged_sentence): # These while-statements are an attempt to get around the question of how much intervening material to allow by instead setting conditions for when to stop looking on (either because an instance of the feature has been found or an impermissible context has been encountered) (AB)
+    #         x += 1
+    #         if tagged_sentence[x][1] == "VBN":
+    #             paspart = True
+    #             features_dict["vpastperfect_002b"] += 1
+    #         elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"): # Currently, questions, in which the subject is between HAVE and the past participle. (AB)
+    #             nom = True 
+    # elif word_tuple[0] in ["have", "'ve", "has"]: # "'s" excluded because I see no reliable way to separate between IS and HAS contractions - unless we lemmatize (AB)
+    #     nom = False
+    #     paspart = False
+        # x = index
+        # while nom == False and paspart == False and x < len(tagged_sentence):
+        #     x += 1
+        #     if tagged_sentence[x][1] == "VBN":
+        #         paspart = True
+        #         features_dict["vpresperfect_002a"] += 1
+        #     elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"):
+        #         nom = True
     elif word_tuple[0] in belist:
         if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]: # Biber also includes prepositions, but this seems to me to allow for too many false positives (AB)
             features_dict["mainvbe_019"] += 1
