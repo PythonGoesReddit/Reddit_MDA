@@ -10,8 +10,10 @@
     # print()
 
 # Kylas questions for next meeting:
-# Dealing with set phrases (saw a couple of these in the preposition section), like kind of, sort of etc. -> use the analyze_sentence function?
-# Dealing with uncertain number of words in between (ex ft 21c) --> preposition earlier in sentence, then any number of interceding items then NOT then wh-word
+# Do we still want to normalize deviant spelling and emojis in the clean_sentence function? 
+# If not can get rid of the clean_sentence function and just integrate it into tag_sentence
+# Can we integrate analyze_raw_words into the analyze_sentence function ? 
+    # Went ahead and did this, saved the code in another doc in case we want to go back but was pretty sure it makes sense this way (but if we decide otherwise ill put it back!)
 
 # 25_01
 # Should we transform all 'word_tuple's into 'tagged_sentence[index]'? Or does it improve readability?
@@ -99,6 +101,10 @@ def open_reddit_json(folder_path):
 
 # Untagged feature extraction functions
 def analyze_sentence(preprocessed_json):
+    ## NEEDED: feature 7: emoticons 
+    ## NEEDED: feature 10: strategic lengthening 
+    ## NEEDED: feature 11: alternating uppercase-lowercase 
+    ## NEEDED: function for feature 12: community-specific acronyms/lexical items (such as 'op')
     '''Takes the preprocessed json and adds to the features sub-dictionary the following keys and counts (values): "hashtag_201": no. of hashtags,
     "question_208": no. of question marks, "exclamation_209": no of exclamation marks, "lenchar_210": len of sentence in char, "lenword_211": len of sentence in words, "conjuncts_045"'''
 
@@ -121,7 +127,7 @@ def analyze_sentence(preprocessed_json):
         for hedge in ["at about", "something like", "more or less"]:
             s["hedges_047"] += sentence.count(hedge)
 
-        for conjunct in ["on the contrary", "on the other hand","for example", "for instance", "by contrast", "by comparison", "in comparison", "in contrast", "in particular", "in addition", "in conclusion", "in consequence", "in sum", "in summary", "in any event", "in any case", "in other words", "as a result", "as a consequence"]:
+        for conjunct in ["on the contrary", "on the other hand", "for example", "for instance", "by contrast", "by comparison", "in comparison", "in contrast", "in particular", "in addition", "in conclusion", "in consequence", "in sum", "in summary", "in any event", "in any case", "in other words", "as a result", "as a consequence"]:
             s["conjuncts_045"] += sentence.count(conjunct)
 
         for advsub in ["inasmuch as", "forasmuch as", "insofar as", "insomuch as", "as long as", "as soon as"]:
@@ -130,17 +136,7 @@ def analyze_sentence(preprocessed_json):
         s["lenchar_210"] = len(sentence) 
         s["lenword_211"] = len(sentence.split(" ")) 
 
-def analyze_raw_words(preprocessed_json):
-    '''Takes the preprocessed json and updates the counts of the following keys in the features sub-dictionary: "link_202": no. of external links, 
-    "interlink_203": no. of internal links, "caps_204": no of words in all caps.'''
-    ## NEEDED: feature 7: emoticons - Gustavo
-    ## NEEDED: feature 10: strategic lengthening 
-    ## NEEDED: feature 11: alternating uppercase-lowercase 
-    for id in preprocessed_json: 
-        sentence_dict = preprocessed_json.get(id)
-        sentence = sentence_dict["body"]
-        s = sentence_dict["features"]
-
+    #code below was orginially in its own function, analye_raw_words, but that seems unneccessary now
         for word in sentence.split():
             if word.startswith("u/") or word.startswith("r/"):
                 s["link_202"] += 1 
@@ -150,8 +146,6 @@ def analyze_raw_words(preprocessed_json):
 
             if word.isupper() and (word not in ["A", "I"]): #Capital A at the beginning of sentences is commmon but this will throw out A in the middle of a string, i.e. EVERYBODY GETS A JOOOB
                 s["caps_204"] += 1  
-
-## NEEDED: function for feature 12: community-specific acronyms/lexical items (such as 'op') - Gustavo ??
 
 def clean_sentence(sentence):
     '''Takes a sentence and returns it in all lowercase, with deviant/creative spelling normalized, 
@@ -253,7 +247,7 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
         features_dict["vseemappear_058"] += 1
     if tagged_sentence[index + 1][1] == "WDT" and tagged_sentence[index + 1][0] != "that" and tagged_sentence[index + 2][1] == "PRP":
         features_dict["whclause_023"] += 1
-        
+
     #Toggled out temporarily -- index error, out of range (KM)
     # if word_tuple[0] in ["had", "'d"]: # Centering the lookup for perfect forms on the HAVE means counting only once for, e.g. "has considered, debated, but ultimately rejected a different search strategy". Let's discuss whether this is desirable. (AB)
     #     nom = False
@@ -326,6 +320,9 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
 
     #if word_tuple in private/public/suasive: Leaving this undefined until we have decided about lemmatization, because it will be so much easier with lemma info.
     #     Checking this individual classes will be easy enough
+    # KM -> we also need this for feature 21. part a is down in analye_wh_word but parts b and c need to identify public/private/suasive verbs -- can we add that in this part when theyre identified?:
+    # (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/TJf/anrf){that-c\a\ises as complements to verbs which are not included in the above verb classes are not counted - see Quirk et al. 1985:1179ff.) 
+# (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)(This algorithm allows an intervening prepositional phrase between a verb and its complement.)
     #     Biber also checks for that-deletion, which is probably bad in terms of precision and recall. I currently have strong reservations against implementing his search, but have not come up with a better one yet. (AB)
         
     #"vperfect_002" -> how many places should it lookahead for a form of have?
@@ -402,11 +399,10 @@ def analyze_adverb(index, tagged_sentence, features_dict): ## Hanna
 def analyze_adjective(index, tagged_sentence, features_dict): ## Kyla
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "adjattr_040", "adjpred_041", "emphatics_049", "comparatives_212", "superlatives_213".'''
-    word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
    
-    if word_tuple[1] == "JJR":
+    if tagged_sentence[index][1] == "JJR":
         features_dict["comparatives_212"] += 1
-    elif word_tuple[1] == "JJS":
+    elif tagged_sentence[index][1] == "JJS":
         features_dict["superlatives_213"] += 1
     
     if tagged_sentence[index-1][0] in belist:
@@ -416,12 +412,11 @@ def analyze_adjective(index, tagged_sentence, features_dict): ## Kyla
         elif not tagged_sentence[index+1][1].startswith("RB"): ##!!! Check not-statement (KM)
             features_dict["adjpred_041"] += 1
 
-        if tagged_sentence[index+1][1].startswith("JJ") and not tagged_sentence[index+2][1].startswith("JJ") and not tagged_sentence[index+2][1].startswith("NN"): #Would it not be okay to have JJ in position +1 and +2?
-            ##!!! Check not-statement (KM)
+        if tagged_sentence[index+1][1].startswith("JJ") and not tagged_sentence[index+2][1].startswith("JJ") and not tagged_sentence[index+2][1].startswith("NN"): #Would it not be okay to have JJ in position +1 and +2? 
             features_dict["adjpred_041"] += 1
             
-    elif tagged_sentence[index-1][0] in ["real", "so"] and word_tuple[1] == "JJ":
-        #BUG: This is catching so much junk, I don't understand why ('so I' comes up a lot ) KM
+    elif tagged_sentence[index-1][0] in ["real", "so"] and tagged_sentence[index][1] == "JJ":
+        #I think this should work but should double check because it was catching junk at some point (KM)
         features_dict["emphatics_049"] += 1
       
 def analyze_preposition(index, tagged_sentence, features_dict): ## Gustavo
@@ -613,11 +608,11 @@ def analyze_wh_word(index, tagged_sentence, features_dict): ## Kyla
         if tagged_sentence[index-1][1] == "IN":
             features_dict["whrepied_033"] += 1 #pied-piping relative clauses (e.g., the manner in which he was told) PREP + WHP in relative clauses
 
-        if word_tuple[0] == "which" and tagged_sentence[index-1][0] == ",": #34. sentence relatives (e.g., Bob likesfried mangoes, which is the most disgusting thing I've ever heard of) Biber: (These forms are edited by hand to exclude non-restrictive relative clauses.)
+        if word_tuple[0] == "which" and tagged_sentence[index-1][0] == ",": #34. sentence relatives (e.g., Bob likes fried mangoes, which is the most disgusting thing I've ever heard of) Biber: (These forms are edited by hand to exclude non-restrictive relative clauses.)
             features_dict["sentencere_034"] += 1 
 
         elif word_tuple[0] == "that" and tagged_sentence[index-1][1].startswith("J"): #This catches things like I'm sure that's a, there's nothing good that can come out of it, etc. Biber keeps mentioning tone boundaries but I dont understand how you could do that computationally (he refers to it as T#)
-            features_dict["thatacom_022"] += 1 #that adjective complements (e.g., I'm glad that yo like it) ADJ + (T#) + that (complements across intonation boundaries were edited by hand)
+            features_dict["thatacom_022"] += 1 #that adjective complements (e.g., I'm glad that you like it) ADJ + (T#) + that (complements across intonation boundaries were edited by hand)
 
 
     #13. direct WH-questions CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)
@@ -628,13 +623,13 @@ def analyze_wh_word(index, tagged_sentence, features_dict): ## Kyla
             if tagged_sentence[index+1][0] in belist or tagged_sentence[index+1][0] in havelist or tagged_sentence[index+1][0] in dolist:
                 featuresdict["whquest_013"] += 1
     
-    #21 21. that verb complements (e.g., / said that he went) 
+    #21 that verb complements (e.g., / said that he went) 
     # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions) 
-    if word_tuple[1] == "that":
+    if tagged_sentence[index][0] == "that":
         if tagged_sentence[index-1][1].startswith("I") or tagged_sentence[index-1][0] in ["and", "nor", "but", "or", "who"]: #does this first part of this catch Bibers ALL-P?
             if tagged_sentence[index+1][1].startswith("D") or tagged_sentence[index+1][1].startswith("PR") or tagged_sentence[index+1][0] == "there" or tagged_sentence[index+1][1].startswith("NNP") or tagged_sentence[index+1][1].startswith("NNS") or titlelist in tagged_sentence[index+1][0]:
                 featuresdict["thatvcom_021"] += 1
-
+    # moved b and c of 21 to analyze_verb
     
         #29. that relative clauses on subject position (e.g., the dog that bit me) N -p (T#) + that + (ADV) + AUX/V {that relatives across intonation boundaries are identified by hand.)
         #30. that relative clauses on object position (e.g., the dog that I saw) N + (T#) + that + DET / SUBJPRO / POSSPRO / it / ADJ / plural noun/ proper noun / possessive noun / TITLE
@@ -666,10 +661,6 @@ def analyze_wh_word(index, tagged_sentence, features_dict): ## Kyla
     elif tagged_sentence[index-1][1].startswith("N") and (tagged_sentence[index+1][1].startswith("V") or tagged_sentence[index+1][1].startswith("MD")):
         features_dict["whresub_031"] += 1
         
-#TO ADD:
-#21 21. that verb complements (e.g., / said that he went) 
-# (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/TJf/anrf){that-c\a\ises as complements to verbs which are not included in the above verb classes are not counted - see Quirk et al. 1985:1179ff.) 
-# (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)(This algorithm allows an intervening prepositional phrase between a verb and its complement.)
 
 
 def analyze_there(index, tagged_sentence, features_dict): ## noone...
@@ -701,7 +692,6 @@ def analyze_particle(index, tagged_sentence, features_dict): ## Hanna
 preprocessed_file = open_reddit_json(path) #reads in file, separates into sentences, initializes feature dict
 
 analyze_sentence(preprocessed_file) #updates raw-sentence based counts (i.e. punctuation marks, length)
-analyze_raw_words(preprocessed_file) #updates raw-word based counts (i.e. links, emojis)
 
 for id in preprocessed_file: #loops through all individual sentences in the file one by one
      sentence_dict = preprocessed_file.get(id) #retrieves entire dictionary and all sub-dicts for the given sentence
