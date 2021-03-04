@@ -121,10 +121,10 @@ def analyze_sentence(preprocessed_json):
         for hedge in ["at about", "something like", "more or less"]:
             s["hedges_047"] += sentence.count(hedge)
 
-        for conjunct in ["on the contrary", "on the other hand","for example", "for instance", "by contrast", "by comparison", "in comparison", "in contrast", "in particular", "in addition", "in conclusion", "in consequence", "in sum", "in summary", "in any event", "in any case", "in other words", "as a result", "as a consequence"]
+        for conjunct in ["on the contrary", "on the other hand","for example", "for instance", "by contrast", "by comparison", "in comparison", "in contrast", "in particular", "in addition", "in conclusion", "in consequence", "in sum", "in summary", "in any event", "in any case", "in other words", "as a result", "as a consequence"]:
             s["conjuncts_045"] += sentence.count(conjunct)
 
-        for advsub in ["inasmuch as", "forasmuch as", "insofar as", "insomuch as", "as long as", "as soon as"]
+        for advsub in ["inasmuch as", "forasmuch as", "insofar as", "insomuch as", "as long as", "as soon as"]:
             s["advsubother_038"] += sentence.count(advsub)
 
         s["lenchar_210"] = len(sentence) 
@@ -158,7 +158,7 @@ def clean_sentence(sentence):
     with punctuation removed, and emojis removed.'''
     ## look into what might or might not be necessary here
     ## replace emojis and emoticons (with what?)
-    sentence = sentence.strip(string.punctuation).lower()
+    sentence = str(sentence).strip(string.punctuation).lower()
     ## NEEDED: remove emojis - Gustavo
     return sentence
 
@@ -705,6 +705,23 @@ for id in preprocessed_file: #loops through all individual sentences in the file
      sentence_dict = preprocessed_file.get(id) #retrieves entire dictionary and all sub-dicts for the given sentence
      sentence = sentence_dict["body"] #retrieves sentence only (str)) 
      features_dict = sentence_dict["features"] #retrieves s for the given sentence
+
+## UNCOMMENT BELOW TO TEST YOUR OWN SENTENCE
+# practice_sentences = ["This is a practice sentence", "This is another practice sentence", "Another sentence here"]
+# for practice_sentence in practice_sentences:
+#      sentence = tag_sentence(practice_sentence)
+#      features_dict = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0, 
+#                             "prothirdper_008": 0, "proit_009": 0, "prodemons_010": 0, "proindef_011": 0, "pverbdo_012": 0, "whquest_013": 0, "nominalis_014": 0, "gerund_015": 0,
+#                             "nouns_016": 0, "passagentl_017": 0, "passby_018": 0, "mainvbe_019": 0, "exthere_020": 0, "thatvcom_021": 0, "thatacom_022": 0, "whclause_023": 0,
+#                             "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0, "thatresub_029": 0, "thatreobj_030": 0,
+#                             "whresub_031": 0, "whreobj_032": 0, "whrepied_033": 0, "sentencere_034": 0, "advsubcause_035": 0, "advsubconc_036": 0, "advsubcond_037": 0,
+#                             "advsubother_038": 0, "prepositions_039": 0, "adjattr_040": 0, "adjpred_041": 0, "adverbs_042": 0, "ttratio_043": 0, "wordlength_044": 0, "conjuncts_045": 0,
+#                             "downtoners_046": 0, "hedges_047": 0, "amplifiers_048": 0, "emphatics_049": 0, "discpart_050": 0, "demonstr_051": 0, "modalsposs_052": 0,
+#                             "modalsness_053": 0, "modalspred_054": 0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "vseemappear_058": 0, "contractions_059": 0, 
+#                             "thatdel_060": 0, "strandprep_061": 0, "vsplitinf_062": 0, "vsplitaux_063": 0, "coordphras_064": 0, "coordnonp_065": 0, "negsyn_066": 0, 
+#                             "negana_067": 0, "hashtag_201": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_205": 0,
+#                             "question_208": 0, "exclamation_209": 0, "lenchar_210": 0, "lenword_211": 0, "comparatives_212": 0, "superlatives_213": 0}
+    
      tagged_sentence = tag_sentence(sentence) #tags sentence, returning list of tuples with (word, pos)
 
      for index in range(3, len(tagged_sentence)-3): #based on POS, apply different function
@@ -735,9 +752,8 @@ for id in preprocessed_file: #loops through all individual sentences in the file
              analyze_there(index, tagged_sentence, features_dict)
     # at some point the order of these elif-statements could be updated using freq counts from our data
 
-    #for testing purposes
-     #print(sentence, features_dict)
-     #print(tagged_sentence)
+    #UNCOMMENT BELOW TO PRINT OUTPUT FROM PRACTICE SENTENCES -- change features dict to desired feature
+     #print(practice_sentence, "//count = ", features_dict["prothirdper_008"]) #change to feature you want to look at
     
     #helpful for in console, first import nltk and (first time only) nltk.download("tagsets")
     # nltk.help.upenn_tagset('NNS')
