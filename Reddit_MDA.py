@@ -186,6 +186,7 @@ indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "e
 conjunctslist = ["alternatively", "altogether", "consequently", "conversely", "eg", "else", "furthermore",
                  "hence", "however", "ie", "instead", "likewise", "moreover", "namely", "nevertheless",
                  "nonetheless", "notwithstanding", "otherwise", "rather", "similarly", "therefore", "thus", "viz"]
+conjunctsmultilist = ["on the contrary", "on the other hand", "for example", "for instance", "by contrast", "by comparison", "in comparison", "in contrast", "in particular", "in addition", "in conclusion", "in consequence", "in sum", "in summary", "in any event", "in any case", "in other words", "as a result", "as a consequence"]
 punct_final = [".", "!", "?", ":", ";"] # here, Biber also includes the long dash -- , but I am unsure how this would be rendered
 belist = ["be", "am", "are", "is", "was", "were", "been", "being", "'m", "'re",] # I have added the contracted forms of am and are (AB)
 havelist = ["have", "has", "had", "having"]
@@ -205,7 +206,7 @@ amplifierlist = ["absolutely", "altogether", "completely", "enormously", "entire
                  "intensely", "perfectly", "strongly", "thoroughly", "totally", "utterly", "very"]
 asktelllist = ["ask", "asked", "asking", "asks", "tell", "telling", "tells", "told"] #this could also be accomplished with .startswith("ask"), .startswith("tell") or == "told" (KM)
 titlelist = ["mr", "ms", "mrs", "prof", "professor", "dr", "sir"] #??????? (KM)
-
+otheradvsublist = ["since", "while", "whilst", "whereupon", "whereas", "whereby", "such that", "so that", "such that", "inasmuch as", "forasmuch as", "insofar as", "insomuch as", "as long as", "as soon as"]
 
 #POS-functions
 def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
@@ -443,8 +444,8 @@ def analyze_preposition(index, tagged_sentence, features_dict): ## Gustavo
 
     if word_tuple[0] == "that" and tagged_sentence[index-1][0] in ["such", "so"] and not tagged_sentence[index+1][1] in ["JJ", "JJR", "JJS", "NN", "NNS", "NNP", "NNPS"]:
         features_dict["advsubother_038"] += 1 # Using not statement here again. There is also an overlap with the "such that" construction in Biber's original features. (GK)
-    if word_tuple[0] == "like" and tagged_sentence[index-1][0] == "something":
-        features_dict["hedges_047"] += 1
+    #if word_tuple[0] == "like" and tagged_sentence[index-1][0] == "something":
+        #features_dict["hedges_047"] += 1
         #Maybe they could be handled in the full sentence, pretagged function if they just need surface forms
         #Any other ideas? (KM)
         # I agree that this way of looking for the hedges is tedious, but I can't think of a better way to do it.
@@ -559,13 +560,13 @@ def analyze_conjunction(index, tagged_sentence, features_dict): ## Gustavo
             features_dict["coordnonp_065"] += 1
         elif tagged_sentence[index+1][0] in WHP or tagged_sentence[index+1][0] in WHO or tagged_sentence[index+1][0] in discpart:
             features_dict["coordnonp_065"] += 1
-        elif tagged_sentence[index+1][0] : #adverbial subordinator (nos. 35-8)
+        elif tagged_sentence[index+1][0] in ["because", "although", "though", "if", "unless",] or tagged_sentence[index+1][0] in otheradvsublist: # added the otheradvsublist for this particular feature (GK)
             features_dict["coordnonp_065"] += 1
-        elif tagged_sentence[index+1][0] : #conjunct (no. 45)
+        elif tagged_sentence[index+1][0] : in conjunctslist or tagged_sentence[index+1][0] in conjunctsmultilist: # added the conjunctsmultilist for the this particular feature (GK)
             features_dict["coordnonp_065"] += 1
-    elif word_tuple[0] == "or":
-        if tagged_sentence[index-1][0] == "more" and tagged_sentence[index+1][0] == "less":
-            features_dict["hedges_047"] += 1 ## Move to analyze_sentence (KM)
+    #elif word_tuple[0] == "or":
+        #if tagged_sentence[index-1][0] == "more" and tagged_sentence[index+1][0] == "less":
+            #features_dict["hedges_047"] += 1 ## Move to analyze_sentence (KM)
 
 
     if word_tuple[0] == "and" and tagged_sentence[index+1][0] in WHP or tagged_sentence[index+1][0] in WHO:
