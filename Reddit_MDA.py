@@ -249,7 +249,7 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
             elif tagged_sentence[x][1].startswith("R") and tagged_sentence[x][0] not in ["n't", "not"]: # Unfortunately, negators and adverbs have the same tags, so we manually exclude negators.
                 insert_adv = True
             elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P") or tagged_sentence[x][1].startswith("X"): # Currently excludes questions, in which the subject is between HAVE and the past participle. (AB)
-                move_on =  = True 
+                move_on =  False 
     elif word_tuple[0] in ["have", "'ve", "has"]: # "'s" excluded because I see no reliable way to separate between IS and HAS contractions - unless we lemmatize (AB)
         move_on = True
         insert_adv = False
@@ -264,8 +264,8 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
             elif tagged_sentence[x][1].startswith("R") and tagged_sentence[x][0] not in ["n't", "not"]:
                 insert_adv = True
             elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P") or tagged_sentence[x][1].startswith("X"): # Currently excludes questions, in which the subject is between HAVE and the past participle. (AB)
-                move_on =  = True 
-    elif word_tuple[0] in belist:
+                move_on =  False
+    elif word_tuple[0] in belist: # Something that is very obviously missing from Biber's list and also our features right now is progressive. Here would be the place to include them.
         if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]: # Biber also includes prepositions, but this seems to me to allow for too many false positives (AB)
             features_dict["mainvbe_019"] += 1
         else:
@@ -280,12 +280,12 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
                         features_dict["passby_018"] += 1
                         if insert_adv:
                             features_dict["vsplitaux_063"] += 1
-                    elif tagged_sentence[x+1][1] == "IN":
+                    elif tagged_sentence[x+1][1] == "IN": # Here, provision is made for by-passive with intervening PPs: "was shot in the head by an unidentified suspect"
                         x += 1
                         move_on2 = True
                         while move_on2:
                             x += 1
-                            if tagged_sentence[x+1][1].startswith("N") or tagged_sentence[x+1][1].startswith("DT"):
+                            if tagged_sentence[x+1][1].startswith("N") or tagged_sentence[x+1][1].startswith("DT"): # One might include adjectives here as well, but prob at the cost of precision.
                                 pass
                             elif tagged_sentence[x+1][0] == "by":
                                 features_dict["passby_018"] += 1
@@ -316,6 +316,7 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
         while move_on:
             x += 1
             if tagged_sentence[x][1].startswith("V"):
+                move_on = False
                 if negator == False:
                     features_dict["emphatics_049"] += 1
                 if insert_adv:
