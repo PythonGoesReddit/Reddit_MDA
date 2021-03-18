@@ -219,19 +219,6 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
         features_dict["vpast_001"] += 1
     elif word_tuple[1] == "VB":
         features_dict["vinfinitive_024"] += 1 # Note that "VB" - at least in the GUM data - is also used for imperative forms
-        if tagged_sentence[index-1][1].startswith("RB"):
-            move_on = True
-            x = index-1
-            while move_on == True:
-                x -= 1
-                if tagged_sentence[x][0] == "to":
-                    move_on = False
-                    features_dict["vsplitinf_062"] += 1
-                elif tagged_sentence[x][0] in belist:
-                    move_on = False
-                    features_dict["vsplitaux_063"] += 1 # This implements Biber's abstract representation of Feature 63, which however is not in line with the example he gives. Need to discuss this.
-                elif not tagged_sentence[x][0].startswith("RB"):
-                    move_on = False
     elif word_tuple[1] == "VBG":
         if (tagged_sentence[index-1][0] == "X" or tagged_sentence[index-1][0] in ".!?;:,-") and tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]: #gerund or present participle.. is this ok? or do we have to separate these # AB: In Biber, this is in fact only for present participial clauses, a fairly narrow range of ING-forms. I implement it accordingly and would suggest a separate class of features for progressives (which Biber really does not seem to have considered in the 80s)
             features_dict["vpresentpart_025"] += 1
@@ -248,35 +235,43 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
         features_dict["vseemappear_058"] += 1
     if tagged_sentence[index + 1][1] == "WDT" and tagged_sentence[index + 1][0] != "that" and tagged_sentence[index + 2][1] == "PRP":
         features_dict["whclause_023"] += 1
-
     #Toggled out temporarily -- index error, out of range (KM)
-    # if word_tuple[0] in ["had", "'d"]: # Centering the lookup for perfect forms on the HAVE means counting only once for, e.g. "has considered, debated, but ultimately rejected a different search strategy". Let's discuss whether this is desirable. (AB)
-    #     nom = False
-    #     paspart = False
-    #     x = index
-    #     while nom == False and paspart == False and x < len(tagged_sentence): # These while-statements are an attempt to get around the question of how much intervening material to allow by instead setting conditions for when to stop looking on (either because an instance of the feature has been found or an impermissible context has been encountered) (AB)
-    #         x += 1
-    #         if tagged_sentence[x][1] == "VBN":
-    #             paspart = True
-    #             features_dict["vpastperfect_002b"] += 1
-    #         elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"): # Currently, questions, in which the subject is between HAVE and the past participle. (AB)
-    #             nom = True 
-    # elif word_tuple[0] in ["have", "'ve", "has"]: # "'s" excluded because I see no reliable way to separate between IS and HAS contractions - unless we lemmatize (AB)
-    #     nom = False
-    #     paspart = False
-        # x = index
-        # while nom == False and paspart == False and x < len(tagged_sentence):
-        #     x += 1
-        #     if tagged_sentence[x][1] == "VBN":
-        #         paspart = True
-        #         features_dict["vpresperfect_002a"] += 1
-        #     elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"):
-        #         nom = True
-    elif word_tuple[0] in belist:
+    if word_tuple[0] in ["had", "'d"]: # Centering the lookup for perfect forms on the HAVE means counting only once for, e.g. "has considered, debated, but ultimately rejected a different search strategy". Let's discuss whether this is desirable. (AB)
+        move_on = True
+        insert_adv = False
+        x = index
+        while move_on: # These while-statements are an attempt to get around the question of how much intervening material to allow by instead setting conditions for when to stop looking on (either because an instance of the feature has been found or an impermissible context has been encountered) (AB)
+            x += 1
+            if tagged_sentence[x][1] == "VBN":
+                move_on = False
+                features_dict["vpastperfect_002b"] += 1
+                if insert_adv:
+                    features_dict["vsplitaux_063"] += 1
+            elif tagged_sentence[x][1].startswith("R") and tagged_sentence[x][0] not in ["n't", "not"]: # Unfortunately, negators and adverbs have the same tags, so we manually exclude negators.
+                insert_adv = True
+            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P") or tagged_sentence[x][1].startswith("X"): # Currently excludes questions, in which the subject is between HAVE and the past participle. (AB)
+                move_on =  False 
+    elif word_tuple[0] in ["have", "'ve", "has"]: # "'s" excluded because I see no reliable way to separate between IS and HAS contractions - unless we lemmatize (AB)
+        move_on = True
+        insert_adv = False
+        x = index
+        while move_on: # These while-statements are an attempt to get around the question of how much intervening material to allow by instead setting conditions for when to stop looking on (either because an instance of the feature has been found or an impermissible context has been encountered) (AB)
+            x += 1
+            if tagged_sentence[x][1] == "VBN":
+                move_on = False
+                features_dict["vpresperfect_002a"] += 1
+                if insert_adv:
+                    features_dict["vsplitaux_063"] += 1
+            elif tagged_sentence[x][1].startswith("R") and tagged_sentence[x][0] not in ["n't", "not"]:
+                insert_adv = True
+            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P") or tagged_sentence[x][1].startswith("X"): # Currently excludes questions, in which the subject is between HAVE and the past participle. (AB)
+                move_on =  False
+    elif word_tuple[0] in belist: # Something that is very obviously missing from Biber's list and also our features right now is progressive. Here would be the place to include them.
         if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]: # Biber also includes prepositions, but this seems to me to allow for too many false positives (AB)
             features_dict["mainvbe_019"] += 1
         else:
             move_on = True
+            insert_adv = False
             x = index
             while move_on == True:
                 x += 1
@@ -284,34 +279,53 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
                     move_on = False
                     if tagged_sentence[x+1][0] == "by":
                         features_dict["passby_018"] += 1
-                    elif tagged_sentence[x+1][1] == "IN":
+                        if insert_adv:
+                            features_dict["vsplitaux_063"] += 1
+                    elif tagged_sentence[x+1][1] == "IN": # Here, provision is made for by-passive with intervening PPs: "was shot in the head by an unidentified suspect"
                         x += 1
                         move_on2 = True
                         while move_on2:
                             x += 1
-                            if tagged_sentence[x+1][1].startswith("N") or tagged_sentence[x+1][1].startswith("DT"):
+                            if tagged_sentence[x+1][1].startswith("N") or tagged_sentence[x+1][1].startswith("DT"): # One might include adjectives here as well, but prob at the cost of precision.
                                 pass
                             elif tagged_sentence[x+1][0] == "by":
                                 features_dict["passby_018"] += 1
+                                if insert_adv:
+                                    features_dict["vsplitaux_063"] += 1
                                 move_on2 = False
                             else:
                                 features_dict["passagentl_017"] += 1
+                                if insert_adv:
+                                    features_dict["vsplitaux_063"] += 1
                                 move_on2 = False
                     else:
-                        features_dict["passagentl_017"] += 1           
+                        features_dict["passagentl_017"] += 1
+                        if insert_adv:
+                            features_dict["vsplitaux_063"] += 1  
                 elif tagged_sentence[x][1].startswith("RB"):
-                    pass
+                    if tagged_sentence[x][0] not in ["n't", "not"]:
+                        insert_adv = True
+                    else:
+                        pass
                 else:
                     move_on = False
     elif word_tuple[0] in dolist:
         move_on = True
+        negator = False
+        insert_adv = False
         x = index
         while move_on:
             x += 1
             if tagged_sentence[x][1].startswith("V"):
-                features_dict["emphatics_049"] += 1
-            elif tagged_sentence[x][1].startswith("J"):
-                pass
+                move_on = False
+                if negator == False:
+                    features_dict["emphatics_049"] += 1
+                if insert_adv:
+                    features_dict["vsplitaux_063"] += 1
+            elif tagged_sentence[x][0] in ["not", "n't"]:
+                negator = True
+            elif tagged_sentence[x][1].startswith("R"):
+                insert_adv = True
             else:
                 move_on = False
                 if not (tagged_sentence[index-1][0] in WHP+WHO and tagged_sentence[index-2][0] == "X"):
@@ -353,6 +367,21 @@ def analyze_modal(index, tagged_sentence, features_dict): ## Axel
         features_dict["modalspred_054"] += 1
     if word_tuple[0].startswith("'"):
         features_dict["contractions_059"] += 1
+    move_on = True
+    insert_adv = False
+    x = index
+    while move_on:
+        x += 1
+        if tagged_sentence[x][1].startswith("V"):
+            move_on = False
+            if insert_adv:
+                features_dict["vsplitaux_063"] += 1
+        elif tagged_sentence[x][0] in ["not", "n't"]:
+            pass
+        elif tagged_sentence[x][1].startswith("R"):
+            insert_adv = True
+        else:
+            move_on = False
     
     # still missing: vimperative_205". There is no separate tag for this in our tagset.
     # Perhaps imperatives can be identified by looking for bare verbs at the very beginning of sentences (and following commas, provided there is no preceding verb in the sentence)?
