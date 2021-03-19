@@ -205,6 +205,7 @@ amplifierlist = ["absolutely", "altogether", "completely", "enormously", "entire
                  "intensely", "perfectly", "strongly", "thoroughly", "totally", "utterly", "very"]
 asktelllist = ["ask", "asked", "asking", "asks", "tell", "telling", "tells", "told"] #this could also be accomplished with .startswith("ask"), .startswith("tell") or == "told" (KM)
 titlelist = ["mr", "ms", "mrs", "prof", "professor", "dr", "sir"] #??????? (KM)
+notgerundlist = ["nothing", "everything", "something", "anything", "thing", "things", "string", "strings"]
 
 
 #POS-functions
@@ -388,7 +389,7 @@ def analyze_modal(index, tagged_sentence, features_dict): ## Axel
     ## originally I thought it might make sense to look for contractions (feature 59) within the pronoun-section as well, but it is probably
     ## sufficient to look for them here, isn't it? (HM) -> afaik, the tagger will represent "he's" as "he" + "'s", etc., so no need to look in the pronoun section (AB).
 
-def analyze_adverb(index, tagged_sentence, features_dict): ## Hanna
+def analyze_adverb(index, tagged_sentence, features_dict): ## 1. Hanna 2. Raffaela
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "advplace_004", "advtime_005", "adverbs_042", "conjuncts_045",
     "downtoners_046", "hedges_047", "amplifiers_048", "discpart_050", "negana_067".'''
@@ -425,7 +426,7 @@ def analyze_adverb(index, tagged_sentence, features_dict): ## Hanna
             features_dict["conjuncts_045"] += 1
 
  
-def analyze_adjective(index, tagged_sentence, features_dict): ## Kyla
+def analyze_adjective(index, tagged_sentence, features_dict): ## 1. Kyla 2. Raffaela
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "adjattr_040", "adjpred_041", "emphatics_049", "comparatives_212", "superlatives_213".'''
    
@@ -516,19 +517,20 @@ def analyze_preposition(index, tagged_sentence, features_dict): ## Gustavo
     #elif tagged_sentence[index+2][0] == "other" and tagged_sentence[index+3][0] == "hand":
         features_dict["conjuncts_045"] += 1
 
-def analyze_noun(index, tagged_sentence, features_dict): ## Rafaela
+def analyze_noun(index, tagged_sentence, features_dict): ## 1. Rafaela 2. Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "nominalis_014", "gerund_015", "nouns_016".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
 
     if word_tuple[0].endswith("ing") or word_tuple[0].endswith("ings"):
-        features_dict["gerund_015"] += 1 # this is edited manually by Biber
+        if word_tuple[1] not in notgerundlist:
+            features_dict["gerund_015"] += 1 # this is edited manually by Biber
     elif word_tuple[0].endswith("tions") or word_tuple[0].endswith("tion") or word_tuple[0].endswith("ments") or word_tuple[0].endswith("ment") or word_tuple[0].endswith("ness") or word_tuple[0].endswith("ity") or word_tuple[0].endswith("nesses") or word_tuple[0].endswith("ities"):
         features_dict["nominalis_014"] += 1
     else: 
         features_dict["nouns_016"] += 1
         
-def analyze_pronoun(index, tagged_sentence, features_dict): ## Hanna
+def analyze_pronoun(index, tagged_sentence, features_dict): ## 1. Hanna 2.?
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "profirpers_006", "prosecpers_007", "prothirper_008", "proit_009", "prodemons_010", "proindef_011".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
@@ -557,7 +559,7 @@ def analyze_pronoun(index, tagged_sentence, features_dict): ## Hanna
     elif word_tuple[0] == "that" and tagged_sentence[index+1][0] == "'s": ## should this be 's or s ? Does the apostrophe get removed? (HM)
         features_dict["prodemons_010"] += 1
 
-def analyze_conjunction(index, tagged_sentence, features_dict): ## Gustavo
+def analyze_conjunction(index, tagged_sentence, features_dict): ## 1. Gustavo
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "hedges_047", "coordphras_064", "coordnonp_065".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
@@ -610,7 +612,7 @@ def analyze_conjunction(index, tagged_sentence, features_dict): ## Gustavo
     # still missing: "coordnonp_065" (only for 'and' followed by adverbial subordinator or conjunct, depend on other features)
 
 
-def analyze_determiner(index, tagged_sentence, features_dict): ## Rafaela
+def analyze_determiner(index, tagged_sentence, features_dict): ## 1. Rafaela 2. Gustavo
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "demonstr_051", "negsyn_066".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
@@ -625,7 +627,7 @@ def analyze_determiner(index, tagged_sentence, features_dict): ## Rafaela
         elif tagged_sentence[index+1][0] in QUAN:
             features_dict["negsyn_066"] += 1
 
-def analyze_wh_word(index, tagged_sentence, features_dict): ## Kyla
+def analyze_wh_word(index, tagged_sentence, features_dict): ## 1. Kyla
     # Check: Ft 32 (Biber's way of finding this seems like it could be optimized)
     # Check: Ft 22 (catches unintended phrases)
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
@@ -692,12 +694,12 @@ def analyze_wh_word(index, tagged_sentence, features_dict): ## Kyla
         
 
 
-def analyze_there(index, tagged_sentence, features_dict): ## noone...
+def analyze_there(index, tagged_sentence, features_dict): ## 1. noone 2. Gustavo
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "exthere_020".'''
     features_dict["exthere_020"] += 1
     
-def analyze_particle(index, tagged_sentence, features_dict): ## Hanna
+def analyze_particle(index, tagged_sentence, features_dict): ## 1. Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "discpart_050".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
