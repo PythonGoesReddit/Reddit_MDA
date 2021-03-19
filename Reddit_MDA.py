@@ -209,11 +209,14 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 
 #POS-functions
-def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
+def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. ?
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: "vpast_001", "vperfect_002", "vpresent_003", 
-    "whclause_023", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
-    "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
-    "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''    
+    "pverbdo_012", "passagentl_017", "passby_018", "mainvbe_019", "whclause_023", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
+    "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
+    "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''
+    ## I think it would make sense to divide this verb-function into several smaller functions (depending on the final tag inventory)
+    ## our initial goal was to keep the computational effort low by only searching for a lower number of features depending on the tag, with this function
+    ## we are currently searching for a lot of stuff for a word class that will appear fairly often. (HM)    
     word_tuple = tagged_sentence[index]
     if word_tuple[1] == "VBD":
         features_dict["vpast_001"] += 1
@@ -351,22 +354,28 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## Axel
     #  "vpresentwhiz_028",
     #present participial WHIZ deletion relatives (e.g., the event causing this decline is . . .)N + VBG (these forms were edited by hand)
     #
-    # "vpublic_055", "vprivate_056", "vsuasive_057", "contractions_059", "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".
+    # "vpublic_055", "vprivate_056", "vsuasive_057", "contractions_059", "thatdel_060", "vsplitinf_062", "vsplitaux_063"
+    
+    # still missing: vimperative_205". There is no separate tag for this in our tagset.
+    # Perhaps imperatives can be identified by looking for bare verbs at the very beginning of sentences (and following commas, provided there is no preceding verb in the sentence)?
 
-def analyze_modal(index, tagged_sentence, features_dict): ## Axel
+
+def analyze_modal(index, tagged_sentence, features_dict): ## 1. Axel 2. Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
-    "pverbdo_012", "passagentl_017", "passby_018","mainvbe_019",
-    "emphatics_049", "modalsposs_052", "modalsness_053", "modalspred_054", "contractions_059", 
-    "vimperative_205".'''
+    "modalsposs_052", "modalsness_053", "modalspred_054", "contractions_059", "vsplitaux_063".'''
+    ## Several of the features that were origianlly intended for analyze_modal have been moved to analyze_verb instead.
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
     if word_tuple[0] in ["can","may","might","could"]:
         features_dict["modalsposs_052"] += 1
     elif word_tuple[0] in ["ought","should","must"]:
         features_dict["modalsness_053"] += 1
-    elif word_tuple[0] in ["will","would","shall","'ll","'d"]:
+    elif word_tuple[0] in ["will","would","shall","'ll","'d"]: 
+        ## right now our tagger does not remove the apostrophes before the clitics - does the new tagger do so as well?
+        ## otherwise they would have to be removed from these strings
         features_dict["modalspred_054"] += 1
-    if word_tuple[0].startswith("'"):
+    if word_tuple[0].startswith("'"): ## same question about apostrophe applies here
         features_dict["contractions_059"] += 1
+        
     move_on = True
     insert_adv = False
     x = index
@@ -383,21 +392,18 @@ def analyze_modal(index, tagged_sentence, features_dict): ## Axel
         else:
             move_on = False
     
-    # still missing: vimperative_205". There is no separate tag for this in our tagset.
-    # Perhaps imperatives can be identified by looking for bare verbs at the very beginning of sentences (and following commas, provided there is no preceding verb in the sentence)?
-    
-    ## originally I thought it might make sense to look for contractions (feature 59) within the pronoun-section as well, but it is probably
-    ## sufficient to look for them here, isn't it? (HM) -> afaik, the tagger will represent "he's" as "he" + "'s", etc., so no need to look in the pronoun section (AB).
-
 def analyze_adverb(index, tagged_sentence, features_dict): ## 1. Hanna 2. Raffaela
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "advplace_004", "advtime_005", "adverbs_042", "conjuncts_045",
-    "downtoners_046", "hedges_047", "amplifiers_048", "discpart_050", "negana_067".'''
+    "downtoners_046", "hedges_047", "amplifiers_048", "discpart_050", "contractions_059", "negana_067".'''
     features_dict["adverbs_042"] += 1
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
 
-    if word_tuple[0] == "not" or word_tuple[0] == "n't": # Suggestion: do separate conditions for "not" and "n't", and for the latter also update the contractions count? (AB)
+    if word_tuple[0] == "not":
         features_dict["negana_067"] += 1
+    if word_tuple[0] == "n't":
+        features_dict["negana_067"] += 1
+        features_dict["contractions_059"] += 1
     elif word_tuple[0] in placelist: ## added some more ideas to the list above (HM)
         features_dict["advplace_004"] += 1
     elif word_tuple[0] in timelist: ## added some more ideas to the list above (HM)
@@ -449,7 +455,7 @@ def analyze_adjective(index, tagged_sentence, features_dict): ## 1. Kyla 2. Raff
         #I think this should work but should double check because it was catching junk at some point (KM)
         features_dict["emphatics_049"] += 1
       
-def analyze_preposition(index, tagged_sentence, features_dict): ## Gustavo
+def analyze_preposition(index, tagged_sentence, features_dict): ## 1. Gustavo 2. ?
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "advsubcause_035", "advsubconc_036", "advsubcond_037", "advsubother_038", "prepositions_039", 
     "conjuncts_045", "hedges_047", "strandprep_061".'''
@@ -559,7 +565,7 @@ def analyze_pronoun(index, tagged_sentence, features_dict): ## 1. Hanna 2.?
     elif word_tuple[0] == "that" and tagged_sentence[index+1][0] == "'s": ## should this be 's or s ? Does the apostrophe get removed? (HM)
         features_dict["prodemons_010"] += 1
 
-def analyze_conjunction(index, tagged_sentence, features_dict): ## 1. Gustavo
+def analyze_conjunction(index, tagged_sentence, features_dict): ## 1. Gustavo 2. ?
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "hedges_047", "coordphras_064", "coordnonp_065".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
@@ -627,7 +633,7 @@ def analyze_determiner(index, tagged_sentence, features_dict): ## 1. Rafaela 2. 
         elif tagged_sentence[index+1][0] in QUAN:
             features_dict["negsyn_066"] += 1
 
-def analyze_wh_word(index, tagged_sentence, features_dict): ## 1. Kyla
+def analyze_wh_word(index, tagged_sentence, features_dict): ## 1. Kyla 2. ?
     # Check: Ft 32 (Biber's way of finding this seems like it could be optimized)
     # Check: Ft 22 (catches unintended phrases)
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
