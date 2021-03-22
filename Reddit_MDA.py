@@ -204,7 +204,7 @@ downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "on
 amplifierlist = ["absolutely", "altogether", "completely", "enormously", "entirely", "extremely", "fully", "greatly", "highly", 
                  "intensely", "perfectly", "strongly", "thoroughly", "totally", "utterly", "very"]
 asktelllist = ["ask", "asked", "asking", "asks", "tell", "telling", "tells", "told"] #this could also be accomplished with .startswith("ask"), .startswith("tell") or == "told" (KM)
-titlelist = ["mr", "ms", "mrs", "prof", "professor", "dr", "sir"] #??????? (KM)
+titlelist = ["mr", "ms", "mrs", "prof", "professor", "dr", "sir"]
 notgerundlist = ["nothing", "everything", "something", "anything", "thing", "things", "string", "strings"]
 
 
@@ -633,43 +633,47 @@ def analyze_determiner(index, tagged_sentence, features_dict): ## 1. Rafaela 2. 
         elif tagged_sentence[index+1][0] in QUAN:
             features_dict["negsyn_066"] += 1
 
-def analyze_wh_word(index, tagged_sentence, features_dict): ## 1. Kyla 2. ?
+def analyze_wh_word(index, tagged_sentence, features_dict): ## 1. Kyla 2. Hanna (still in progress)
     # Check: Ft 32 (Biber's way of finding this seems like it could be optimized)
     # Check: Ft 22 (catches unintended phrases)
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
-    "whquest_013", "thatvcom_021", "thatacom_022", "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032", 
-    "whrepied_033", "sentencere_034".'''
+    "whquest_013", "thatvcom_021", "whrepied_033", "sentencere_034"
+    "thatacom_022",
+    "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
 
-    if word_tuple[0] in WHP: #["who", "whom", "whose", "which"]
+    if word_tuple[0] in WHP: # WHP = ["who", "whom", "whose", "which"]
         if tagged_sentence[index-1][1] == "IN":
             features_dict["whrepied_033"] += 1 #pied-piping relative clauses (e.g., the manner in which he was told) PREP + WHP in relative clauses
 
         if word_tuple[0] == "which" and tagged_sentence[index-1][0] == ",": #34. sentence relatives (e.g., Bob likes fried mangoes, which is the most disgusting thing I've ever heard of) Biber: (These forms are edited by hand to exclude non-restrictive relative clauses.)
-            features_dict["sentencere_034"] += 1 
+            features_dict["sentencere_034"] += 1  ### this only works if the tagger does not delete commas (HM)
 
         elif word_tuple[0] == "that" and tagged_sentence[index-1][1].startswith("J"): #This catches things like I'm sure that's a, there's nothing good that can come out of it, etc. Biber keeps mentioning tone boundaries but I dont understand how you could do that computationally (he refers to it as T#)
             features_dict["thatacom_022"] += 1 #that adjective complements (e.g., I'm glad that you like it) ADJ + (T#) + that (complements across intonation boundaries were edited by hand)
-
+            ## we could try restricting the search further by limiting the element in front of the adjective to a copular (and adverb?), but that is then probably too narrow (HM)
+            ## further problem: this only catches instances in which 'that' is not dropped - what about "I am glad you liked it"? (HM)
+            ## maybe this is one of the features we should leave out? (HM)
 
     #13. direct WH-questions CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)
-    if tagged_sentence[index-1] in punct_final and word in WHO:
+    if tagged_sentence[index-1][1] == "X" and word_tuple[0] in WHO:  # WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", "whichever", "whenever", "whatever", "however"]
         if tagged_sentence[index+1][1] == "MD":
-            featuresdict["whquest_013"] += 1 
-        elif tagged_sentence[index+1][1].startwith("V"):
+            features_dict["whquest_013"] += 1 
+        elif tagged_sentence[index+1][1].startswith("V"):
             if tagged_sentence[index+1][0] in belist or tagged_sentence[index+1][0] in havelist or tagged_sentence[index+1][0] in dolist:
-                featuresdict["whquest_013"] += 1
+                features_dict["whquest_013"] += 1
+        ## I changed this code to look for the first index position instead of sentence-final punctuation, since the tagger will separate the sentences.
     
     #21 that verb complements (e.g., / said that he went) 
     # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions) 
     if tagged_sentence[index][0] == "that":
-        if tagged_sentence[index-1][1].startswith("I") or tagged_sentence[index-1][0] in ["and", "nor", "but", "or", "who"]: #does this first part of this catch Bibers ALL-P?
-            if tagged_sentence[index+1][1].startswith("D") or tagged_sentence[index+1][1].startswith("PR") or tagged_sentence[index+1][0] == "there" or tagged_sentence[index+1][1].startswith("NNP") or tagged_sentence[index+1][1].startswith("NNS") or titlelist in tagged_sentence[index+1][0]:
-                featuresdict["thatvcom_021"] += 1
-    # moved b and c of 21 to analyze_verb
+        if tagged_sentence[index-1][0] in ALLP or tagged_sentence[index-1][0] in ["and", "nor", "but", "or", "who"]:
+            if tagged_sentence[index+1][1].startswith("D") or tagged_sentence[index+1][1].startswith("PR") or tagged_sentence[index+1][0] == "there" or tagged_sentence[index+1][1].startswith("NNP") or tagged_sentence[index+1][1].startswith("NNS") or tagged_sentence[index+1][0] in titlelist:
+                features_dict["thatvcom_021"] += 1
+    # moved b and c of 21 to analyze_verb (because they need to identify certain types of verbs)
     
-        #29. that relative clauses on subject position (e.g., the dog that bit me) N -p (T#) + that + (ADV) + AUX/V {that relatives across intonation boundaries are identified by hand.)
-        #30. that relative clauses on object position (e.g., the dog that I saw) N + (T#) + that + DET / SUBJPRO / POSSPRO / it / ADJ / plural noun/ proper noun / possessive noun / TITLE
+    #29. that relative clauses on subject position (e.g., the dog that bit me) N -p (T#) + that + (ADV) + AUX/V {that relatives across intonation boundaries are identified by hand.)
+    #30. that relative clauses on object position (e.g., the dog that I saw) N + (T#) + that + DET / SUBJPRO / POSSPRO / it / ADJ / plural noun/ proper noun / possessive noun / TITLE
     if tagged_sentence[index-1][1].startswith("NN"):
         if tagged_sentence[index+1][1].startswith("RB") and (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
             features_dict["thatresub_029"] += 1 
