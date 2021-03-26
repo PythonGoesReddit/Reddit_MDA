@@ -26,11 +26,13 @@ import string
 import re
 import string
 import time
+import concurrent.futures
 from datetime import timedelta
 start_time = time.time()
 
 dirname = os.path.dirname(__file__)
-path = os.path.join(dirname, 'sample_data')
+data_folder = os.path.join(dirname, 'sample_data')
+all_files = [os.path.join("sample_data", file) for file in os.listdir(data_folder) if os.path.splitext(file)[1] == ".json"]
 
 # Preprocessing functions
 
@@ -51,52 +53,51 @@ def check_English(text):
             return False
     
 # initialize empty feature dictionary
-def open_reddit_json(folder_path):
+def open_reddit_json(filename):
     '''Takes Reddit json file. Separates each sentence into one dictionary.  
     Simplifies metainfo (retains body, author, link_id, subreddit). 
     Removes deleted and non-English comments. 
     Returns dict of dicts in format {id: {body: str, author: str, link_id: str, sentence_no: int, subreddit: str, features: dict}'''
     errors = 0
-    for filename in os.listdir(folder_path):
-        if os.path.splitext(filename)[1] == ".json": #open file only if extension is .json, else will try to open folders and other random files
-            base = os.path.splitext(filename)[0] #strip the .json extension
-            with open(os.path.join(path, filename), "r", errors="replace") as j:
-                print("Opening file: " + str(filename))
-                prepped_json = {}
-                counter = 0 #counts number of comments, for ID below
-                for line in j:
-                    counter += 1
+    base = os.path.splitext(filename)[0] #strip the .json extension
 
-                    try: 
-                        if json.loads(line.strip())["body"] != "[deleted]" and check_English(json.loads(line.strip())["body"]): #does not consider deleted comments or comments that fail check_English
-                            body = json.loads(line.strip())["body"]
-                            author = json.loads(line.strip())["author"]
-                            link_id = json.loads(line.strip())["link_id"]
-                            subreddit = json.loads(line.strip())["subreddit"]
+    with open(filename, "r", errors="replace") as j:
+        print("Opening file: " + str(filename))
+        prepped_json = {}
+        counter = 0 #counts number of comments, for ID below
+        for line in j:
+            counter += 1
 
-                        sentence_counter = 0
-                        for sentence in nltk.tokenize.sent_tokenize(body): #separates into sentences
-                            sentence_counter +=1 #keep track of which sentence it is (1st, 2nd, etc.)
-                            sentence_dict = {"body": sentence, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}
-                            s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0, 
-                            "prothirdper_008": 0, "proit_009": 0, "prodemons_010": 0, "proindef_011": 0, "pverbdo_012": 0, "whquest_013": 0, "nominalis_014": 0, "gerund_015": 0,
-                            "nouns_016": 0, "passagentl_017": 0, "passby_018": 0, "mainvbe_019": 0, "exthere_020": 0, "thatvcom_021": 0, "thatacom_022": 0, "whclause_023": 0,
-                            "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0, "thatresub_029": 0, "thatreobj_030": 0,
-                            "whresub_031": 0, "whreobj_032": 0, "whrepied_033": 0, "sentencere_034": 0, "advsubcause_035": 0, "advsubconc_036": 0, "advsubcond_037": 0,
-                            "advsubother_038": 0, "prepositions_039": 0, "adjattr_040": 0, "adjpred_041": 0, "adverbs_042": 0, "ttratio_043": 0, "wordlength_044": 0, "conjuncts_045": 0,
-                            "downtoners_046": 0, "hedges_047": 0, "amplifiers_048": 0, "emphatics_049": 0, "discpart_050": 0, "demonstr_051": 0, "modalsposs_052": 0,
-                            "modalsness_053": 0, "modalspred_054": 0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "vseemappear_058": 0, "contractions_059": 0, 
-                            "thatdel_060": 0, "strandprep_061": 0, "vsplitinf_062": 0, "vsplitaux_063": 0, "coordphras_064": 0, "coordnonp_065": 0, "negsyn_066": 0, 
-                            "negana_067": 0, "hashtag_201": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_205": 0,
-                            "question_208": 0, "exclamation_209": 0, "lenchar_210": 0, "lenword_211": 0, "comparatives_212": 0, "superlatives_213": 0}
-                            sentence_dict["features"] = s
-                            prepped_json[str(base + "_" + str(link_id) + "_" + str(sentence_counter))] = sentence_dict #creates a dict within a dict, so that the key (filename, linkid, sentence number) calls the whole dict
+            try: 
+                if json.loads(line.strip())["body"] != "[deleted]" and check_English(json.loads(line.strip())["body"]): #does not consider deleted comments or comments that fail check_English
+                    body = json.loads(line.strip())["body"]
+                    author = json.loads(line.strip())["author"]
+                    link_id = json.loads(line.strip())["link_id"]
+                    subreddit = json.loads(line.strip())["subreddit"]
 
-                    except json.decoder.JSONDecodeError:
-                        errors +=1 #keeps track of how many errors are encountered/lines skipped
+                sentence_counter = 0
+                for sentence in nltk.tokenize.sent_tokenize(body): #separates into sentences
+                    sentence_counter +=1 #keep track of which sentence it is (1st, 2nd, etc.)
+                    sentence_dict = {"body": sentence, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}
+                    s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0, 
+                    "prothirdper_008": 0, "proit_009": 0, "prodemons_010": 0, "proindef_011": 0, "pverbdo_012": 0, "whquest_013": 0, "nominalis_014": 0, "gerund_015": 0,
+                    "nouns_016": 0, "passagentl_017": 0, "passby_018": 0, "mainvbe_019": 0, "exthere_020": 0, "thatvcom_021": 0, "thatacom_022": 0, "whclause_023": 0,
+                    "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0, "thatresub_029": 0, "thatreobj_030": 0,
+                    "whresub_031": 0, "whreobj_032": 0, "whrepied_033": 0, "sentencere_034": 0, "advsubcause_035": 0, "advsubconc_036": 0, "advsubcond_037": 0,
+                    "advsubother_038": 0, "prepositions_039": 0, "adjattr_040": 0, "adjpred_041": 0, "adverbs_042": 0, "ttratio_043": 0, "wordlength_044": 0, "conjuncts_045": 0,
+                    "downtoners_046": 0, "hedges_047": 0, "amplifiers_048": 0, "emphatics_049": 0, "discpart_050": 0, "demonstr_051": 0, "modalsposs_052": 0,
+                    "modalsness_053": 0, "modalspred_054": 0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "vseemappear_058": 0, "contractions_059": 0, 
+                    "thatdel_060": 0, "strandprep_061": 0, "vsplitinf_062": 0, "vsplitaux_063": 0, "coordphras_064": 0, "coordnonp_065": 0, "negsyn_066": 0, 
+                    "negana_067": 0, "hashtag_201": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_205": 0,
+                    "question_208": 0, "exclamation_209": 0, "lenchar_210": 0, "lenword_211": 0, "comparatives_212": 0, "superlatives_213": 0}
+                    sentence_dict["features"] = s
+                    prepped_json[str(base + "_" + str(link_id) + "_" + str(sentence_counter))] = sentence_dict #creates a dict within a dict, so that the key (filename, linkid, sentence number) calls the whole dict
 
-                print("Total lines skipped = " + str(errors))
-            return prepped_json
+            except json.decoder.JSONDecodeError:
+                errors +=1 #keeps track of how many errors are encountered/lines skipped
+
+        print("Total lines skipped = " + str(errors))
+    return prepped_json
 
 
 # Untagged feature extraction functions
@@ -601,7 +602,7 @@ def analyze_conjunction(index, tagged_sentence, features_dict): ## 1. Gustavo 2.
             features_dict["coordnonp_065"] += 1
         elif tagged_sentence[index+1][0] in ["because", "although", "though", "if", "unless",] or tagged_sentence[index+1][0] in otheradvsublist: # added the otheradvsublist for this particular feature (GK)
             features_dict["coordnonp_065"] += 1
-        elif tagged_sentence[index+1][0] : in conjunctslist or tagged_sentence[index+1][0] in conjunctsmultilist: # added the conjunctsmultilist for the this particular feature (GK)
+        elif tagged_sentence[index+1][0] in conjunctslist or tagged_sentence[index+1][0] in conjunctsmultilist: # added the conjunctsmultilist for the this particular feature (GK)
             features_dict["coordnonp_065"] += 1
     #elif word_tuple[0] == "or":
         #if tagged_sentence[index-1][0] == "more" and tagged_sentence[index+1][0] == "less":
@@ -733,14 +734,14 @@ def analyze_particle(index, tagged_sentence, features_dict): ## 1. Hanna
 # CALL FUNCTIONS DOWN HERE
 ## NEEDED: Multiprocessing set up 
 
-preprocessed_file = open_reddit_json(path) #reads in file, separates into sentences, initializes feature dict
+def MDA_analyzer(filepath):
+    preprocessed_file = open_reddit_json(filepath) #reads in file, separates into sentences, initializes feature dict
+    analyze_sentence(preprocessed_file) #updates raw-sentence based counts (i.e. punctuation marks, length)
 
-analyze_sentence(preprocessed_file) #updates raw-sentence based counts (i.e. punctuation marks, length)
-
-for id in preprocessed_file: #loops through all individual sentences in the file one by one
-     sentence_dict = preprocessed_file.get(id) #retrieves entire dictionary and all sub-dicts for the given sentence
-     sentence = sentence_dict["body"] #retrieves sentence only (str)) 
-     features_dict = sentence_dict["features"] #retrieves s for the given sentence
+    for id in preprocessed_file: #loops through all individual sentences in the file one by one
+        sentence_dict = preprocessed_file.get(id) #retrieves entire dictionary and all sub-dicts for the given sentence
+        sentence = sentence_dict["body"] #retrieves sentence only (str)) 
+        features_dict = sentence_dict["features"] #retrieves s for the given sentence
 
 ## UNCOMMENT BELOW TO TEST YOUR OWN SENTENCE
 # practice_sentences = ["This is a practice sentence", "This is another practice sentence", "Another sentence here"]
@@ -758,34 +759,34 @@ for id in preprocessed_file: #loops through all individual sentences in the file
 #                             "negana_067": 0, "hashtag_201": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_205": 0,
 #                             "question_208": 0, "exclamation_209": 0, "lenchar_210": 0, "lenword_211": 0, "comparatives_212": 0, "superlatives_213": 0}
     
-     tagged_sentence = tag_sentence(sentence) #tags sentence, returning list of tuples with (word, pos)
+        tagged_sentence = tag_sentence(sentence) #tags sentence, returning list of tuples with (word, pos)
 
-     for index in range(3, len(tagged_sentence)-3): #based on POS, apply different function
-         current_tag = tagged_sentence[index][1]
-         if current_tag.startswith("V"):
-             analyze_verb(index, tagged_sentence, features_dict)
-         elif current_tag == "MD":
-             analyze_modal(index, tagged_sentence, features_dict)
-         elif current_tag.startswith("N"):
-             analyze_noun(index, tagged_sentence, features_dict)
-         elif current_tag.startswith("RB"):
-             analyze_adverb(index, tagged_sentence,features_dict)
-         elif current_tag.startswith("J"):
-             analyze_adjective(index, tagged_sentence, features_dict)
-         elif current_tag.startswith("I"):
-             analyze_preposition(index, tagged_sentence, features_dict)
-         elif current_tag.startswith("W"):
-             analyze_wh_word(index, tagged_sentence, features_dict)
-         elif current_tag.startswith("CC"):
-             analyze_conjunction(index, tagged_sentence, features_dict)
-         elif current_tag.startswith("RP"):
-             analyze_particle(index, tagged_sentence, features_dict)
-         elif current_tag.startswith("DT"):
-             analyze_determiner(index, tagged_sentence, features_dict)
-         elif current_tag.startswith("PR"):
-             analyze_pronoun(index, tagged_sentence, features_dict)
-         elif current_tag.startswith("EX"):
-             analyze_there(index, tagged_sentence, features_dict)
+        for index in range(3, len(tagged_sentence)-3): #based on POS, apply different function
+            current_tag = tagged_sentence[index][1]
+            if current_tag.startswith("V"):
+                analyze_verb(index, tagged_sentence, features_dict)
+            elif current_tag == "MD":
+                analyze_modal(index, tagged_sentence, features_dict)
+            elif current_tag.startswith("N"):
+                analyze_noun(index, tagged_sentence, features_dict)
+            elif current_tag.startswith("RB"):
+                analyze_adverb(index, tagged_sentence,features_dict)
+            elif current_tag.startswith("J"):
+                analyze_adjective(index, tagged_sentence, features_dict)
+            elif current_tag.startswith("I"):
+                analyze_preposition(index, tagged_sentence, features_dict)
+            elif current_tag.startswith("W"):
+                analyze_wh_word(index, tagged_sentence, features_dict)
+            elif current_tag.startswith("CC"):
+                analyze_conjunction(index, tagged_sentence, features_dict)
+            elif current_tag.startswith("RP"):
+                analyze_particle(index, tagged_sentence, features_dict)
+            elif current_tag.startswith("DT"):
+                analyze_determiner(index, tagged_sentence, features_dict)
+            elif current_tag.startswith("PR"):
+                analyze_pronoun(index, tagged_sentence, features_dict)
+            elif current_tag.startswith("EX"):
+                analyze_there(index, tagged_sentence, features_dict)
     # at some point the order of these elif-statements could be updated using freq counts from our data
 
     #UNCOMMENT BELOW TO PRINT OUTPUT FROM PRACTICE SENTENCES -- change features dict to desired feature
@@ -795,7 +796,11 @@ for id in preprocessed_file: #loops through all individual sentences in the file
     # nltk.help.upenn_tagset('NNS')
     # nltk.help.upenn_tagset()
 
+# with concurrent.futures.Executor() as executor:
+#     executor.map(MDA_analyzer, all_files)
 
+for file in all_files:
+    MDA_analyzer(file)
 
 ## Add output functions here at end
 
