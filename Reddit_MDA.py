@@ -214,21 +214,27 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 #POS-functions
 def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
-    '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: "vpast_001", "vperfect_002", "vpresent_003", 
+    '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: "vpast_001", "vpresperfect_002a", "vpastperfect_002b", "vpresent_003", 
     "pverbdo_012", "passagentl_017", "passby_018", "mainvbe_019", "whclause_023", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
     "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
     "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''
-    ## I think it would make sense to divide this verb-function into several smaller functions (depending on the final tag inventory)
-    ## our initial goal was to keep the computational effort low by only searching for a lower number of features depending on the tag, with this function
-    ## we are currently searching for a lot of stuff for a word class that will appear fairly often. (HM)    
+    ## already checked: "vpast_001", "vinfinitive_024", "vimperative_205", "vpresentpart_025", 
+    ## still needs checking: "vpresperfect_002a", "vpastperfect_002b", "vpresent_003", "pverbdo_012", "passagentl_017", "passby_018", "mainvbe_019", "whclause_023", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
+    ## "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", "thatdel_060", "vsplitinf_062", "vsplitaux_063"
     word_tuple = tagged_sentence[index]
     if word_tuple[1] == "VBD":
         features_dict["vpast_001"] += 1
     elif word_tuple[1] == "VB":
-        features_dict["vinfinitive_024"] += 1 # Note that "VB" - at least in the GUM data - is also used for imperative forms
+        if tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] == ",": ## counts base forms as imperatives if they are sentence-initial (or behind a comma) and as infinitives everywhere else, which is not ideal but a start (HM)
+            features_dict["vimperative_205"] += 1
+        else: 
+            features_dict["vinfinitive_024"] += 1
     elif word_tuple[1] == "VBG":
-        if (tagged_sentence[index-1][0] == "X" or tagged_sentence[index-1][0] in ".!?;:,-") and tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]: #gerund or present participle.. is this ok? or do we have to separate these # AB: In Biber, this is in fact only for present participial clauses, a fairly narrow range of ING-forms. I implement it accordingly and would suggest a separate class of features for progressives (which Biber really does not seem to have considered in the 80s)
+        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP) and tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]: #gerund or present participle.. is this ok? or do we have to separate these 
+            # AB: In Biber, this is in fact only for present participial clauses, a fairly narrow range of ING-forms. I implement it accordingly and would suggest a separate class of features for progressives (which Biber really does not seem to have considered in the 80s)
+            # HM: I agree that it would be good to have a separate count for progressives, but how can we implement this given that our tag-set only has one tag for all ING-forms? Preceded by BE?
             features_dict["vpresentpart_025"] += 1
+            
         elif tagged_sentence[index-1][1] == "NN":
             features_dict["vpresentwhiz_028"] += 1 # Iffy, because catches things like "with prices going up", which is not a case of WHIZ deletion (AB)
     elif word_tuple[1] == "VBN":
@@ -242,7 +248,7 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
         features_dict["vseemappear_058"] += 1
     if tagged_sentence[index + 1][1] == "WDT" and tagged_sentence[index + 1][0] != "that" and tagged_sentence[index + 2][1] == "PRP":
         features_dict["whclause_023"] += 1
-    #Toggled out temporarily -- index error, out of range (KM)
+
     if word_tuple[0] in ["had", "'d"]: # Centering the lookup for perfect forms on the HAVE means counting only once for, e.g. "has considered, debated, but ultimately rejected a different search strategy". Let's discuss whether this is desirable. (AB)
         move_on = True
         insert_adv = False
@@ -340,29 +346,17 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
     if word_tuple[0].startswith("'"):
         features_dict["contractions_059"] += 1
 
-    #if word_tuple in private/public/suasive: Leaving this undefined until we have decided about lemmatization, because it will be so much easier with lemma info.
+    #if word_tuple in private/public/suasive (for feature 55, 56, 57): 
+    # Leaving this undefined until we have decided about lemmatization, because it will be so much easier with lemma info.
     #     Checking this individual classes will be easy enough
+    # -> also needed for features 23 and 60
     # KM -> we also need this for feature 21. part a is down in analye_wh_word but parts b and c need to identify public/private/suasive verbs -- can we add that in this part when theyre identified?:
     # (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/TJf/anrf){that-c\a\ises as complements to verbs which are not included in the above verb classes are not counted - see Quirk et al. 1985:1179ff.) 
-# (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)(This algorithm allows an intervening prepositional phrase between a verb and its complement.)
+    # (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)(This algorithm allows an intervening prepositional phrase between a verb and its complement.)
     #     Biber also checks for that-deletion, which is probably bad in terms of precision and recall. I currently have strong reservations against implementing his search, but have not come up with a better one yet. (AB)
         
-    #"vperfect_002" -> how many places should it lookahead for a form of have?
-    #if word_tuple[0].startswith():
-    # 55, 56, 57 -> 23, 60
-        
-    # still missing: 
-    # "vpastwhiz_027",
-    # 27. past participial WHIZ deletion relatives (e.g., the solution produced by this process) N/QUANPRO + VBN + PREP/BE/ADV
-    #
-    #  "vpresentwhiz_028",
-    #present participial WHIZ deletion relatives (e.g., the event causing this decline is . . .)N + VBG (these forms were edited by hand)
-    #
-    # "vpublic_055", "vprivate_056", "vsuasive_057", "contractions_059", "thatdel_060", "vsplitinf_062", "vsplitaux_063"
+    # still missing: "vpublic_055", "vprivate_056", "vsuasive_057", "thatdel_060", "vsplitinf_062"
     
-    # still missing: vimperative_205". There is no separate tag for this in our tagset.
-    # Perhaps imperatives can be identified by looking for bare verbs at the very beginning of sentences (and following commas, provided there is no preceding verb in the sentence)?
-
 
 def analyze_modal(index, tagged_sentence, features_dict): ## 1. Axel 2. Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
