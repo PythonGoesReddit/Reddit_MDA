@@ -200,6 +200,7 @@ WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", 
        "whenever", "whatever", "however"] # can this be accomplished with tag WDT? (KM) # Tag WDT comprises Biber's WHP and WHO plus relativizer "that" afaict. (AB)
 discpart = ["well", "now", "anyway", "anyhow", "anyways"]
 QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
+QUANPRO = ["everybody", "somebody", "anybody", "everyone", "someone", "anyone", "everything", "something", "anything"]
 ALLP = [".", "!", "?", ":", ";", ","]  # here, Biber also includes the long dash -- , but I am unsure how this would be rendered 
 downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "only", "partially", "partly", "practically", "scarcely", "slightly", "somewhat"]
                 # some others that could be included: a little, a bit, a tad (HM)
@@ -218,9 +219,10 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
     "pverbdo_012", "passagentl_017", "passby_018", "mainvbe_019", "whclause_023", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
     "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
     "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''
-    ## already checked: "vpast_001", "vinfinitive_024", "vimperative_205", "vpresentpart_025", 
-    ## still needs checking: "vpresperfect_002a", "vpastperfect_002b", "vpresent_003", "pverbdo_012", "passagentl_017", "passby_018", "mainvbe_019", "whclause_023", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
-    ## "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", "thatdel_060", "vsplitinf_062", "vsplitaux_063"
+    ## already checked: "vpast_001", "vinfinitive_024", "vimperative_205", "vpresentpart_025", "vpresentwhiz_028", "vpastpart_026", "vpastwhiz_027", "vpresent_003", 
+    ## "vseemappear_058", 
+    ## still needs checking: "vpresperfect_002a", "vpastperfect_002b", "pverbdo_012", "passagentl_017", "passby_018", "mainvbe_019", "whclause_023", 
+    ## "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "contractions_059", "thatdel_060", "vsplitinf_062", "vsplitaux_063"
     word_tuple = tagged_sentence[index]
     if word_tuple[1] == "VBD":
         features_dict["vpast_001"] += 1
@@ -234,18 +236,24 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
             # AB: In Biber, this is in fact only for present participial clauses, a fairly narrow range of ING-forms. I implement it accordingly and would suggest a separate class of features for progressives (which Biber really does not seem to have considered in the 80s)
             # HM: I agree that it would be good to have a separate count for progressives, but how can we implement this given that our tag-set only has one tag for all ING-forms? Preceded by BE?
             features_dict["vpresentpart_025"] += 1
-            
         elif tagged_sentence[index-1][1] == "NN":
-            features_dict["vpresentwhiz_028"] += 1 # Iffy, because catches things like "with prices going up", which is not a case of WHIZ deletion (AB)
+            features_dict["vpresentwhiz_028"] += 1 
+            # Iffy, because catches things like "with prices going up", which is not a case of WHIZ deletion (AB)
+            # I agree, we might have to drop this one. Also catches stuff like "or is the passage saying something different" (HM)
     elif word_tuple[1] == "VBN":
-        if (tagged_sentence[index-1][0] == "X" or tagged_sentence[index-1][0] in ".!?;:,-") and tagged_sentence[index+1][1] in ["IN", "RB", "TO"]: # Again, in Biber this is present participial clauses only. Biber (1988:233) notes for both that "these forms were edited by hand." So we may consider scrapping them, if automated accuracy is not sufficient.
-            features_dict["vpastpart_026"] += 1
-        elif tagged_sentence[index-1][1] in ["NN", "NNP", "CD"] and (tagged_sentence[index+1][1] in ["IN", "RBR", "RB", "RBS"] or tagged_sentence[index+1][0] in belist):
-            features_dict["vpastwhiz_027"] += 1 # This reproduces the search strategy from Biber, but strikes me as extremely iffy. Needs further quality control.
+        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
+            if tagged_sentence[index+1][1] in ["IN", "RB", "TO"]: # Again, in Biber this is present participial clauses only. Biber (1988:233) notes for both that "these forms were edited by hand." So we may consider scrapping them, if automated accuracy is not sufficient.
+                features_dict["vpastpart_026"] += 1 ## this one seems accurate enough to me (HM)
+        elif tagged_sentence[index-1][1] in ["NN", "NNP"] or tagged_sentence[index-1][0] in QUANPRO:
+            if tagged_sentence[index+1][1] in ["IN", "RBR", "RB", "RBS"] or tagged_sentence[index+1][0] in belist:
+                features_dict["vpastwhiz_027"] += 1 
+                # This reproduces the search strategy from Biber, but strikes me as extremely iffy. Needs further quality control.
+                # I can't check this right now due to tagger problems, revisit later! (HM)
     elif word_tuple[1] in ["VBP","VBZ"]:
         features_dict["vpresent_003"] += 1
     if word_tuple[0].startswith("seem") or word_tuple[0].startswith("appear"):
         features_dict["vseemappear_058"] += 1
+        
     if tagged_sentence[index + 1][1] == "WDT" and tagged_sentence[index + 1][0] != "that" and tagged_sentence[index + 2][1] == "PRP":
         features_dict["whclause_023"] += 1
 
