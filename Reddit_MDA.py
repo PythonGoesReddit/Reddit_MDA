@@ -220,9 +220,9 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
     "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
     "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''
     ## already checked: "vpast_001", "vinfinitive_024", "vimperative_205", "vpresentpart_025", "vpresentwhiz_028", "vpastpart_026", "vpastwhiz_027", "vpresent_003", 
-    ## "vseemappear_058", 
-    ## still needs checking: "vpresperfect_002a", "vpastperfect_002b", "pverbdo_012", "passagentl_017", "passby_018", "mainvbe_019", "whclause_023", 
-    ## "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "contractions_059", "thatdel_060", "vsplitinf_062", "vsplitaux_063"
+    ##          "vseemappear_058", "vpastperfect_002b", "vpresperfect_002a", "mainvbe_019", "contractions_059", 
+    ## still needs checking: "pverbdo_012", "passagentl_017", "passby_018", "whclause_023", 
+    ##          "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "thatdel_060", "vsplitinf_062", "vsplitaux_063"
     word_tuple = tagged_sentence[index]
     if word_tuple[1] == "VBD":
         features_dict["vpast_001"] += 1
@@ -254,10 +254,9 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
     if word_tuple[0].startswith("seem") or word_tuple[0].startswith("appear"):
         features_dict["vseemappear_058"] += 1
         
-    if tagged_sentence[index + 1][1] == "WDT" and tagged_sentence[index + 1][0] != "that" and tagged_sentence[index + 2][1] == "PRP":
-        features_dict["whclause_023"] += 1
-
-    if word_tuple[0] in ["had", "'d"]: # Centering the lookup for perfect forms on the HAVE means counting only once for, e.g. "has considered, debated, but ultimately rejected a different search strategy". Let's discuss whether this is desirable. (AB)
+    if word_tuple[0] in ["had", "'d"]: 
+        # Centering the lookup for perfect forms on the HAVE means counting only once for, e.g. "has considered, debated, but ultimately rejected a different search strategy". Let's discuss whether this is desirable. (AB)
+        # I would say that this is acceptable. Such concatenations are probably very marginal.
         move_on = True
         insert_adv = False
         x = index
@@ -272,7 +271,13 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
                 insert_adv = True
             elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P") or tagged_sentence[x][1].startswith("X"): # Currently excludes questions, in which the subject is between HAVE and the past participle. (AB)
                 move_on =  False 
-    elif word_tuple[0] in ["have", "'ve", "has"]: # "'s" excluded because I see no reliable way to separate between IS and HAS contractions - unless we lemmatize (AB)
+                ## this actually exlcudes Biber's other condition for feature 2: to also count questions he includes HAVE + N/PRO + VBN (HM)
+                ## We should discuss whether we want that or not.
+
+    elif word_tuple[0] in ["have", "'ve", "has"]: 
+        # "'s" excluded because I see no reliable way to separate between IS and HAS contractions - unless we lemmatize (AB)
+        # I thought we said that lemmatisation probably makes sense to also look for the public/private/suasive verbs below? (HM)
+        # So if we do it anyway we can also insert it here later on.
         move_on = True
         insert_adv = False
         x = index
@@ -285,10 +290,14 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
                     features_dict["vsplitaux_063"] += 1
             elif tagged_sentence[x][1].startswith("R") and tagged_sentence[x][0] not in ["n't", "not"]:
                 insert_adv = True
-            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P") or tagged_sentence[x][1].startswith("X"): # Currently excludes questions, in which the subject is between HAVE and the past participle. (AB)
+            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P") or tagged_sentence[x][1].startswith("X"): 
+                # Currently excludes questions, in which the subject is between HAVE and the past participle. (AB)
+                # see comment above on vpastperfect_002b (HM)
                 move_on =  False
+                
     elif word_tuple[0] in belist: # Something that is very obviously missing from Biber's list and also our features right now is progressive. Here would be the place to include them.
         if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]: # Biber also includes prepositions, but this seems to me to allow for too many false positives (AB)
+            ## Why doesn't Biber also include adverbs here? "I AM REALLY interested"/"He is truly a liar" are also cases of BE as main verb.
             features_dict["mainvbe_019"] += 1
         else:
             move_on = True
@@ -354,7 +363,16 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
     if word_tuple[0].startswith("'"):
         features_dict["contractions_059"] += 1
 
+
+
     #if word_tuple in private/public/suasive (for feature 55, 56, 57): 
+    ## also here: include feature 23:
+    if tagged_sentence[index + 1][1] == "WDT" and tagged_sentence[index + 1][0] != "that" and tagged_sentence[index + 2][1] == "PRP":
+        features_dict["whclause_023"] += 1 
+        ## this is different from and a lot wider than Biber's definition (HM)
+        ## Biber: Publich/private/suasive verb + WHP/WHO + xxx (xxx not AUX to exclude WH-questions), e.g. "I believed what he told me"
+  
+
     # Leaving this undefined until we have decided about lemmatization, because it will be so much easier with lemma info.
     #     Checking this individual classes will be easy enough
     # -> also needed for features 23 and 60
@@ -376,10 +394,8 @@ def analyze_modal(index, tagged_sentence, features_dict): ## 1. Axel 2. Hanna
     elif word_tuple[0] in ["ought","should","must"]:
         features_dict["modalsness_053"] += 1
     elif word_tuple[0] in ["will","would","shall","'ll","'d"]: 
-        ## right now our tagger does not remove the apostrophes before the clitics - does the new tagger do so as well?
-        ## otherwise they would have to be removed from these strings
         features_dict["modalspred_054"] += 1
-    if word_tuple[0].startswith("'"): ## same question about apostrophe applies here
+    if word_tuple[0].startswith("'"): ## the tagger will not remove apostrophes!
         features_dict["contractions_059"] += 1
         
     move_on = True
