@@ -200,6 +200,7 @@ WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", 
        "whenever", "whatever", "however"] # can this be accomplished with tag WDT? (KM) # Tag WDT comprises Biber's WHP and WHO plus relativizer "that" afaict. (AB)
 discpart = ["well", "now", "anyway", "anyhow", "anyways"]
 QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
+QUANPRO = ["everybody", "somebody", "anybody", "everyone", "someone", "anyone", "everything", "something", "anything"]
 ALLP = [".", "!", "?", ":", ";", ","]  # here, Biber also includes the long dash -- , but I am unsure how this would be rendered 
 downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "only", "partially", "partly", "practically", "scarcely", "slightly", "somewhat"]
                 # some others that could be included: a little, a bit, a tad (HM)
@@ -213,37 +214,49 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 
 #POS-functions
-def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. ?
-    '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: "vpast_001", "vperfect_002", "vpresent_003", 
+def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
+    '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: "vpast_001", "vpresperfect_002a", "vpastperfect_002b", "vpresent_003", 
     "pverbdo_012", "passagentl_017", "passby_018", "mainvbe_019", "whclause_023", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
     "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
     "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''
-    ## I think it would make sense to divide this verb-function into several smaller functions (depending on the final tag inventory)
-    ## our initial goal was to keep the computational effort low by only searching for a lower number of features depending on the tag, with this function
-    ## we are currently searching for a lot of stuff for a word class that will appear fairly often. (HM)    
+    ## already checked: "vpast_001", "vinfinitive_024", "vimperative_205", "vpresentpart_025", "vpresentwhiz_028", "vpastpart_026", "vpastwhiz_027", "vpresent_003", 
+    ##          "vseemappear_058", "vpastperfect_002b", "vpresperfect_002a", "mainvbe_019", "contractions_059", 
+    ## still needs checking: "pverbdo_012", "passagentl_017", "passby_018", "whclause_023", 
+    ##          "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "thatdel_060", "vsplitinf_062", "vsplitaux_063"
     word_tuple = tagged_sentence[index]
     if word_tuple[1] == "VBD":
         features_dict["vpast_001"] += 1
     elif word_tuple[1] == "VB":
-        features_dict["vinfinitive_024"] += 1 # Note that "VB" - at least in the GUM data - is also used for imperative forms
+        if tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] == ",": ## counts base forms as imperatives if they are sentence-initial (or behind a comma) and as infinitives everywhere else, which is not ideal but a start (HM)
+            features_dict["vimperative_205"] += 1
+        else: 
+            features_dict["vinfinitive_024"] += 1
     elif word_tuple[1] == "VBG":
-        if (tagged_sentence[index-1][0] == "X" or tagged_sentence[index-1][0] in ".!?;:,-") and tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]: #gerund or present participle.. is this ok? or do we have to separate these # AB: In Biber, this is in fact only for present participial clauses, a fairly narrow range of ING-forms. I implement it accordingly and would suggest a separate class of features for progressives (which Biber really does not seem to have considered in the 80s)
+        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP) and tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]: #gerund or present participle.. is this ok? or do we have to separate these 
+            # AB: In Biber, this is in fact only for present participial clauses, a fairly narrow range of ING-forms. I implement it accordingly and would suggest a separate class of features for progressives (which Biber really does not seem to have considered in the 80s)
+            # HM: I agree that it would be good to have a separate count for progressives, but how can we implement this given that our tag-set only has one tag for all ING-forms? Preceded by BE?
             features_dict["vpresentpart_025"] += 1
         elif tagged_sentence[index-1][1] == "NN":
-            features_dict["vpresentwhiz_028"] += 1 # Iffy, because catches things like "with prices going up", which is not a case of WHIZ deletion (AB)
+            features_dict["vpresentwhiz_028"] += 1 
+            # Iffy, because catches things like "with prices going up", which is not a case of WHIZ deletion (AB)
+            # I agree, we might have to drop this one. Also catches stuff like "or is the passage saying something different" (HM)
     elif word_tuple[1] == "VBN":
-        if (tagged_sentence[index-1][0] == "X" or tagged_sentence[index-1][0] in ".!?;:,-") and tagged_sentence[index+1][1] in ["IN", "RB", "TO"]: # Again, in Biber this is present participial clauses only. Biber (1988:233) notes for both that "these forms were edited by hand." So we may consider scrapping them, if automated accuracy is not sufficient.
-            features_dict["vpastpart_026"] += 1
-        elif tagged_sentence[index-1][1] in ["NN", "NNP", "CD"] and (tagged_sentence[index+1][1] in ["IN", "RBR", "RB", "RBS"] or tagged_sentence[index+1][0] in belist):
-            features_dict["vpastwhiz_027"] += 1 # This reproduces the search strategy from Biber, but strikes me as extremely iffy. Needs further quality control.
+        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
+            if tagged_sentence[index+1][1] in ["IN", "RB", "TO"]: # Again, in Biber this is present participial clauses only. Biber (1988:233) notes for both that "these forms were edited by hand." So we may consider scrapping them, if automated accuracy is not sufficient.
+                features_dict["vpastpart_026"] += 1 ## this one seems accurate enough to me (HM)
+        elif tagged_sentence[index-1][1] in ["NN", "NNP"] or tagged_sentence[index-1][0] in QUANPRO:
+            if tagged_sentence[index+1][1] in ["IN", "RBR", "RB", "RBS"] or tagged_sentence[index+1][0] in belist:
+                features_dict["vpastwhiz_027"] += 1 
+                # This reproduces the search strategy from Biber, but strikes me as extremely iffy. Needs further quality control.
+                # I can't check this right now due to tagger problems, revisit later! (HM)
     elif word_tuple[1] in ["VBP","VBZ"]:
         features_dict["vpresent_003"] += 1
     if word_tuple[0].startswith("seem") or word_tuple[0].startswith("appear"):
         features_dict["vseemappear_058"] += 1
-    if tagged_sentence[index + 1][1] == "WDT" and tagged_sentence[index + 1][0] != "that" and tagged_sentence[index + 2][1] == "PRP":
-        features_dict["whclause_023"] += 1
-    #Toggled out temporarily -- index error, out of range (KM)
-    if word_tuple[0] in ["had", "'d"]: # Centering the lookup for perfect forms on the HAVE means counting only once for, e.g. "has considered, debated, but ultimately rejected a different search strategy". Let's discuss whether this is desirable. (AB)
+        
+    if word_tuple[0] in ["had", "'d"]: 
+        # Centering the lookup for perfect forms on the HAVE means counting only once for, e.g. "has considered, debated, but ultimately rejected a different search strategy". Let's discuss whether this is desirable. (AB)
+        # I would say that this is acceptable. Such concatenations are probably very marginal.
         move_on = True
         insert_adv = False
         x = index
@@ -258,7 +271,13 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. ?
                 insert_adv = True
             elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P") or tagged_sentence[x][1].startswith("X"): # Currently excludes questions, in which the subject is between HAVE and the past participle. (AB)
                 move_on =  False 
-    elif word_tuple[0] in ["have", "'ve", "has"]: # "'s" excluded because I see no reliable way to separate between IS and HAS contractions - unless we lemmatize (AB)
+                ## this actually exlcudes Biber's other condition for feature 2: to also count questions he includes HAVE + N/PRO + VBN (HM)
+                ## We should discuss whether we want that or not.
+
+    elif word_tuple[0] in ["have", "'ve", "has"]: 
+        # "'s" excluded because I see no reliable way to separate between IS and HAS contractions - unless we lemmatize (AB)
+        # I thought we said that lemmatisation probably makes sense to also look for the public/private/suasive verbs below? (HM)
+        # So if we do it anyway we can also insert it here later on.
         move_on = True
         insert_adv = False
         x = index
@@ -271,10 +290,14 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. ?
                     features_dict["vsplitaux_063"] += 1
             elif tagged_sentence[x][1].startswith("R") and tagged_sentence[x][0] not in ["n't", "not"]:
                 insert_adv = True
-            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P") or tagged_sentence[x][1].startswith("X"): # Currently excludes questions, in which the subject is between HAVE and the past participle. (AB)
+            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P") or tagged_sentence[x][1].startswith("X"): 
+                # Currently excludes questions, in which the subject is between HAVE and the past participle. (AB)
+                # see comment above on vpastperfect_002b (HM)
                 move_on =  False
+                
     elif word_tuple[0] in belist: # Something that is very obviously missing from Biber's list and also our features right now is progressive. Here would be the place to include them.
         if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]: # Biber also includes prepositions, but this seems to me to allow for too many false positives (AB)
+            ## Why doesn't Biber also include adverbs here? "I AM REALLY interested"/"He is truly a liar" are also cases of BE as main verb.
             features_dict["mainvbe_019"] += 1
         else:
             move_on = True
@@ -340,29 +363,26 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. ?
     if word_tuple[0].startswith("'"):
         features_dict["contractions_059"] += 1
 
-    #if word_tuple in private/public/suasive: Leaving this undefined until we have decided about lemmatization, because it will be so much easier with lemma info.
+
+
+    #if word_tuple in private/public/suasive (for feature 55, 56, 57): 
+    ## also here: include feature 23:
+    if tagged_sentence[index + 1][1] == "WDT" and tagged_sentence[index + 1][0] != "that" and tagged_sentence[index + 2][1] == "PRP":
+        features_dict["whclause_023"] += 1 
+        ## this is different from and a lot wider than Biber's definition (HM)
+        ## Biber: Publich/private/suasive verb + WHP/WHO + xxx (xxx not AUX to exclude WH-questions), e.g. "I believed what he told me"
+  
+
+    # Leaving this undefined until we have decided about lemmatization, because it will be so much easier with lemma info.
     #     Checking this individual classes will be easy enough
+    # -> also needed for features 23 and 60
     # KM -> we also need this for feature 21. part a is down in analye_wh_word but parts b and c need to identify public/private/suasive verbs -- can we add that in this part when theyre identified?:
     # (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/TJf/anrf){that-c\a\ises as complements to verbs which are not included in the above verb classes are not counted - see Quirk et al. 1985:1179ff.) 
-# (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)(This algorithm allows an intervening prepositional phrase between a verb and its complement.)
+    # (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)(This algorithm allows an intervening prepositional phrase between a verb and its complement.)
     #     Biber also checks for that-deletion, which is probably bad in terms of precision and recall. I currently have strong reservations against implementing his search, but have not come up with a better one yet. (AB)
         
-    #"vperfect_002" -> how many places should it lookahead for a form of have?
-    #if word_tuple[0].startswith():
-    # 55, 56, 57 -> 23, 60
-        
-    # still missing: 
-    # "vpastwhiz_027",
-    # 27. past participial WHIZ deletion relatives (e.g., the solution produced by this process) N/QUANPRO + VBN + PREP/BE/ADV
-    #
-    #  "vpresentwhiz_028",
-    #present participial WHIZ deletion relatives (e.g., the event causing this decline is . . .)N + VBG (these forms were edited by hand)
-    #
-    # "vpublic_055", "vprivate_056", "vsuasive_057", "contractions_059", "thatdel_060", "vsplitinf_062", "vsplitaux_063"
+    # still missing: "vpublic_055", "vprivate_056", "vsuasive_057", "thatdel_060", "vsplitinf_062"
     
-    # still missing: vimperative_205". There is no separate tag for this in our tagset.
-    # Perhaps imperatives can be identified by looking for bare verbs at the very beginning of sentences (and following commas, provided there is no preceding verb in the sentence)?
-
 
 def analyze_modal(index, tagged_sentence, features_dict): ## 1. Axel 2. Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
@@ -374,10 +394,8 @@ def analyze_modal(index, tagged_sentence, features_dict): ## 1. Axel 2. Hanna
     elif word_tuple[0] in ["ought","should","must"]:
         features_dict["modalsness_053"] += 1
     elif word_tuple[0] in ["will","would","shall","'ll","'d"]: 
-        ## right now our tagger does not remove the apostrophes before the clitics - does the new tagger do so as well?
-        ## otherwise they would have to be removed from these strings
         features_dict["modalspred_054"] += 1
-    if word_tuple[0].startswith("'"): ## same question about apostrophe applies here
+    if word_tuple[0].startswith("'"): ## the tagger will not remove apostrophes!
         features_dict["contractions_059"] += 1
         
     move_on = True
@@ -540,7 +558,7 @@ def analyze_noun(index, tagged_sentence, features_dict): ## 1. Rafaela 2. Hanna
     else: 
         features_dict["nouns_016"] += 1
         
-def analyze_pronoun(index, tagged_sentence, features_dict): ## 1. Hanna 2.?
+def analyze_pronoun(index, tagged_sentence, features_dict): ## 1. Hanna 2. Gustavo
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "profirpers_006", "prosecpers_007", "prothirper_008", "proit_009", "prodemons_010", "proindef_011".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
@@ -569,7 +587,7 @@ def analyze_pronoun(index, tagged_sentence, features_dict): ## 1. Hanna 2.?
     elif word_tuple[0] == "that" and tagged_sentence[index+1][0] == "'s": ## should this be 's or s ? Does the apostrophe get removed? (HM)
         features_dict["prodemons_010"] += 1
 
-def analyze_conjunction(index, tagged_sentence, features_dict): ## 1. Gustavo 2. ?
+def analyze_conjunction(index, tagged_sentence, features_dict): ## 1. Gustavo 2. Raffaela
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "hedges_047", "coordphras_064", "coordnonp_065".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
@@ -637,36 +655,15 @@ def analyze_determiner(index, tagged_sentence, features_dict): ## 1. Rafaela 2. 
         elif tagged_sentence[index+1][0] in QUAN:
             features_dict["negsyn_066"] += 1
 
-def analyze_wh_word(index, tagged_sentence, features_dict): ## 1. Kyla 2. Hanna (still in progress)
+def analyze_wh_word(index, tagged_sentence, features_dict): ## 1. Kyla 2. Hanna
     # Check: Ft 32 (Biber's way of finding this seems like it could be optimized)
     # Check: Ft 22 (catches unintended phrases)
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
-    "whquest_013", "thatvcom_021", "whrepied_033", "sentencere_034"
-    "thatacom_022",
-    "thatresub_029", "thatreobj_030", "whresub_031", "whreobj_032".'''
+    "whquest_013", "thatvcom_021", "thatacom_022", "whrepied_033", "sentencere_034", "thatresub_029", "thatreobj_030", 
+    "whresub_031", "whreobj_032".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-
-    if word_tuple[0] in WHP: # WHP = ["who", "whom", "whose", "which"]
-        if tagged_sentence[index-1][1] == "IN":
-            features_dict["whrepied_033"] += 1 #pied-piping relative clauses (e.g., the manner in which he was told) PREP + WHP in relative clauses
-
-        if word_tuple[0] == "which" and tagged_sentence[index-1][0] == ",": #34. sentence relatives (e.g., Bob likes fried mangoes, which is the most disgusting thing I've ever heard of) Biber: (These forms are edited by hand to exclude non-restrictive relative clauses.)
-            features_dict["sentencere_034"] += 1  ### this only works if the tagger does not delete commas (HM)
-
-        elif word_tuple[0] == "that" and tagged_sentence[index-1][1].startswith("J"): #This catches things like I'm sure that's a, there's nothing good that can come out of it, etc. Biber keeps mentioning tone boundaries but I dont understand how you could do that computationally (he refers to it as T#)
-            features_dict["thatacom_022"] += 1 #that adjective complements (e.g., I'm glad that you like it) ADJ + (T#) + that (complements across intonation boundaries were edited by hand)
-            ## we could try restricting the search further by limiting the element in front of the adjective to a copular (and adverb?), but that is then probably too narrow (HM)
-            ## further problem: this only catches instances in which 'that' is not dropped - what about "I am glad you liked it"? (HM)
-            ## maybe this is one of the features we should leave out? (HM)
-
-    #13. direct WH-questions CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)
-    if tagged_sentence[index-1][1] == "X" and word_tuple[0] in WHO:  # WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", "whichever", "whenever", "whatever", "however"]
-        if tagged_sentence[index+1][1] == "MD":
-            features_dict["whquest_013"] += 1 
-        elif tagged_sentence[index+1][1].startswith("V"):
-            if tagged_sentence[index+1][0] in belist or tagged_sentence[index+1][0] in havelist or tagged_sentence[index+1][0] in dolist:
-                features_dict["whquest_013"] += 1
-        ## I changed this code to look for the first index position instead of sentence-final punctuation, since the tagger will separate the sentences.
+    ## I changed the structure of the function so that we first distinguish between 'that' and all other items
+    ## and then between WHO and WHP-items. I hope this makes sense?
     
     #21 that verb complements (e.g., / said that he went) 
     # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions) 
@@ -675,37 +672,61 @@ def analyze_wh_word(index, tagged_sentence, features_dict): ## 1. Kyla 2. Hanna 
             if tagged_sentence[index+1][1].startswith("D") or tagged_sentence[index+1][1].startswith("PR") or tagged_sentence[index+1][0] == "there" or tagged_sentence[index+1][1].startswith("NNP") or tagged_sentence[index+1][1].startswith("NNS") or tagged_sentence[index+1][0] in titlelist:
                 features_dict["thatvcom_021"] += 1
     # moved b and c of 21 to analyze_verb (because they need to identify certain types of verbs)
-    
+
     #29. that relative clauses on subject position (e.g., the dog that bit me) N -p (T#) + that + (ADV) + AUX/V {that relatives across intonation boundaries are identified by hand.)
     #30. that relative clauses on object position (e.g., the dog that I saw) N + (T#) + that + DET / SUBJPRO / POSSPRO / it / ADJ / plural noun/ proper noun / possessive noun / TITLE
-    if tagged_sentence[index-1][1].startswith("NN"):
-        if tagged_sentence[index+1][1].startswith("RB") and (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
-            features_dict["thatresub_029"] += 1 
+        if tagged_sentence[index-1][1].startswith("NN"):
+            if tagged_sentence[index+1][1].startswith("RB"):
+                if (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
+                    features_dict["thatresub_029"] += 1 
+            elif tagged_sentence[index+1][1].startswith("VB") or tagged_sentence[index+1][1].startswith("MD"):
+                features_dict["thatresub_029"] += 1
 
-        elif tagged_sentence[index+1][1].startswith("VB") or tagged_sentence[index+1][1].startswith("MD"):
-            features_dict["thatresub_029"] += 1
+            elif tagged_sentence[index+1][1].startswith("DT") or tagged_sentence[index+1][1].startswith("JJ") or tagged_sentence[index+1][1] == "NNS" or tagged_sentence[index+1][1].startswith("NNP"):
+                features_dict["thatreobj_030"] += 1
 
-        elif tagged_sentence[index+1][1].startswith("DT") or tagged_sentence[index+1][1].startswith("JJ") or tagged_sentence[index+1][1] == "NNS" or tagged_sentence[index+1][1].startswith("NNP"):
-            features_dict["thatreobj_030"] += 1
+            elif tagged_sentence[index+1][0] == "it" or tagged_sentence[index+1][0] in subjpro or tagged_sentence[index+1][0] in posspro:
+                features_dict["thatreobj_030"] += 1    
+            
+        if tagged_sentence[index-1][1].startswith("J"): #This catches things like I'm sure that's a, there's nothing good that can come out of it, etc. Biber keeps mentioning tone boundaries but I dont understand how you could do that computationally (he refers to it as T#)
+            features_dict["thatacom_022"] += 1 #that adjective complements (e.g., I'm glad that you like it) ADJ + (T#) + that (complements across intonation boundaries were edited by hand)
+                ## we could try restricting the search further by limiting the element in front of the adjective to a copular (and adverb?), but that is then probably too narrow (HM)
+                ## further problem: this only catches instances in which 'that' is not dropped - what about "I am glad you liked it"? (HM)
+                ## maybe this is one of the features we should leave out? (HM)
+                
+    else:
+        if word_tuple[0] in WHP: # WHP = ["who", "whom", "whose", "which"]
+            if tagged_sentence[index-1][1] == "IN":
+                features_dict["whrepied_033"] += 1 #pied-piping relative clauses (e.g., the manner in which he was told) PREP + WHP in relative clauses
 
-        elif tagged_sentence[index+1][0] == "it" or tagged_sentence[index+1][0] in subjpro or tagged_sentence[index+1][0] in posspro:
-            features_dict["thatreobj_030"] += 1
+            if word_tuple[0] == "which" and tagged_sentence[index-1][0] == ",": #34. sentence relatives (e.g., Bob likes fried mangoes, which is the most disgusting thing I've ever heard of) Biber: (These forms are edited by hand to exclude non-restrictive relative clauses.)
+                features_dict["sentencere_034"] += 1  ### this only works if the tagger does not delete commas (HM)
 
-        # if tagged_sentence[index-1][0] in ["and", "nor", "but", "or", "also"] or tagged_sentence[index-1][0] in punct_final or tagged_sentence[index-1][0] == ",":
-        # start to 021, tbc
+            #31. WH relative clauses on subject position (e.g., the man who likes popcorn) xxx + yyy + N + WHP + (ADV) + AUX/V (where xxx is NOT any form of the verbs ASK or TELL; to exclude indirect WH questions like Tom asked the man who went to the store)
+            if tagged_sentence[index-1][1].startswith("N"):
+                if tagged_sentence[index+1][1].startswith("R"):
+                    if (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
+                        features_dict["whresub_031"] += 1
 
-    #right now, only wh-words at least two words from the front and 2 from the end will be caught here (KM) -> won't catch ex "boys who Sally likes" (is that grammatically acceptable??) also won't catch passives, ex "the men who are liked by Sally" (kind of awkward tbh) (KM)
-    if not tagged_sentence[index-2][0].startswith("ask") and not tagged_sentence[index-2][0].startswith("tell") and not tagged_sentence[index-2][0] == "told": 
-        if not tagged_sentence[index+1][1].startswith("R") and not tagged_sentence[index+1][1].startswith("V") and not tagged_sentence[index+1][1].startswith("MD"):
-            features_dict["whreobj_032"] += 1 #32. WH relative clauses on object positions (e.g., the man who Sally likes) xxx + yyy + N + WHP + zzz (where xxx is NOT any form of the verbs ASK or TELL, to exclude indirect WH questions, and zzz is not ADV, AUX or V, to exclude relativization on subject position)
-
-    #31. WH relative clauses on subject position (e.g., the man who likes popcorn) xxx + yyy + N + WHP + (ADV) + AUX/V (where xxx is NOT any form of the verbs ASK or TELL; to exclude indirect WH questions like Tom asked the man who went to the store)
-    if tagged_sentence[index-1][1].startswith("N") and tagged_sentence[index+1][1].startswith("R") and (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
-        features_dict["whresub_031"] += 1
-
-    elif tagged_sentence[index-1][1].startswith("N") and (tagged_sentence[index+1][1].startswith("V") or tagged_sentence[index+1][1].startswith("MD")):
-        features_dict["whresub_031"] += 1
+                elif(tagged_sentence[index+1][1].startswith("V") or tagged_sentence[index+1][1].startswith("MD")):
+                    features_dict["whresub_031"] += 1
         
+            #32. WH relative clauses on object positions (e.g., the man who Sally likes) xxx + yyy + N + WHP + zzz (where xxx is NOT any form of the verbs ASK or TELL, to exclude indirect WH questions, and zzz is not ADV, AUX or V, to exclude relativization on subject position)
+            #right now, only wh-words at least two words from the front and 2 from the end will be caught here (KM) -> won't catch ex "boys who Sally likes" (is that grammatically acceptable??) also won't catch passives, ex "the men who are liked by Sally" (kind of awkward tbh) (KM)
+            if not tagged_sentence[index-2][0].startswith("ask") and not tagged_sentence[index-2][0].startswith("tell") and not tagged_sentence[index-2][0] == "told": 
+                if not tagged_sentence[index+1][1].startswith("R") and not tagged_sentence[index+1][1].startswith("V") and not tagged_sentence[index+1][1].startswith("MD"):
+                    features_dict["whreobj_032"] += 1 
+                
+        if word_tuple in WHO: # WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", "whichever", "whenever", "whatever", "however"]
+            #13. direct WH-questions CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)
+            if tagged_sentence[index-1][1] == "X":  
+                if tagged_sentence[index+1][1] == "MD":
+                    features_dict["whquest_013"] += 1 
+            elif tagged_sentence[index+1][1].startswith("V"):
+                if tagged_sentence[index+1][0] in belist or tagged_sentence[index+1][0] in havelist or tagged_sentence[index+1][0] in dolist:
+                    features_dict["whquest_013"] += 1
+                    ## I changed this code to look for the first index position instead of sentence-final punctuation, since the tagger will separate the sentences.
+       
 
 
 def analyze_there(index, tagged_sentence, features_dict): ## 1. noone 2. Gustavo
@@ -715,7 +736,7 @@ def analyze_there(index, tagged_sentence, features_dict): ## 1. noone 2. Gustavo
         features_dict["exthere_020"] += 1
     # depending on the accuracy of the tagger for this feature, it may be necessary to add further restraints
     
-def analyze_particle(index, tagged_sentence, features_dict): ## 1. Hanna
+def analyze_particle(index, tagged_sentence, features_dict): ## 1. Hanna 2. Gustavo
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "discpart_050".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
