@@ -732,7 +732,7 @@ def analyze_wh_word(index, tagged_sentence, features_dict): ## 1. Kyla 2. Hanna
 def analyze_there(index, tagged_sentence, features_dict): ## 1. noone 2. Gustavo
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "exthere_020".'''
-    if tagged_sentence[index][1] == "EX"
+    if tagged_sentence[index][1] == "EX":
         features_dict["exthere_020"] += 1
     # depending on the accuracy of the tagger for this feature, it may be necessary to add further restraints
     
