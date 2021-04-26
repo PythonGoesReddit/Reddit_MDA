@@ -219,10 +219,10 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
     "pverbdo_012", "passagentl_017", "passby_018", "mainvbe_019", "whclause_023", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
     "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
     "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''
-    ## already checked: "vpast_001", "vinfinitive_024", "vimperative_205", "vpresentpart_025", "vpresentwhiz_028", "vpastpart_026", "vpastwhiz_027", "vpresent_003", 
-    ##          "vseemappear_058", "vpastperfect_002b", "vpresperfect_002a", "mainvbe_019", "contractions_059", 
-    ## still needs checking: "pverbdo_012", "passagentl_017", "passby_018", "whclause_023", 
-    ##          "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "thatdel_060", "vsplitinf_062", "vsplitaux_063"
+    ## already checked: "vpast_001", "pverbdo_012", "vinfinitive_024", "vimperative_205", "vpresentpart_025", "vpresentwhiz_028", "vpastpart_026", "vpastwhiz_027", "vpresent_003", 
+    ##          "emphatics_049", "vseemappear_058", "vpastperfect_002b", "vpresperfect_002a", "mainvbe_019", "contractions_059", "vsplitinf_062", "vsplitaux_063", 
+    ## still needs checking: "passagentl_017", "passby_018", "whclause_023", "vpublic_055", "vprivate_056", "vsuasive_057", "thatdel_060",    
+      
     word_tuple = tagged_sentence[index]
     if word_tuple[1] == "VBD":
         features_dict["vpast_001"] += 1
@@ -231,6 +231,18 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
             features_dict["vimperative_205"] += 1
         else: 
             features_dict["vinfinitive_024"] += 1
+            if tagged_sentence[index-2][0] == "to":
+                if tagged_sentence[index-1][1] == "RB" and not tagged_sentence[index-1][0] in ["n't", "not"]:
+                    features_dict["vsplitinf_062"] += 1
+                else:
+                    pass
+            elif tagged_sentence[index-3][0] == "to":
+                if tagged_sentence[index-2][1] == "RB" and not tagged_sentence[index-2][0] in ["n't", "not"]:
+                    if tagged_sentence[index-1][1] == "RB" and not tagged_sentence[index-1][0] in ["n't", "not"]:
+                        features_dict["vsplitinf_062"] += 1
+                else:
+                    pass
+            
     elif word_tuple[1] == "VBG":
         if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP) and tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]: #gerund or present participle.. is this ok? or do we have to separate these 
             # AB: In Biber, this is in fact only for present participial clauses, a fairly narrow range of ING-forms. I implement it accordingly and would suggest a separate class of features for progressives (which Biber really does not seem to have considered in the 80s)
@@ -311,6 +323,10 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
                         features_dict["passby_018"] += 1
                         if insert_adv:
                             features_dict["vsplitaux_063"] += 1
+                            ## HM: I think there is a mistake in Biber's formula here: for 63 he states AUX + ADV + VB (with VB meaning the base form of the verb),
+                            ## but the example sentence he gives is "they are objectively SHOWN to", which does not use the base form.
+                            ## So far in our code we only count split auxiliaries if the verb is in the past participle (VBN). Is this what we want?
+                            ## What about interverning adverbs in progressive verb phrases? "I am really trying"?
                     elif tagged_sentence[x+1][1] == "IN": # Here, provision is made for by-passive with intervening PPs: "was shot in the head by an unidentified suspect"
                         x += 1
                         move_on2 = True
@@ -358,8 +374,23 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
                 insert_adv = True
             else:
                 move_on = False
-                if not (tagged_sentence[index-1][0] in WHP+WHO and tagged_sentence[index-2][0] == "X"):
-                    features_dict["pverbdo_012"] += 1 # This follows the criteria in Biber, but seems too broad. Do we want things like "do someone a favor" "do the boogie" etc. here? (AB)
+                #if not (tagged_sentence[index-1][0] in WHP+WHO and tagged_sentence[index-2][0] == "X"):
+                    #features_dict["pverbdo_012"] += 1 # This follows the criteria in Biber, but seems too broad. Do we want things like "do someone a favor" "do the boogie" etc. here? (AB)
+                        ## HM: this does indeed catch a lot of garbage ("does this mean", "do rides", "what he does" ...)
+                        ## alternatively we could look for some restricted contexts in which do is sure to be a pro-verb: 
+                        ## - followed by ", too": I DO, too.
+                        ## - sentence-final position: I DO.
+                        ## - followed by a placeholder: DO this/that/it/so.
+                        ## I implemented this belows. Awaits evaluation from someone else.
+    if word_tuple[0] in dolist:
+        if tagged_sentence[index+1][1] == "X":
+            features_dict["pverbdo_012"] += 1
+        elif tagged_sentence[index+1][0] in ["too", "this", "that", "it", "so"]:
+            if tagged_sentence[index+2][1] == "X" or tagged_sentence[index+2][0] in ALLP:
+                features_dict["pverbdo_012"] += 1
+            else:
+                pass
+    
     if word_tuple[0].startswith("'"):
         features_dict["contractions_059"] += 1
 
@@ -381,7 +412,7 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
     # (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)(This algorithm allows an intervening prepositional phrase between a verb and its complement.)
     #     Biber also checks for that-deletion, which is probably bad in terms of precision and recall. I currently have strong reservations against implementing his search, but have not come up with a better one yet. (AB)
         
-    # still missing: "vpublic_055", "vprivate_056", "vsuasive_057", "thatdel_060", "vsplitinf_062"
+    # still missing: "vpublic_055", "vprivate_056", "vsuasive_057", "thatdel_060"
     
 
 def analyze_modal(index, tagged_sentence, features_dict): ## 1. Axel 2. Hanna
