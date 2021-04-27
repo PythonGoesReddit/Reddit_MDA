@@ -211,6 +211,40 @@ titlelist = ["mr", "ms", "mrs", "prof", "professor", "dr", "sir"] #??????? (KM)
 otheradvsublist = ["since", "while", "whilst", "whereupon", "whereas", "whereby", "such that", "so that", "such that", "inasmuch as", "forasmuch as", "insofar as", "insomuch as", "as long as", "as soon as"]
 titlelist = ["mr", "ms", "mrs", "prof", "professor", "dr", "sir"]
 notgerundlist = ["nothing", "everything", "something", "anything", "thing", "things", "string", "strings"]
+publiclist = ["acknowledege", "acknowledges", "acknowledged", "acknowledging", "admit", "admits", "admitted", "admitting",
+              "agree", "agrees", "agreed", "agreeing", "assert", "asserts", "asserted", "asserting", "claim", "claimed", 
+              "claims", "claiming", "complain", "complains", "complained", "complaining", "declare", "declared", "declares",
+              "declaring", "deny", "denies", "denied", "denying", "explain", "explains", "explained", "explaining", "hint",
+              "hints", "hinted", "hinting", "insist", "insisted", "insists", "insisting", "mention", "mentions", "mentioned",
+              "mentioning", "proclaim", "proclaims", "proclaimed", "proclaiming", "promise", "promises", "promised", "promising",
+              "protest", "protests","protested", "protesting", "remark", "remarks", "remarking", "remarked", "reply", 
+              "replied", "replies", "replying", "report", "reports", "reported", "reporting", "say", "says", "said", "saying",
+              "suggest", "suggests", "suggested", "suggesting", "swear", "swears", "swore", "swearing", "write", "wrote", "writing", "writes"]
+privatelist = ["anticipate", "anticipates", "anticipated", "anticipating", "assume", "assumes", "assumed", "assuming",
+               "believe", "believes", "believed", "believing", "conclude", "concludes", "concluded", "concluding", "decide",
+               "decides", "decided", "deciding", "demonstrate", "demostrates", "demonstrated","demonstrating", "determine",
+               "determines", "determined", "determining", "discover", "discovers", "discovered", "discovering", "doubt",
+               "doubts", "doubted", "doubting", "estimate", "estimated", "estimates", "estimating", "fear", "fears", "feared",
+               "fearing", "feel", "feels", "feeled", "feeling", "find", "finds", "found", "finding", "forget", "forgets", 
+               "forgot", "forgetting", "guess", "guesses", "guessed", "guessing", "hear", "hears", "heard", "hearing", "hope",
+               "hopes", "hoped", "hoping", "imagine", "imagines", "imagined", "imagining", "imply", "implies", "implied", 
+               "implying", "indicate", "indicates", "indicating", "indicated", "infer", "infers", "infered", "inferring", "inferred",
+               "know", "knows", "knew", "knowing", "learn", "learns", "learnt", "learned", "learning", "mean", "means", "meant",
+               "meaning", "notice", "notices", "noticed", "noticing", "prove", "proves", "proved", "proving", "realise", "realize",
+               "realised", "realized", "realises","realizes", "realising", "realizing", "recognise", "recognize", "recognises",
+               "recognizes", "recognised", "recognized", "recognising", "recognizing", "remember", "remembers", "remembered",
+               "remembering", "reveal", "reveals", "revealing", "revealed", "see", "sees", "saw", "seen", "seeing", "show", "shows",
+               "showed", "showing", "suppose", "supposed", "supposes", "supposing", "think", "thinks", "thought", "thinking",
+               "understand", "understands", "understood", "understanding"]
+suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "arranged", "arranging", "ask", "asks", "asked",
+               "asking", "beg", "begs", "begged", "begging", "command", "commands", "commanded", "commanding", "decide", "decides",
+               "decided", "deciding", "demand", "demands", "demanding", "demanded", "grant", "grants", "granted", "granting",
+               "insist", "insists", "insisted", "insisting", "instruct", "instructs", "instructed", "instructing", "ordain", 
+               "ordains", "ordained", "ordaining", "pledge", "pledges", "pledging", "pledged", "pronounce", "pronounces", 
+               "pronounced", "pronouncing", "propose", "proposes", "proposed", "proposing", "recommend", "recommends", "recommended",
+               "recommending", "request", "requests", "requested", "requesting", "stipulate", "stipulates", "stipulated", "stipulating",
+               "suggest", "suggests", "suggested", "suggesting", "urge", "urged", "urges", "urging"]
+
 
 
 #POS-functions
@@ -219,9 +253,9 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
     "pverbdo_012", "passagentl_017", "passby_018", "mainvbe_019", "whclause_023", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
     "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
     "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''
-    ## already checked: "vpast_001", "pverbdo_012", "vinfinitive_024", "vimperative_205", "vpresentpart_025", "vpresentwhiz_028", "vpastpart_026", "vpastwhiz_027", "vpresent_003", 
-    ##          "emphatics_049", "vseemappear_058", "vpastperfect_002b", "vpresperfect_002a", "mainvbe_019", "contractions_059", "vsplitinf_062", "vsplitaux_063", 
-    ## still needs checking: "passagentl_017", "passby_018", "whclause_023", "vpublic_055", "vprivate_056", "vsuasive_057", "thatdel_060",    
+    ## already checked: "vpast_001", "pverbdo_012", "passagentl_017", "passby_018", "whclause_023", "vinfinitive_024", "vimperative_205", "vpresentpart_025", "vpresentwhiz_028", "vpastpart_026", "vpastwhiz_027", "vpresent_003", 
+    ##          "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "vpastperfect_002b", "vpresperfect_002a", "mainvbe_019", "contractions_059", "thatdel_060", "vsplitinf_062", "vsplitaux_063", 
+    ## still needs checking: 
       
     word_tuple = tagged_sentence[index]
     if word_tuple[1] == "VBD":
@@ -394,25 +428,65 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
     if word_tuple[0].startswith("'"):
         features_dict["contractions_059"] += 1
 
+    
+    ## for now I implemented this with a preliminary list of verbs in each class - change this condition once lemmatisation is implemented (HM)
+    if word_tuple[0] in publiclist:
+        features_dict["vpublic_055"] += 1
+        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]: ## 60-1 pub/priv/sua + demonstrative pronoun/subjpro (I we he she they)
+            features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"): ## 60-2 pub/priv/sua + PRO/N + AUX/V
+            if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
+                features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]: ## 60-3 pub/priv/sua + adj/adv/det/posspro + (Adj) + N + AUX/V
+            if tagged_sentence[index + 2][1].startswith("NN"):
+                if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
+                    features_dict["thatdel_060"] += 1
+        if tagged_sentence[index + 1][0] in WHP or tagged_sentence[index + 1][0] in WHO:
+            if tagged_sentence[index + 2][1] != "MD":
+                features_dict["whclause_023"] += 1
+            else:
+                pass
 
+    if word_tuple[0] in privatelist:
+        features_dict["vprivate_056"] += 1
+        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]: ## 60-1 pub/priv/sua + demonstrative pronoun/subjpro (I we he she they)
+            features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"): ## 60-2 pub/priv/sua + PRO/N + AUX/V
+            if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
+                features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]: ## 60-3 pub/priv/sua + adj/adv/det/posspro + (Adj) + N + AUX/V
+            if tagged_sentence[index + 2][1].startswith("NN"):
+                if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
+                    features_dict["thatdel_060"] += 1
+        if tagged_sentence[index + 1][0] in WHP or tagged_sentence[index + 1][0] in WHO:
+            if tagged_sentence[index + 2][1] != "MD":
+                features_dict["whclause_023"] += 1
+            else:
+                pass
 
-    #if word_tuple in private/public/suasive (for feature 55, 56, 57): 
-    ## also here: include feature 23:
-    if tagged_sentence[index + 1][1] == "WDT" and tagged_sentence[index + 1][0] != "that" and tagged_sentence[index + 2][1] == "PRP":
-        features_dict["whclause_023"] += 1 
-        ## this is different from and a lot wider than Biber's definition (HM)
-        ## Biber: Publich/private/suasive verb + WHP/WHO + xxx (xxx not AUX to exclude WH-questions), e.g. "I believed what he told me"
-  
-
-    # Leaving this undefined until we have decided about lemmatization, because it will be so much easier with lemma info.
-    #     Checking this individual classes will be easy enough
+    if word_tuple[0] in suasivelist:
+        features_dict["vsuasive_057"] += 1
+        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]: ## 60-1 pub/priv/sua + demonstrative pronoun/subjpro (I we he she they)
+            features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"): ## 60-2 pub/priv/sua + PRO/N + AUX/V
+            if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
+                features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]: ## 60-3 pub/priv/sua + adj/adv/det/posspro + (Adj) + N + AUX/V
+            if tagged_sentence[index + 2][1].startswith("NN"):
+                if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
+                    features_dict["thatdel_060"] += 1
+        if tagged_sentence[index + 1][0] in WHP or tagged_sentence[index + 1][0] in WHO:
+            if tagged_sentence[index + 2][1] != "MD":
+                features_dict["whclause_023"] += 1
+            else:
+                pass
+            
     # -> also needed for features 23 and 60
     # KM -> we also need this for feature 21. part a is down in analye_wh_word but parts b and c need to identify public/private/suasive verbs -- can we add that in this part when theyre identified?:
     # (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/TJf/anrf){that-c\a\ises as complements to verbs which are not included in the above verb classes are not counted - see Quirk et al. 1985:1179ff.) 
     # (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)(This algorithm allows an intervening prepositional phrase between a verb and its complement.)
     #     Biber also checks for that-deletion, which is probably bad in terms of precision and recall. I currently have strong reservations against implementing his search, but have not come up with a better one yet. (AB)
         
-    # still missing: "vpublic_055", "vprivate_056", "vsuasive_057", "thatdel_060"
     
 
 def analyze_modal(index, tagged_sentence, features_dict): ## 1. Axel 2. Hanna
