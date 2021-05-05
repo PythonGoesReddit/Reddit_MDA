@@ -3,3 +3,4 @@
 *.vscode
 *.Rhistory
 .Rproj.user
+output.txt

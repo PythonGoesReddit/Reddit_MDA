@@ -9,12 +9,6 @@
     # print(tagged_sentence[index-1][0], word_tuple[0], "//", " ".join(sentence))
     # print()
 
-# Kylas questions for next meeting:
-# Do we still want to normalize deviant spelling and emojis in the clean_sentence function? 
-# If not can get rid of the clean_sentence function and just integrate it into tag_sentence
-# Can we integrate analyze_raw_words into the analyze_sentence function ? 
-    # Went ahead and did this, saved the code in another doc in case we want to go back but was pretty sure it makes sense this way (but if we decide otherwise ill put it back!)
-
 # 25_01
 # Should we transform all 'word_tuple's into 'tagged_sentence[index]'? Or does it improve readability?
 
@@ -865,6 +859,7 @@ def analyze_particle(index, tagged_sentence, features_dict): ## 1. Hanna 2. Gust
 def MDA_analyzer(filepath):
     preprocessed_file = open_reddit_json(filepath) #reads in file, separates into sentences, initializes feature dict
     analyze_sentence(preprocessed_file) #updates raw-sentence based counts (i.e. punctuation marks, length)
+    all_ft_dicts = []
 
     for id in preprocessed_file: #loops through all individual sentences in the file one by one
         sentence_dict = preprocessed_file.get(id) #retrieves entire dictionary and all sub-dicts for the given sentence
@@ -917,6 +912,9 @@ def MDA_analyzer(filepath):
                 analyze_there(index, tagged_sentence, features_dict)
     # at some point the order of these elif-statements could be updated using freq counts from our data
 
+        all_ft_dicts.append(sentence_dict)
+    
+    return all_ft_dicts
     #UNCOMMENT BELOW TO PRINT OUTPUT FROM PRACTICE SENTENCES -- change features dict to desired feature
      #print(practice_sentence, "//count = ", features_dict["prothirdper_008"]) #change to feature you want to look at
     
@@ -924,19 +922,15 @@ def MDA_analyzer(filepath):
     # nltk.help.upenn_tagset('NNS')
     # nltk.help.upenn_tagset()
 
-# with concurrent.futures.Executor() as executor:
-#     executor.map(MDA_analyzer, all_files)
 
-for file in all_files:
-    MDA_analyzer(file)
+with concurrent.futures.ProcessPoolExecutor() as executor:
+    output = executor.map(MDA_analyzer, all_files)
 
-## Add output functions here at end
+f = open(os.path.join(dirname, 'output.txt'), "w")
+for item in output:
+    f.write(str(item)) #doesn't work as wanted yet, because it only prints the last item in the row but working on that!
+f.close()
 
-
-
-# General open questions
-## Question: What level of precision for the feature-identifying functions do we want to set in advance? 
-## How many comments from how many months should inspect to determine the level of precision?
 print(timedelta(seconds=time.time() - start_time))
 
 
