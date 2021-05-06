@@ -84,7 +84,7 @@ def open_reddit_json(filename):
                 for sentence in nltk.tokenize.sent_tokenize(body): #separates into sentences
                     sentence_counter +=1 #keep track of which sentence it is (1st, 2nd, etc.)
                     sentence_dict = {"body": sentence, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}
-                    sentence_dict["features"] = s
+                    sentence_dict["features"] = s.copy()
                     prepped_json[str(base + "_" + str(link_id) + "_" + str(sentence_counter))] = sentence_dict #creates a dict within a dict, so that the key (filename, linkid, sentence number) calls the whole dict
 
             except json.decoder.JSONDecodeError:
@@ -898,14 +898,17 @@ def MDA_analyzer(filepath):
 def tester(practice_sentences, feature):
     for practice_sentence in practice_sentences:
         tagged_sentence = tag_sentence(practice_sentence)
-        features_dict = s
+        features_dict = s.copy()
         POS_tagger(tagged_sentence, features_dict)
         
+        #put breakpoint on line below
         print(practice_sentence, "//count = ", features_dict[feature]) 
 
-practice_sentences = ["Look ahead, beside, behind you: example sentences are all around.", "See example sentences below.", "Writing example sentences is usually an activity done indoors."]
+practice_sentences = ["He then consequently ate five donuts in a row.", 
+"Go buy donuts now else there won't be any left.", "I want something else.", 
+"Go eat a donut instead of complaining.", "I would much rather have a donut now than later."]
 
-#tester(practice_sentences, "advplace_004")
+tester(practice_sentences, "conjuncts_045")
 
 with concurrent.futures.ProcessPoolExecutor() as executor:
     #output = 
