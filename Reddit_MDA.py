@@ -106,42 +106,67 @@ def analyze_sentence(preprocessed_json):
 
     for id in preprocessed_json: 
         sentence_dict = preprocessed_json.get(id)
-        sentence = sentence_dict["body"] # AB: At what point should we regularize capitalization? Most of the code below presupposes all-lowercase.
-        # ABxxx: Split code up into pass over raw and all-lowercased version
-        # ABxxx: look into individual .count() cases and see where insertion of space makes sense.
+        sentence = sentence_dict["body"].lower() # AB: lowercasing spelling here, as most code below presupposes all lowercase.
+        # AB: For individual items in the .count() functions, there is a tradeoff between " ITEM " and "ITEM".
+        # AB: Without spaces, there may be unexpected false positives (e.g. "such a" counting "such astronomical costs" etc.)
+        # AB: With spaces, we lose items in sentence-initial position and with following puncutation, e.g. "for instance,"
+        # AB: I have made decisions on an educated-guess case basis here, and they fall into three types:
+        # AB: a) keep "ITEM" because false positives are extremely unlikely (e.g. "in other words").
+        # AB: b) insert spaces, because " ITEM " is going to catch all relevant cases (e.g. " such a " 
         s = sentence_dict["features"]
 
-        s["hashtag_201"] = sentence.count("#")
+        s["hashtag_201"] = len(re.findall(r"#\w+", sentence)) # AB: Used a regex here because otherwise sequences of "#" or individual "#" are going to inflate the count
 
-        s["question_208"] = sentence.count("?")
+        s["question_208"] = sentence.count("?") # AB: Currently, something like "WHY????" will be counted as four questions. Arguably, a regex with r"\?+" would be better?
 
-        s["exclamation_209"] = sentence.count("!")
+        s["exclamation_209"] = sentence.count("!") # AB: Same as above.
  
         s["conjuncts_045"] = sentence.count("that is,") #Will only catch sentences with proper punctuation but it's a start
 
-        for emphatic in ["for sure", "a lot", "such a", "such an", "just", "really", "most", "more"]: 
-            s["emphatics_049"] += sentence.count(emphatic) # AB: would it make sense to only count "a lot" if NOT folowed by "of"?
+        for emphatic in [" for sure", " a lot", " such a ", " such an ", " just ", " really", " most ", " more "]: 
+        # AB: This whole category strikes me as ill-conceived. Almost all items can, and often do, serve other functions than emphatics:
+        # AB: "such a(n)" as anaphoric determinatives ("But such an approach is not easily implemented."),
+        # AB: "more/most" in adverb/adjective gradation ("more relevant") and general comparison ("more cases of the new covid mutant reported"), where they really aren't "emphatic"
+        # AB: "a lot" as prenominal quantifier ("a lot of talk"). There might be something to be said for this being treated as emphatic, but then so should "much," which it isn't
+        # AB: "just" is so versatile in situated use that any simple interpretation seems implausible
+        # AB: (and my default, acontextual interpretation would be more in the direction of downtoner, e.g. "just saying")
+        # AB: "really" is similar to "just" although perhaps a bit more clearly emphatic. But it can definitely meet other functions as well.
+        # AB: That, to me, only leaves "for sure" as a clear-cut count case.
+        # AB: One option would be to expend a whole lot of effort trying to get at the specifically emphatic cases of all the items in the list
+        # AB: The other might be dropping this feature.
+            s["emphatics_049"] += sentence.count(emphatic)
+        s["emphatics_049"] -= sentence.count(" a lot of ") # AB: removing all the "a lot of" cases post-hoc. Biber does not do this, but I think it makes sense, because they are simple quantifiers, not emphatics
+        if sentence.startswith("for sure"): # AB: Catch cases of sentence-initial "for sure" that have been excluded through the insertion of spaces above
+            s["emphatics_049"] += 1
 
-        for hedge in ["at about", "something like", "more or less", "kind of", "sort of", "kinda", "sorta"]:
-            s["hedges_047"] += sentence.count(hedge) # AB: Careful with word boundaries: this .count() will find things like
-            # AB: "that about" (e.g. in "it is estimated that about 1 in 5 students..."), "kind offer"
+        for hedge in [" at about ", " something like ", " more or less", " kinda ", " sorta "]:
+            s["hedges_047"] += sentence.count(hedge)
+        if sentence.startswith("at about ") or sentence.startswith("something like ") or sentence.startswith("more or less") or sentence.startswith("kinda ") or sentence.startswith("sorta "):
+        # AB: Catch sentence-initial cases excluded by spaces above
+            s["hedges_047"] += 1
 
         for conjunct in ["on the contrary", "on the other hand", "for example", "for instance", "by contrast", "by comparison", "in comparison", "in contrast", "in particular", "in addition", "in conclusion", "in consequence", "in sum", "in summary", "in any event", "in any case", "in other words", "as a result", "as a consequence"]:
-            s["conjuncts_045"] += sentence.count(conjunct)
+            s["conjuncts_045"] += sentence.count(conjunct) # AB: I have not inserted any spaces above because the likelihood of false positives in all cases seems very low
 
-        for advsub in ["inasmuch as", "forasmuch as", "insofar as", "insomuch as", "as long as", "as soon as"]:
+        for advsub in ["inasmuch as", "forasmuch as", "insofar as", "insomuch as", " as long as ", " as soon as "]:
             s["advsubother_038"] += sentence.count(advsub)
-
+        if sentence.startswith("as long as ") or sentence.startswith("as soon as "):
+            s["advsubother_038"] += 1
+            
+        for advsubcond in [" if ", " unless ", " if, ", " unless, "]:
+            s["advsubcond_037"] += sentence.count(advsubcond)
+        if sentence.startswith("if ") or sentence.startswith("if, ") or sentence.startswith("unless ") or sentence.startswith("unless, "):
+            s["advsubcond_037"] += 1
         s["lenchar_210"] = len(sentence) 
         s["lenword_211"] = len(sentence.split(" ")) 
 
     #code below was orginially in its own function, analye_raw_words, but that seems unneccessary now
-        words = sentence.split()
+        words = sentence_dict["body"].split()
         for i in range(len(words)):
-            if words[i].startswith("u/") or words[i].startswith("r/"):
+            if words[i].lower().startswith("u/") or words[i].lower().startswith("r/"):
                 s["link_202"] += 1 
 
-            if "http" in words[i] or "www" in words[i]:
+            if "http" in words[i].lower() or "www" in words[i].lower():
                 s["interlink_203"] += 1 
 
             if not i == 0:
@@ -201,7 +226,7 @@ DEM = ["that", "this", "these", "those"]
 WHP = ["who", "whom", "whose", "which"]
 WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", "whichever", 
        "whenever", "whatever", "however"] # can this be accomplished with tag WDT? (KM) # Tag WDT comprises Biber's WHP and WHO plus relativizer "that" afaict. (AB)
-discpart = ["well", "now", "anyway", "anyhow", "anyways"]
+discpart = ["well", "now", "anyway", "anyhow", "anyways", "though"]
 QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
 QUANPRO = ["everybody", "somebody", "anybody", "everyone", "someone", "anyone", "everything", "something", "anything"]
 ALLP = [".", "!", "?", ":", ";", ","]  # here, Biber also includes the long dash -- , but I am unsure how this would be rendered 
@@ -589,76 +614,27 @@ def analyze_preposition(index, tagged_sentence, features_dict): ## 1. Gustavo 2.
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "advsubcause_035", "advsubconc_036", "advsubcond_037", "advsubother_038", "prepositions_039", 
     "conjuncts_045", "hedges_047", "strandprep_061".'''
-    ## There are several features in here that I think would be better in the analyze_sentence function becuase they are just looking for surface forms
-    ## For example, instead of looking for the word proceeding 'as' or 'of', we could just count in the full, untagged sentence (before it is separated into words)
-    ## for "kind of" and "inasmuch as" -- kind of like what we're doing with emphatics in analyze_sentence()
-    ## I'd be happy to do this as my next task if we think its best (KM)
-    ## Other candidates would also be things like "on the other hand", etc.
-    features_dict["prepositions_039"] += 1 # AB: Do we want everything that is tagged "IN" to count here? This includes "because", "that",
-    # AB: maybe some others that already go into separate features and are not included in Biber's list.
-    # ABxxx: Exclude clause-introducing forms
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-
-    if word_tuple[0] == "because":
-        features_dict["advsubcause_035"] += 1 # AB: I think it would be productive, and easy to do, to distinguish between "because of" and "because" NOT followed by "of". These two usages are very differently distributed across modes and indicate different structural orientations: "because of" for phrasal-nominal discourse, and just "because" for verbal-clausal discourse.
-        # ABxxx: Implement differentiation.
+    if not word_tuple[0] in ["because", "unless", "whilst", "while", "though", "tho", "although", "that", "since", "whereupon", "whereas", "whereby"] + timelist + placelist: 
+        features_dict["prepositions_039"] += 1 # AB: I am excluding conjunctions and time/place adverbials here, as they count towards other features
+    if word_tuple[0] in ["because", "becuase", "beacuse", "cause", "'cause", "cos", "'cos", "coz", "'coz", "caus", "'caus", "cuz", "'cuz", "bcoz", "bcuz", "bcos", "bcause", "bcaus"] and tagged_sentence[index+1][0] != "of":
+        features_dict["advsubcause_035"] += 1 # AB: I decided against a separate feature for "because of" since it goes into "prepositions_039".
+        # AB: The list of possible forms of "because" is already quite long, but probably not exhaustive...
     elif word_tuple[0] == "although" or word_tuple[0] == "though" or word_tuple[0] == "tho":
-        features_dict["advsubconc_036"] += 1 #AB: For "though/tho", would it make sense to make a distinction between clause-initial ("He came along, though he really didn't feel like it") and clause final ("It's true though.")? They strike me as stylistically distinct. It seems like our silver-tagged data already make that distinction, tagging clause-initial as "IN" and cluase-final as "RB". So should we add the clause-final version under analyze_adverbs?
-        # ABxxx: include "though/tho" in analyze_adverb
-    elif word_tuple[0] == "if" or word_tuple[0] == "unless":
-        features_dict["advsubcond_037"] += 1 # AB: There is one instance in the Reddit data where "unless" is tagged as "RB", not "IN": "... (unless for Grapheart I guess) ...". We should decide whether such instances should count as part of advsubcond or not. My inclination is yes, in which case it may best to move this feature to analyze_sentence" 
-        # ABxxx: Shift if and unless to analyze sentence
+        features_dict["advsubconc_036"] += 1 #AB: I added "though" tagged as "RB" ("Are you sure though?") to the dicpart list, so it contributes to feature
+        # AB: "discpart_050" through the analyze_adverb function
         
-    elif word_tuple[0] == "that" and tagged_sentence[index-1][0] in ["such", "so"] and not tagged_sentence[index+1][1] in ["JJ", "JJR", "JJS", "NN", "NNS", "NNP", "NNPS"]:
-        features_dict["advsubother_038"] += 1 # Using not statement here again. There is also an overlap with the "such that" construction in Biber's original features. (GK)
-        # AB: The above is terribly imprecise in Biber (1988) already. It arguably excludes most genuine cases of "such/so that" subordination,
-        # AB: e.g. "such that variation is contrained to minimum", "so that people can relate", etc.
-        # AB: A search of "(so|such) that _N" in COCA shows almost all cases to actually be adverbial subordinators
-        # AB: Exceptions are "so that way", "so that kind of", but these are tagged as (that|DT)" in our training data anyway, so will not have to be filtered here.
-        # AB: On the other hand, Biber apparently allows for "so that explains it", etc. Luckily, again, our tagger should differentiate these pronominal cases as "WDT"
-        # AB: Document deviations from Biber in "Overview_feature_ex...."
+    elif word_tuple[0] == "that" and tagged_sentence[index-1][0] in ["such", "so"]: #and not tagged_sentence[index+1][1] in ["JJ", "JJR", "JJS", "NN", "NNS", "NNP", "NNPS"]:
+        features_dict["advsubother_038"] += 1 # AB: Above, the condition that no Adj or N can follow (used by Biber) has been commented out because our tagger allows us to
+        # AB: make the kind of differentiation intended (between "that" as a complementizer and as a determinative/demonstrative PN). This means we avoid many false negatives.
 
-    elif word_tuple[0] == "of" and tagged_sentence[index-1][0] in ["kind", "sort"] and not tagged_sentence[index-2][1] in ["JJ", "JJR", "JJS", "DT", "PRP", "WP"]:
-        features_dict["hedges_047"] += 1 
-        # Ok sorry I broke that :D maybe we can move this to the whole sentence analyzer function? And just look for the phrases "kind of" and "sort of" (and kinda/sorta)
-        #Same goes for below, in as much as, etc. (KM)
-        # AB: For kind/sort of, there is something to be said for keeping it here in that we can exclude "a new kind of approach", "that sort of question is not helpful"
-        # AB: The code should work as is now, but is suboptimal in that it excludes "who kind of," "which kind of" categorically
-        # ABxxx: Write a new if-statement to address the above.
-        
+    elif word_tuple[0] == "of" and tagged_sentence[index-1][0] in ["kind", "sort"] and not tagged_sentence[index-2][1] in ["JJ", "JJR", "JJS", "DT", "PRP$"]:
+        if not tagged_sentence[index-2][0] in ["what", "whatever", "whichever"]:
+            features_dict["hedges_047"] += 1
 
     if tagged_sentence[index+1][0] in ALLP or tagged_sentence[index+1][1] == "X":
         features_dict["strandprep_061"] += 1
-    # AB: I agree that everything below here can probably go into the analyze_sentence function. We only have to watch out for case and word boundaries (see my comments in that function).
-    #elif word_tuple[0] == "at" and tagged_sentence[index+1][0] == "about":
-        #features_dict["hedges_047"] += 1
-    #elif word_tuple[0] == "for" and tagged_sentence[index+1][0] in ["example", "instance"]:
-        #features_dict["conjuncts_045"] += 1 ## the other elements within feature 45 are checked in the adverb-function, just so you know (HM)
-    #elif word_tuple[0] == "by" and tagged_sentence[index+1][0] in ["contrast", "comparison"]:
-        #features_dict["conjuncts_045"] += 1
-    #elif word_tuple[0] == "in": 
-    #if tagged_sentence[index+1][0] in ["comparison", "contrast", "particular", "addition", "conclusion", "consequence", "sum", "summary"]:
-        #features_dict["conjuncts_045"] += 1
-    #elif tagged_sentence[index+1][0] == "any" and tagged_sentence[index+2][0] in ["event", "case"]:
-        #features_dict["conjuncts_045"] += 1
-    #elif tagged_sentence[index+1][0] == "other" and tagged_sentence[index+2][0] == "words":
-        #features_dict["conjuncts_045"] += 1
 
-
-    #if word_tuple[0] == "as" and tagged_sentence[index+1][0] == "a" and tagged_sentence[index+2][0] in ["result", "consequence"]:
-        #features_dict["conjuncts_045"] += 1
-        
-    #elif word_tuple[0] == "on" and tagged_sentence[index+1][0] == "the":
-        #if tagged_sentence[index+2][0] == "contrary":
-            #features_dict["conjuncts_045"] += 1
-    #Gustavo, I moved your features up here so that it doesn't have to assign tagged_sentence[index+2] twice (KM)
-    #But I think these features maybe can go in the whole sentence section (and kind of / sort of / kinda / sorta, see comments above)
-    #elif word_tuple[0] in ["inasmuch", "forasmuch", "insofar", "insomuch"] and tagged_sentence[index+1][0] == "as":
-        #features_dict["advsubother_038"] += 1
-    #elif word_tuple[0] == "as" and tagged_sentence[index+1][0] in ["long", "soon"] and tagged_sentence[index+2][0] == "as":
-        #features_dict["advsubother_038"] += 1
-    #elif tagged_sentence[index+2][0] == "other" and tagged_sentence[index+3][0] == "hand":
-        #features_dict["conjuncts_045"] += 1
 
 def analyze_noun(index, tagged_sentence, features_dict): ## 1. Rafaela 2. Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
