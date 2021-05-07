@@ -107,6 +107,8 @@ def analyze_sentence(preprocessed_json):
     for id in preprocessed_json: 
         sentence_dict = preprocessed_json.get(id)
         sentence = sentence_dict["body"] # AB: At what point should we regularize capitalization? Most of the code below presupposes all-lowercase.
+        # ABxxx: Split code up into pass over raw and all-lowercased version
+        # ABxxx: look into individual .count() cases and see where insertion of space makes sense.
         s = sentence_dict["features"]
 
         s["hashtag_201"] = sentence.count("#")
@@ -594,18 +596,19 @@ def analyze_preposition(index, tagged_sentence, features_dict): ## 1. Gustavo 2.
     ## Other candidates would also be things like "on the other hand", etc.
     features_dict["prepositions_039"] += 1 # AB: Do we want everything that is tagged "IN" to count here? This includes "because", "that",
     # AB: maybe some others that already go into separate features and are not included in Biber's list.
+    # ABxxx: Exclude clause-introducing forms
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
 
     if word_tuple[0] == "because":
         features_dict["advsubcause_035"] += 1 # AB: I think it would be productive, and easy to do, to distinguish between "because of" and "because" NOT followed by "of". These two usages are very differently distributed across modes and indicate different structural orientations: "because of" for phrasal-nominal discourse, and just "because" for verbal-clausal discourse.
+        # ABxxx: Implement differentiation.
     elif word_tuple[0] == "although" or word_tuple[0] == "though" or word_tuple[0] == "tho":
         features_dict["advsubconc_036"] += 1 #AB: For "though/tho", would it make sense to make a distinction between clause-initial ("He came along, though he really didn't feel like it") and clause final ("It's true though.")? They strike me as stylistically distinct. It seems like our silver-tagged data already make that distinction, tagging clause-initial as "IN" and cluase-final as "RB". So should we add the clause-final version under analyze_adverbs?
+        # ABxxx: include "though/tho" in analyze_adverb
     elif word_tuple[0] == "if" or word_tuple[0] == "unless":
-        features_dict["advsubcond_037"] += 1 # AB: There is one instance in the Reddit data where "unless" is tagges as "RB", not "IN": "... (unless for Grapheart I guess) ...". We should decide whether such instances should count as part of advsubcond or not. My inclination is yes, in which case it may best to move this feature to analyze_sentence" 
-#    elif word_tuple[0] == "of": 
-#       pass #What was meant here? (KM) -> AB: I could imagine this was initially part of "advsubcause"?
-    
-
+        features_dict["advsubcond_037"] += 1 # AB: There is one instance in the Reddit data where "unless" is tagged as "RB", not "IN": "... (unless for Grapheart I guess) ...". We should decide whether such instances should count as part of advsubcond or not. My inclination is yes, in which case it may best to move this feature to analyze_sentence" 
+        # ABxxx: Shift if and unless to analyze sentence
+        
     elif word_tuple[0] == "that" and tagged_sentence[index-1][0] in ["such", "so"] and not tagged_sentence[index+1][1] in ["JJ", "JJR", "JJS", "NN", "NNS", "NNP", "NNPS"]:
         features_dict["advsubother_038"] += 1 # Using not statement here again. There is also an overlap with the "such that" construction in Biber's original features. (GK)
         # AB: The above is terribly imprecise in Biber (1988) already. It arguably excludes most genuine cases of "such/so that" subordination,
@@ -613,18 +616,18 @@ def analyze_preposition(index, tagged_sentence, features_dict): ## 1. Gustavo 2.
         # AB: A search of "(so|such) that _N" in COCA shows almost all cases to actually be adverbial subordinators
         # AB: Exceptions are "so that way", "so that kind of", but these are tagged as (that|DT)" in our training data anyway, so will not have to be filtered here.
         # AB: On the other hand, Biber apparently allows for "so that explains it", etc. Luckily, again, our tagger should differentiate these pronominal cases as "WDT"
+        # AB: Document deviations from Biber in "Overview_feature_ex...."
 
-#    if tagged_sentence[index-1][0] == "kind" or tagged_sentence[index-1][0] == "sort":
-#        pass # AB: this isn't doing anything productive and may mess things up. Right?
     elif word_tuple[0] == "of" and tagged_sentence[index-1][0] in ["kind", "sort"] and not tagged_sentence[index-2][1] in ["JJ", "JJR", "JJS", "DT", "PRP", "WP"]:
         features_dict["hedges_047"] += 1 
         # Ok sorry I broke that :D maybe we can move this to the whole sentence analyzer function? And just look for the phrases "kind of" and "sort of" (and kinda/sorta)
         #Same goes for below, in as much as, etc. (KM)
         # AB: For kind/sort of, there is something to be said for keeping it here in that we can exclude "a new kind of approach", "that sort of question is not helpful"
         # AB: The code should work as is now, but is suboptimal in that it excludes "who kind of," "which kind of" categorically
+        # ABxxx: Write a new if-statement to address the above.
         
 
-    if tagged_sentence[index+1][0] in ALLP:
+    if tagged_sentence[index+1][0] in ALLP or tagged_sentence[index+1][1] == "X":
         features_dict["strandprep_061"] += 1
     # AB: I agree that everything below here can probably go into the analyze_sentence function. We only have to watch out for case and word boundaries (see my comments in that function).
     #elif word_tuple[0] == "at" and tagged_sentence[index+1][0] == "about":
