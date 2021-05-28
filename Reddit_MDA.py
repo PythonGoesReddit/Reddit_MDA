@@ -55,7 +55,7 @@ def check_English(text):
         else:
             return False
     
-s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0,"prothirdper_008": 0, "proit_009": 0, "prodemons_010": 0, "proindef_011": 0, "pverbdo_012": 0, "whquest_013": 0, "nominalis_014": 0, "gerund_015": 0,"nouns_016": 0, "passagentl_017": 0, "passby_018": 0, "mainvbe_019": 0, "exthere_020": 0, "thatvcom_021": 0, "thatacom_022": 0, "whclause_023": 0, "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0, "thatresub_029": 0, "thatreobj_030": 0, "whresub_031": 0, "whreobj_032": 0, "whrepied_033": 0, "sentencere_034": 0, "advsubcause_035": 0, "advsubconc_036": 0, "advsubcond_037": 0, "advsubother_038": 0, "prepositions_039": 0, "adjattr_040": 0, "adjpred_041": 0, "adverbs_042": 0, "ttratio_043": 0, "wordlength_044": 0, "conjuncts_045": 0, "downtoners_046": 0, "hedges_047": 0, "amplifiers_048": 0, "emphatics_049": 0, "discpart_050": 0, "demonstr_051": 0, "modalsposs_052": 0, "modalsness_053": 0, "modalspred_054": 0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "vseemappear_058": 0, "contractions_059": 0, "thatdel_060": 0, "strandprep_061": 0, "vsplitinf_062": 0, "vsplitaux_063": 0, "coordphras_064": 0, "coordnonp_065": 0, "negsyn_066": 0,  "negana_067": 0, "hashtag_201": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_205": 0, "question_208": 0, "exclamation_209": 0, "lenchar_210": 0, "lenword_211": 0, "comparatives_212": 0, "superlatives_213": 0}
+s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0,"prothirdper_008": 0, "proit_009": 0, "prodemons_010": 0, "proindef_011": 0, "pverbdo_012": 0, "whquest_013": 0, "nominalis_014": 0, "gerund_015": 0,"nouns_016": 0, "passagentl_017": 0, "passby_018": 0, "mainvbe_019": 0, "exthere_020": 0, "thatvcom_021": 0, "thatacom_022": 0, "whclause_023": 0, "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0, "thatresub_029": 0, "thatreobj_030": 0, "whresub_031": 0, "whreobj_032": 0, "whrepied_033": 0, "sentencere_034": 0, "advsubcause_035": 0, "advsubconc_036": 0, "advsubcond_037": 0, "advsubother_038": 0, "prepositions_039": 0, "adjattr_040": 0, "adjpred_041": 0, "adverbs_042": 0, "ttratio_043": 0, "wordlength_044": 0, "conjuncts_045": 0, "downtoners_046": 0, "hedges_047": 0, "amplifiers_048": 0, "emphatics_049": 0, "discpart_050": 0, "demonstr_051": 0, "modalsposs_052": 0, "modalsness_053": 0, "modalspred_054": 0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "vseemappear_058": 0, "contractions_059": 0, "thatdel_060": 0, "strandprep_061": 0, "vsplitinf_062": 0, "vsplitaux_063": 0, "coordphras_064": 0, "coordnonp_065": 0, "negsyn_066": 0,  "negana_067": 0, "hashtag_201": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_205": 0, "question_208": 0, "exclamation_209": 0, "lenchar_210": 0, "lenword_211": 0, "comparatives_syn_212": 0, "superlatives_syn_213": 0, "comparatives_ana_214": 0, "superlatives_ana_215":0}
 
 # initialize empty feature dictionary
 def open_reddit_json(filename):
@@ -272,6 +272,7 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
                "pronounced", "pronouncing", "propose", "proposes", "proposed", "proposing", "recommend", "recommends", "recommended",
                "recommending", "request", "requests", "requested", "requesting", "stipulate", "stipulates", "stipulated", "stipulating",
                "suggest", "suggests", "suggested", "suggesting", "urge", "urged", "urges", "urging"]
+copulalist = ["be", "am", "is", "was", "were", "been", "being", "appear", "appears", "appeared", "appearing", "seem", "seems", "seemed", "seeming", "sound", "sounds", "sounding", "sounded", "smell", "smells", "smelled", "smelling", "become", "becomes", "became", "becoming", "turn", "turns", "turning", "turned", "grow", "grows", "grew", "growing", "growed", "get", "got", "look", "looks", "looking", "looked", "taste", "tastes", "tasted", "tasting", "feel", "feels", "feeled", "felt", "feeling"] # AB: are these missing on purpose: "turnt", "grown", "gets", "getting", "gotten"?
 
 
 
@@ -567,8 +568,6 @@ def analyze_adverb(index, tagged_sentence, features_dict): ## 1. Hanna 2. Raffae
         features_dict["downtoners_046"] += 1
     elif word_tuple[0] in amplifierlist:
         features_dict["amplifiers_048"] += 1 
-#    elif word_tuple[0] == "almost" or word_tuple[0] == "maybe": ## AB: Added these to the list of hedges in analyze_sentence()
-#        features_dict["hedges_047"] += 1                        ## AB: (no strict logical reason, but preference to have one feature covered in one function only)
     elif word_tuple[0] in conjunctslist:
         features_dict["conjuncts_045"] += 1 # so far, this list only includes "eg" not "e.g.", since that would probably be split by the tagger? AB: Added "e.g." to the list
     elif index == 0 and word_tuple[0] in discpart:
@@ -576,25 +575,28 @@ def analyze_adverb(index, tagged_sentence, features_dict): ## 1. Hanna 2. Raffae
     ## we also look for discourse particles (feature 050) in the particle-section, this is to make sure that
     ## we actually catch all of them in case they are tagged differently (HM)
     
-    if word_tuple[0] == "rather" and index == 0: # AB: Is there a reason for this being an "if" rather than "elif" statement?
-        if tagged_sentence[index+1][0] == ",": #punctuation will be removed already, right? (KM) then how do we find this without the comma? (HM) # AB: no, tagger keeps punctuation
-            features_dict["conjuncts_045"] += 1  ## we could try it simply without the comma and see how messy the output is
-        elif tagged_sentence[index+1][1] in ["CC", "CD", "DT", "EX", "IN", "LS", "MD", "NN", "NNS", "NNP", "NNPS", "PDT", "PRP", "PRP$", "RP", "TO", "UH", "VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "WDT", "WP", "WP$", "WRB"]:
-            features_dict["conjuncts_045"] += 1 
-    elif word_tuple[0] == "else" and index == 0 and tagged_sentence[index+1][0] == ",": #again, commas (KM) #AB: Should not be a problem.
-            features_dict["conjuncts_045"] += 1
-    elif word_tuple[0] == "altogether" and index == 0 and tagged_sentence[index+1] == ",":
-            features_dict["conjuncts_045"] += 1
+#    if word_tuple[0] == "rather" and index == 0: # if-statement rather than if-else, because "rather"
+#        if tagged_sentence[index+1][0] == ",": #punctuation will be removed already, right? (KM) then how do we find this without the comma? (HM) # AB: no, tagger keeps punctuation
+#            features_dict["conjuncts_045"] += 1  ## we could try it simply without the comma and see how messy the output is
+#        elif tagged_sentence[index+1][1] in ["CC", "CD", "DT", "EX", "IN", "LS", "MD", "NN", "NNS", "NNP", "NNPS", "PDT", "PRP", "PRP$", "RP", "TO", "UH", "VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "WDT", "WP", "WP$", "WRB"]:
+#            features_dict["conjuncts_045"] += 1 
+#    elif word_tuple[0] == "else" and index == 0 and tagged_sentence[index+1][0] == ",": #again, commas (KM) #AB: Should not be a problem.
+#            features_dict["conjuncts_045"] += 1
+#    elif word_tuple[0] == "altogether" and index == 0 and tagged_sentence[index+1] == ",":
+#            features_dict["conjuncts_045"] += 1
 
  
 def analyze_adjective(index, tagged_sentence, features_dict): ## 1. Kyla 2. Raffaela 3. Axel
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "adjattr_040", "adjpred_041", "emphatics_049", "comparatives_212", "superlatives_213".'''
-   
     if tagged_sentence[index][1] == "JJR":
-        features_dict["comparatives_212"] += 1
+        features_dict["comparatives_syn_212"] += 1
     elif tagged_sentence[index][1] == "JJS":
-        features_dict["superlatives_213"] += 1
+        features_dict["superlatives_syn_213"] += 1
+    if tagged_sentence[index-1][0] == "more":
+        features_dict["comparatives_ana_214"] += 1
+    elif tagged_sentence[index-1][0] == "most":
+        features_dict["superlatives_ana_215"] += 1
     ## AB: I am rewriting the part that checks for attributive versus predicative adjectives, as I think this will improve clarity.
     ## AB: The important statent in Biber (1989: 238) is that "any ADJ not identified as predicative" is treated as attributive.
     ## AB: So this means we only need to specify a condition for all predicative adjectives. When True: adj_pred + =1, when False: adj_attr += 1
@@ -603,33 +605,25 @@ def analyze_adjective(index, tagged_sentence, features_dict): ## 1. Kyla 2. Raff
     ## AB: Any adjective preceded by an optional sequence of adverbs of any length, which in turn is preceded by a form of BE
     ## AB: (plus potentially other copular verbs like "feel", "look", "become") is predicative; anything else is attributive
     adj_type = "attr"
-    x = index
-    while adj_type == "attr" and x>0:
+    x = index-1
+    while adj_type == "attr" and tagged_sentence[x][1].startswith("R"):
         x -= 1
-        if sentence[x][1].startswith("R"):
-            pass
-        elif sentence[x][0] in belist:
+        if tagged_sentence[x][0] in copulalist:
             adj_type = "pred"
-        else:
-            x = 0 # stop looking; kind of a cheap cheat, but the easiest way I could think of off the top.
     if adj_type == "attr":
         features_dict["adjattr_040"] += 1
     elif adj_type == "pred":
         features_dict["adjpred_041"] += 1
-        
-    
-    
-    if tagged_sentence[index-1][0] in belist:
-        if tagged_sentence[index+1][1].startswith("JJ") or tagged_sentence[index+1][1].startswith("NN"):
-            features_dict["adjattr_040"] += 1
-
-        elif not tagged_sentence[index+1][1].startswith("RB"): ##!!! Check not-statement (KM)
-            features_dict["adjpred_041"] += 1
-
-        if tagged_sentence[index+1][1].startswith("JJ") and not tagged_sentence[index+2][1].startswith("JJ") and not tagged_sentence[index+2][1].startswith("NN"): #Would it not be okay to have JJ in position +1 and +2? 
-            features_dict["adjpred_041"] += 1
-            
-    if tagged_sentence[index-1][0] in ["real", "so"] and tagged_sentence[index][1] == "JJ":
+#    if tagged_sentence[index-1][0] in belist:
+#        if tagged_sentence[index+1][1].startswith("JJ") or tagged_sentence[index+1][1].startswith("NN"):
+#            features_dict["adjattr_040"] += 1
+#
+#        elif not tagged_sentence[index+1][1].startswith("RB"): ##!!! Check not-statement (KM)
+#            features_dict["adjpred_041"] += 1
+#
+#        if tagged_sentence[index+1][1].startswith("JJ") and not tagged_sentence[index+2][1].startswith("JJ") and not tagged_sentence[index+2][1].startswith("NN"): #Would it not be okay to have JJ in position +1 and +2? 
+#            features_dict["adjpred_041"] += 1        
+    if tagged_sentence[index-1][0] in ["real", "so"]: #and tagged_sentence[index][1] == "JJ":
         #I think this should work but should double check because it was catching junk at some point (KM)
         # AB: Turned this into an if rather than elif. Also, I think the part to the right of the boolean "and" is not needed?
         features_dict["emphatics_049"] += 1
