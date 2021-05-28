@@ -272,8 +272,13 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
                "pronounced", "pronouncing", "propose", "proposes", "proposed", "proposing", "recommend", "recommends", "recommended",
                "recommending", "request", "requests", "requested", "requesting", "stipulate", "stipulates", "stipulated", "stipulating",
                "suggest", "suggests", "suggested", "suggesting", "urge", "urged", "urges", "urging"]
-copulalist = ["be", "am", "is", "was", "were", "been", "being", "appear", "appears", "appeared", "appearing", "seem", "seems", "seemed", "seeming", "sound", "sounds", "sounding", "sounded", "smell", "smells", "smelled", "smelling", "become", "becomes", "became", "becoming", "turn", "turns", "turning", "turned", "grow", "grows", "grew", "growing", "growed", "get", "got", "look", "looks", "looking", "looked", "taste", "tastes", "tasted", "tasting", "feel", "feels", "feeled", "felt", "feeling"] # AB: are these missing on purpose: "turnt", "grown", "gets", "getting", "gotten"?
-
+copulalist = ["be", "am", "is", "was", "were", "been", "being", "appear", "appears", "appeared", "appearing", "seem", "seems", "seemed", "seeming", 
+              "sound", "sounds", "sounding", "sounded", "smell", "smells", "smelled", "smelling", "become", "becomes", "became", "becoming", "turn", 
+              "turns", "turning", "turned", "turn", "grow", "grows", "grew", "growing", "growed", "grown", "get", "gets", "getting", "gotten", 
+              "got", "look", "looks", "looking", "looked", "taste", "tastes", "tasted", "tasting", "feel", "feels", "feeled", "felt", "feeling"] 
+            # AB: are these missing on purpose: "turnt", "grown", "gets", "getting", "gotten"?
+            # HM: nope, sorry! added the missing ones. There are also some more marginal verbs which I didn't include, but I don't think 
+            # we need to worry about these
 
 
 #POS-functions
