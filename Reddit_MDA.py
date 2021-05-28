@@ -139,7 +139,7 @@ def analyze_sentence(preprocessed_json):
         if sentence.startswith("for sure"): # AB: Catch cases of sentence-initial "for sure" that have been excluded through the insertion of spaces above
             s["emphatics_049"] += 1
 
-        for hedge in [" at about ", " something like ", " more or less", " kinda ", " sorta "]:
+        for hedge in [" at about ", " something like ", " more or less", " kinda ", " sorta ", " almost ", " maybe "]:
             s["hedges_047"] += sentence.count(hedge)
         if sentence.startswith("at about ") or sentence.startswith("something like ") or sentence.startswith("more or less") or sentence.startswith("kinda ") or sentence.startswith("sorta "):
         # AB: Catch sentence-initial cases excluded by spaces above
@@ -212,7 +212,7 @@ firstpersonlist = ["i", "me", "we", "us", "my", "our", "myself", "ourselves"]
 secondpersonlist = ["you", "yourself", "your", "yourselves"]
 thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "himself","herself", "themselves"]
 indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "everything", "nobody", "none", "nothing", "nowhere", "somebody", "someone", "something"]
-conjunctslist = ["alternatively", "altogether", "consequently", "conversely", "eg", "else", "furthermore",
+conjunctslist = ["alternatively", "altogether", "consequently", "conversely", "eg", "e.g.", "else", "furthermore",
                  "hence", "however", "ie", "instead", "likewise", "moreover", "namely", "nevertheless",
                  "nonetheless", "notwithstanding", "otherwise", "rather", "similarly", "therefore", "thus", "viz"]
 conjunctsmultilist = ["on the contrary", "on the other hand", "for example", "for instance", "by contrast", "by comparison", "in comparison", "in contrast", "in particular", "in addition", "in conclusion", "in consequence", "in sum", "in summary", "in any event", "in any case", "in other words", "as a result", "as a consequence"]
@@ -547,7 +547,7 @@ def analyze_modal(index, tagged_sentence, features_dict): ## 1. Axel 2. Hanna
         else:
             move_on = False
     
-def analyze_adverb(index, tagged_sentence, features_dict): ## 1. Hanna 2. Raffaela
+def analyze_adverb(index, tagged_sentence, features_dict): ## 1. Hanna 2. Raffaela 3. Axel
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "advplace_004", "advtime_005", "adverbs_042", "conjuncts_045",
     "downtoners_046", "hedges_047", "amplifiers_048", "discpart_050", "contractions_059", "negana_067".'''
@@ -567,27 +567,27 @@ def analyze_adverb(index, tagged_sentence, features_dict): ## 1. Hanna 2. Raffae
         features_dict["downtoners_046"] += 1
     elif word_tuple[0] in amplifierlist:
         features_dict["amplifiers_048"] += 1 
-    elif word_tuple[0] == "almost" or word_tuple[0] == "maybe":
-        features_dict["hedges_047"] += 1
+#    elif word_tuple[0] == "almost" or word_tuple[0] == "maybe": ## AB: Added these to the list of hedges in analyze_sentence()
+#        features_dict["hedges_047"] += 1                        ## AB: (no strict logical reason, but preference to have one feature covered in one function only)
     elif word_tuple[0] in conjunctslist:
-        features_dict["conjuncts_045"] += 1 # so far, this list only includes "eg" not "e.g.", since that would probably be split by the tagger?
+        features_dict["conjuncts_045"] += 1 # so far, this list only includes "eg" not "e.g.", since that would probably be split by the tagger? AB: Added "e.g." to the list
     elif index == 0 and word_tuple[0] in discpart:
         features_dict["discpart_050"] += 1
     ## we also look for discourse particles (feature 050) in the particle-section, this is to make sure that
     ## we actually catch all of them in case they are tagged differently (HM)
     
-    if word_tuple[0] == "rather" and index == 0:
-        if tagged_sentence[index+1][0] == ",": #punctuation will be removed already, right? (KM) then how do we find this without the comma? (HM)
+    if word_tuple[0] == "rather" and index == 0: # AB: Is there a reason for this being an "if" rather than "elif" statement?
+        if tagged_sentence[index+1][0] == ",": #punctuation will be removed already, right? (KM) then how do we find this without the comma? (HM) # AB: no, tagger keeps punctuation
             features_dict["conjuncts_045"] += 1  ## we could try it simply without the comma and see how messy the output is
         elif tagged_sentence[index+1][1] in ["CC", "CD", "DT", "EX", "IN", "LS", "MD", "NN", "NNS", "NNP", "NNPS", "PDT", "PRP", "PRP$", "RP", "TO", "UH", "VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "WDT", "WP", "WP$", "WRB"]:
             features_dict["conjuncts_045"] += 1 
-    elif word_tuple[0] == "else" and index == 0 and tagged_sentence[index+1][0] == ",": #again, commas (KM)
+    elif word_tuple[0] == "else" and index == 0 and tagged_sentence[index+1][0] == ",": #again, commas (KM) #AB: Should not be a problem.
             features_dict["conjuncts_045"] += 1
     elif word_tuple[0] == "altogether" and index == 0 and tagged_sentence[index+1] == ",":
             features_dict["conjuncts_045"] += 1
 
  
-def analyze_adjective(index, tagged_sentence, features_dict): ## 1. Kyla 2. Raffaela
+def analyze_adjective(index, tagged_sentence, features_dict): ## 1. Kyla 2. Raffaela 3. Axel
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "adjattr_040", "adjpred_041", "emphatics_049", "comparatives_212", "superlatives_213".'''
    
@@ -595,6 +595,29 @@ def analyze_adjective(index, tagged_sentence, features_dict): ## 1. Kyla 2. Raff
         features_dict["comparatives_212"] += 1
     elif tagged_sentence[index][1] == "JJS":
         features_dict["superlatives_213"] += 1
+    ## AB: I am rewriting the part that checks for attributive versus predicative adjectives, as I think this will improve clarity.
+    ## AB: The important statent in Biber (1989: 238) is that "any ADJ not identified as predicative" is treated as attributive.
+    ## AB: So this means we only need to specify a condition for all predicative adjectives. When True: adj_pred + =1, when False: adj_attr += 1
+    ## AB: Also note there is a logical inconsistency in Biber's condition "BE + ADJ (+ADV) + xxx": The optional ADV should go before the ADJ
+    ## AB: I am, in fact, going to simplify our lookup, subject to durther discussion:
+    ## AB: Any adjective preceded by an optional sequence of adverbs of any length, which in turn is preceded by a form of BE
+    ## AB: (plus potentially other copular verbs like "feel", "look", "become") is predicative; anything else is attributive
+    adj_type = "attr"
+    x = index
+    while adj_type == "attr" and x>0:
+        x -= 1
+        if sentence[x][1].startswith("R"):
+            pass
+        elif sentence[x][0] in belist:
+            adj_type = "pred"
+        else:
+            x = 0 # stop looking; kind of a cheap cheat, but the easiest way I could think of off the top.
+    if adj_type == "attr":
+        features_dict["adjattr_040"] += 1
+    elif adj_type == "pred":
+        features_dict["adjpred_041"] += 1
+        
+    
     
     if tagged_sentence[index-1][0] in belist:
         if tagged_sentence[index+1][1].startswith("JJ") or tagged_sentence[index+1][1].startswith("NN"):
@@ -606,8 +629,9 @@ def analyze_adjective(index, tagged_sentence, features_dict): ## 1. Kyla 2. Raff
         if tagged_sentence[index+1][1].startswith("JJ") and not tagged_sentence[index+2][1].startswith("JJ") and not tagged_sentence[index+2][1].startswith("NN"): #Would it not be okay to have JJ in position +1 and +2? 
             features_dict["adjpred_041"] += 1
             
-    elif tagged_sentence[index-1][0] in ["real", "so"] and tagged_sentence[index][1] == "JJ":
+    if tagged_sentence[index-1][0] in ["real", "so"] and tagged_sentence[index][1] == "JJ":
         #I think this should work but should double check because it was catching junk at some point (KM)
+        # AB: Turned this into an if rather than elif. Also, I think the part to the right of the boolean "and" is not needed?
         features_dict["emphatics_049"] += 1
       
 def analyze_preposition(index, tagged_sentence, features_dict): ## 1. Gustavo 2. ?
