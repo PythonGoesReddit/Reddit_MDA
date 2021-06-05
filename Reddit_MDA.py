@@ -26,16 +26,22 @@ import json
 import os
 import nltk
 import string
+import flair
 import re
 import string
 import time
 import concurrent.futures
+from flair.models import SequenceTagger
+from flair.data import Sentence
 from datetime import timedelta
 start_time = time.time()
 
 dirname = os.path.dirname(__file__)
 data_folder = os.path.join(dirname, 'sample_data')
 all_files = [os.path.join("sample_data", file) for file in os.listdir(data_folder) if os.path.splitext(file)[1] == ".json"]
+
+tagger_FLAIR = SequenceTagger.load("final-model_64.pt")
+
 
 # Preprocessing functions
 
@@ -183,18 +189,37 @@ def clean_sentence(sentence):
     ## replace emojis and emoticons (with what?)
     sentence = str(sentence).strip(string.punctuation).lower()
     ## NEEDED: remove emojis - Gustavo
-    return sentence
+    return sentence    
+
+ 
+# The function below is the previous NLTK tagger. I have hashed it out so we can revert to it in the event of any issues. (GK)
+
+#def tag_sentence(sentence):
+    #'''Takes a sentence, cleans it with clean_sentence, and tags it using the NLTK averaged_perceptron_tagger. 
+    #Adds a look ahead/behind buffer of three items of type ("X", "X") to prevent negative indices and IndexErrors
+    #Returns a list of tuples of (word, pos_tag).'''
+    #cleaned_sentence = clean_sentence(sentence)
+    #tokens = nltk.word_tokenize(cleaned_sentence)
+    #tagged_sentence = nltk.pos_tag(tokens)
+    #empty_look = [("X", "X"), ("X", "X"), ("X", "X")]
+    #tagged_sentence = empty_look + tagged_sentence + empty_look 
+    #return tagged_sentence
+
+# The function below is the newer FLAIR POS tagger. It uses the tagger_FLAIR, loaded in line 43 of the code. (GK) 
 
 def tag_sentence(sentence):
-    '''Takes a sentence, cleans it with clean_sentence, and tags it using the NLTK averaged_perceptron_tagger. 
+    '''Takes a sentence, cleans it with clean_sentence, and tags it using the FLAIR POS tagger. 
     Adds a look ahead/behind buffer of three items of type ("X", "X") to prevent negative indices and IndexErrors
     Returns a list of tuples of (word, pos_tag).'''
     cleaned_sentence = clean_sentence(sentence)
-    tokens = nltk.word_tokenize(cleaned_sentence)
-    tagged_sentence = nltk.pos_tag(tokens)
+    flair_sentence = Sentence(cleaned_sentence)
+    tagger_FLAIR.predict(flair_sentence)
+    token_list = []
+    for entity in flair_sentence.get_spans('pos'):
+        token_list.append(tuple([entity.text] + [entity.tag]))
     empty_look = [("X", "X"), ("X", "X"), ("X", "X")]
-    tagged_sentence = empty_look + tagged_sentence + empty_look 
-    return tagged_sentence
+    tagged_sentence = empty_look + token_list + empty_look 
+    return tagged_sentence        
 
 ## Definition of stopword lists and checkword lists for following POS-functions
 placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "around", 
