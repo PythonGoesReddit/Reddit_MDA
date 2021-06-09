@@ -4,3 +4,4 @@
 *.Rhistory
 .Rproj.user
 output.txt
+final-model_64.pt

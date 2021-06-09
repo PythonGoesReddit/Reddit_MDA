@@ -1,34 +1,20 @@
 # 06.05.21 - K Q: Do we need if __name__ == "__main__" for multiprocessing? 
-# I changed: make the big for loop for POS into its own function so that we can easily call it on practice sentences
-# Also moved the emtpy features dict to a global variable for the same reason 
-
 # Open Q: Will commas be removed by the tagger?
 # Open Q (HM): What about quoted material from previous comments/posts? Should we exclude it, and if yes, how?
-# Open Q (HM): In several functions we check what the index position of a word within the sentence is to get the start of the sentence only (index == 0).
-#              Does this need to be altered (to index == 3) now that we added empty tuples at the beginning of each sentence?
-
-# Code for easily checking output (adapt word positions for given feature)
-    # sentence = [word[0] for word in tagged_sentence]
-    # print(tagged_sentence[index-1][0], word_tuple[0], "//", " ".join(sentence))
-    # print()
-
-# 25_01
 # Should we transform all 'word_tuple's into 'tagged_sentence[index]'? Or does it improve readability?
+# Remove emojis in the clean sentence function?
 
-#note
-#helpful for in console, first import nltk and (first time only) nltk.download("tagsets")
-    # nltk.help.upenn_tagset('NNS')
-    # nltk.help.upenn_tagset()
+    ## NEEDED: feature 7: emoticons 
+    ## NEEDED: feature 10: strategic lengthening 
+    ## NEEDED: feature 11: alternating uppercase-lowercase 
+    ## NEEDED: function for feature 12: community-specific acronyms/lexical items (such as 'op')
 
-
-#All packages:
 import json
 import os
 import nltk
 import string
 import flair
 import re
-import string
 import time
 import concurrent.futures
 from flair.models import SequenceTagger
@@ -60,10 +46,7 @@ def check_English(text):
             return True
         else:
             return False
-    
-s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0,"prothirdper_008": 0, "proit_009": 0, "prodemons_010": 0, "proindef_011": 0, "pverbdo_012": 0, "whquest_013": 0, "nominalis_014": 0, "gerund_015": 0,"nouns_016": 0, "passagentl_017": 0, "passby_018": 0, "mainvbe_019": 0, "exthere_020": 0, "thatvcom_021": 0, "thatacom_022": 0, "whclause_023": 0, "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0, "thatresub_029": 0, "thatreobj_030": 0, "whresub_031": 0, "whreobj_032": 0, "whrepied_033": 0, "sentencere_034": 0, "advsubcause_035": 0, "advsubconc_036": 0, "advsubcond_037": 0, "advsubother_038": 0, "prepositions_039": 0, "adjattr_040": 0, "adjpred_041": 0, "adverbs_042": 0, "ttratio_043": 0, "wordlength_044": 0, "conjuncts_045": 0, "downtoners_046": 0, "hedges_047": 0, "amplifiers_048": 0, "emphatics_049": 0, "discpart_050": 0, "demonstr_051": 0, "modalsposs_052": 0, "modalsness_053": 0, "modalspred_054": 0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "vseemappear_058": 0, "contractions_059": 0, "thatdel_060": 0, "strandprep_061": 0, "vsplitinf_062": 0, "vsplitaux_063": 0, "coordphras_064": 0, "coordnonp_065": 0, "negsyn_066": 0,  "negana_067": 0, "hashtag_201": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_205": 0, "question_208": 0, "exclamation_209": 0, "lenchar_210": 0, "lenword_211": 0, "comparatives_syn_212": 0, "superlatives_syn_213": 0, "comparatives_ana_214": 0, "superlatives_ana_215":0}
 
-# initialize empty feature dictionary
 def open_reddit_json(filename):
     '''Takes Reddit json file. Separates each sentence into one dictionary.  
     Simplifies metainfo (retains body, author, link_id, subreddit). 
@@ -102,10 +85,6 @@ def open_reddit_json(filename):
 
 # Untagged feature extraction functions
 def analyze_sentence(preprocessed_json):
-    ## NEEDED: feature 7: emoticons 
-    ## NEEDED: feature 10: strategic lengthening 
-    ## NEEDED: feature 11: alternating uppercase-lowercase 
-    ## NEEDED: function for feature 12: community-specific acronyms/lexical items (such as 'op')
     # AB: General comment: careful with the .count() function. It has no inherent concept of word boundaries, which will lead to false positives in some cases (see below)
     '''Takes the preprocessed json and adds to the features sub-dictionary the following keys and counts (values): "hashtag_201": no. of hashtags,
     "question_208": no. of question marks, "exclamation_209": no of exclamation marks, "lenchar_210": len of sentence in char, "lenword_211": len of sentence in words, "conjuncts_045"'''
@@ -166,8 +145,8 @@ def analyze_sentence(preprocessed_json):
         s["lenchar_210"] = len(sentence) 
         s["lenword_211"] = len(sentence.split(" ")) 
 
-    #code below was orginially in its own function, analye_raw_words, but that seems unneccessary now
-        words = sentence_dict["body"].split()
+
+        words = sentence_dict["body"].split() #split into words for single word functions below
         for i in range(len(words)):
             if words[i].lower().startswith("u/") or words[i].lower().startswith("r/"):
                 s["link_202"] += 1 
@@ -185,14 +164,13 @@ def analyze_sentence(preprocessed_json):
 def clean_sentence(sentence):
     '''Takes a sentence and returns it in all lowercase, with deviant/creative spelling normalized, 
     with punctuation removed, and emojis removed.'''
-    ## look into what might or might not be necessary here
-    ## replace emojis and emoticons (with what?)
     sentence = str(sentence).strip(string.punctuation).lower()
-    ## NEEDED: remove emojis - Gustavo
     return sentence    
 
  
 # The function below is the previous NLTK tagger. I have hashed it out so we can revert to it in the event of any issues. (GK)
+# To use the nltk tagger: import nltk and (first time only) nltk.download("tagsets")
+# Can also look up nltk tags with (ex): nltk.help.upenn_tagset('NNS')
 
 #def tag_sentence(sentence):
     #'''Takes a sentence, cleans it with clean_sentence, and tags it using the NLTK averaged_perceptron_tagger. 
@@ -221,7 +199,8 @@ def tag_sentence(sentence):
     tagged_sentence = empty_look + token_list + empty_look 
     return tagged_sentence        
 
-## Definition of stopword lists and checkword lists for following POS-functions
+## Definition of global variables incl. stopword lists and checkword lists for following POS-functions & feature dict
+s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0,"prothirdper_008": 0, "proit_009": 0, "prodemons_010": 0, "proindef_011": 0, "pverbdo_012": 0, "whquest_013": 0, "nominalis_014": 0, "gerund_015": 0,"nouns_016": 0, "passagentl_017": 0, "passby_018": 0, "mainvbe_019": 0, "exthere_020": 0, "thatvcom_021": 0, "thatacom_022": 0, "whclause_023": 0, "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0, "thatresub_029": 0, "thatreobj_030": 0, "whresub_031": 0, "whreobj_032": 0, "whrepied_033": 0, "sentencere_034": 0, "advsubcause_035": 0, "advsubconc_036": 0, "advsubcond_037": 0, "advsubother_038": 0, "prepositions_039": 0, "adjattr_040": 0, "adjpred_041": 0, "adverbs_042": 0, "ttratio_043": 0, "wordlength_044": 0, "conjuncts_045": 0, "downtoners_046": 0, "hedges_047": 0, "amplifiers_048": 0, "emphatics_049": 0, "discpart_050": 0, "demonstr_051": 0, "modalsposs_052": 0, "modalsness_053": 0, "modalspred_054": 0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "vseemappear_058": 0, "contractions_059": 0, "thatdel_060": 0, "strandprep_061": 0, "vsplitinf_062": 0, "vsplitaux_063": 0, "coordphras_064": 0, "coordnonp_065": 0, "negsyn_066": 0,  "negana_067": 0, "hashtag_201": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_205": 0, "question_208": 0, "exclamation_209": 0, "lenchar_210": 0, "lenword_211": 0, "comparatives_syn_212": 0, "superlatives_syn_213": 0, "comparatives_ana_214": 0, "superlatives_ana_215":0}
 placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "around", 
                  "ashore", "astern", "away", "behind", "below", "beneath", "beside", "downhill",
                  "downstairs", "downstream", "east", "far", "hereabouts", "indoors", "inland", "inshore",
