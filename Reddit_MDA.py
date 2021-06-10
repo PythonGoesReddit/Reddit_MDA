@@ -13,10 +13,12 @@ import json
 import os
 import nltk
 import string
-import flair
+#import flair
 import re
 import time
 import concurrent.futures
+from multiprocessing import Pool, Manager
+import psutil
 from flair.models import SequenceTagger
 from flair.data import Sentence
 from datetime import timedelta
@@ -912,7 +914,9 @@ def MDA_analyzer(filepath):
         POS_tagger(tagged_sentence, features_dict)
         all_ft_dicts.append(sentence_dict)
     
-    return all_ft_dicts
+    r = open(os.path.join(dirname, 'results'), "w")
+    r.write(all_ft_dicts + '\n')
+    r.close()
 
 def tester(practice_sentences, feature):
     for practice_sentence in practice_sentences:
@@ -927,19 +931,28 @@ practice_sentences = ["He then consequently ate five donuts in a row.",
 "Go buy donuts now else there won't be any left.", "I want something else.", 
 "Go eat a donut instead of complaining.", "I would much rather have a donut now than later."]
 
-tester(practice_sentences, "conjuncts_045")
+#tester(practice_sentences, "conjuncts_045")
 
-with concurrent.futures.ProcessPoolExecutor() as executor:
-    #output = 
-    executor.map(MDA_analyzer, all_files)
+# if __name__ == "__main__":
+    
+#     ram_present = psutil.virtual_memory()[0] >> 30
+#     if ram_present < 7:
+#         print("WARNING: This is RAM-intensive operation. It cannot continue if you don't have at least 8 GB of RAM.\nExiting...")
+#         sys.exit(0)
+    
+#     p = Pool()
+    
+#     results = p.map(MDA_analyzer, all_files)
+#     print(results)
+    
+#     p.close()
+#     p.join()
 
-# f = open(os.path.join(dirname, 'output.txt'), "w")
-# for item in output:
-#     f.write(str(item))
-# f.close()
+# with concurrent.futures.ProcessPoolExecutor() as executor:
+#     executor.map(MDA_analyzer, all_files)
 
-# for file in all_files:
-#     MDA_analyzer(file)
+for file in all_files:
+    MDA_analyzer(file)
 
 print(timedelta(seconds=time.time() - start_time))
 
