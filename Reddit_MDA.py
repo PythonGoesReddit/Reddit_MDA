@@ -9,6 +9,14 @@
     ## NEEDED: feature 11: alternating uppercase-lowercase 
     ## NEEDED: function for feature 12: community-specific acronyms/lexical items (such as 'op')
 
+#New comments
+# 10.06.21: Flair tagger seems to be much slower (>30min for 3 files for me). Should we separate tagging and feature collection? 
+# For example, we could tag the file, save it in the folder separately, and then use the tagged file for feature collection later
+# Then if we have to change or re-run, we would have a copy of tagging / could do it separately to help with time / CPU power 
+# Would take more hard drive space, but could also have it be optional, i.e. if tagged version exists, use that, if not, tag fresh and save
+# I've added a multiprocessing system for which the feature dicts for each file get saved separately
+# These can easily be combined into one file later and would allow us to divided up parts of Reddit across multiple computers
+
 import json
 import os
 import nltk
@@ -174,32 +182,32 @@ def clean_sentence(sentence):
 # To use the nltk tagger: import nltk and (first time only) nltk.download("tagsets")
 # Can also look up nltk tags with (ex): nltk.help.upenn_tagset('NNS')
 
-#def tag_sentence(sentence):
-    #'''Takes a sentence, cleans it with clean_sentence, and tags it using the NLTK averaged_perceptron_tagger. 
-    #Adds a look ahead/behind buffer of three items of type ("X", "X") to prevent negative indices and IndexErrors
-    #Returns a list of tuples of (word, pos_tag).'''
-    #cleaned_sentence = clean_sentence(sentence)
-    #tokens = nltk.word_tokenize(cleaned_sentence)
-    #tagged_sentence = nltk.pos_tag(tokens)
-    #empty_look = [("X", "X"), ("X", "X"), ("X", "X")]
-    #tagged_sentence = empty_look + tagged_sentence + empty_look 
-    #return tagged_sentence
-
-# The function below is the newer FLAIR POS tagger. It uses the tagger_FLAIR, loaded in line 43 of the code. (GK) 
-
 def tag_sentence(sentence):
-    '''Takes a sentence, cleans it with clean_sentence, and tags it using the FLAIR POS tagger. 
+    '''Takes a sentence, cleans it with clean_sentence, and tags it using the NLTK averaged_perceptron_tagger. 
     Adds a look ahead/behind buffer of three items of type ("X", "X") to prevent negative indices and IndexErrors
     Returns a list of tuples of (word, pos_tag).'''
     cleaned_sentence = clean_sentence(sentence)
-    flair_sentence = Sentence(cleaned_sentence)
-    tagger_FLAIR.predict(flair_sentence)
-    token_list = []
-    for entity in flair_sentence.get_spans('pos'):
-        token_list.append(tuple([entity.text] + [entity.tag]))
+    tokens = nltk.word_tokenize(cleaned_sentence)
+    tagged_sentence = nltk.pos_tag(tokens)
     empty_look = [("X", "X"), ("X", "X"), ("X", "X")]
-    tagged_sentence = empty_look + token_list + empty_look 
-    return tagged_sentence        
+    tagged_sentence = empty_look + tagged_sentence + empty_look 
+    return tagged_sentence
+
+# The function below is the newer FLAIR POS tagger. It uses the tagger_FLAIR, loaded in line 43 of the code. (GK) 
+
+# def tag_sentence(sentence):
+#     '''Takes a sentence, cleans it with clean_sentence, and tags it using the FLAIR POS tagger. 
+#     Adds a look ahead/behind buffer of three items of type ("X", "X") to prevent negative indices and IndexErrors
+#     Returns a list of tuples of (word, pos_tag).'''
+#     cleaned_sentence = clean_sentence(sentence)
+#     flair_sentence = Sentence(cleaned_sentence)
+#     tagger_FLAIR.predict(flair_sentence)
+#     token_list = []
+#     for entity in flair_sentence.get_spans('pos'):
+#         token_list.append(tuple([entity.text] + [entity.tag]))
+#     empty_look = [("X", "X"), ("X", "X"), ("X", "X")]
+#     tagged_sentence = empty_look + token_list + empty_look 
+#     return tagged_sentence        
 
 ## Definition of global variables incl. stopword lists and checkword lists for following POS-functions & feature dict
 s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0,"prothirdper_008": 0, "proit_009": 0, "prodemons_010": 0, "proindef_011": 0, "pverbdo_012": 0, "whquest_013": 0, "nominalis_014": 0, "gerund_015": 0,"nouns_016": 0, "passagentl_017": 0, "passby_018": 0, "mainvbe_019": 0, "exthere_020": 0, "thatvcom_021": 0, "thatacom_022": 0, "whclause_023": 0, "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0, "thatresub_029": 0, "thatreobj_030": 0, "whresub_031": 0, "whreobj_032": 0, "whrepied_033": 0, "sentencere_034": 0, "advsubcause_035": 0, "advsubconc_036": 0, "advsubcond_037": 0, "advsubother_038": 0, "prepositions_039": 0, "adjattr_040": 0, "adjpred_041": 0, "adverbs_042": 0, "ttratio_043": 0, "wordlength_044": 0, "conjuncts_045": 0, "downtoners_046": 0, "hedges_047": 0, "amplifiers_048": 0, "emphatics_049": 0, "discpart_050": 0, "demonstr_051": 0, "modalsposs_052": 0, "modalsness_053": 0, "modalspred_054": 0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "vseemappear_058": 0, "contractions_059": 0, "thatdel_060": 0, "strandprep_061": 0, "vsplitinf_062": 0, "vsplitaux_063": 0, "coordphras_064": 0, "coordnonp_065": 0, "negsyn_066": 0,  "negana_067": 0, "hashtag_201": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_205": 0, "question_208": 0, "exclamation_209": 0, "lenchar_210": 0, "lenword_211": 0, "comparatives_syn_212": 0, "superlatives_syn_213": 0, "comparatives_ana_214": 0, "superlatives_ana_215":0}
@@ -914,7 +922,7 @@ def MDA_analyzer(filepath):
         POS_tagger(tagged_sentence, features_dict)
         all_ft_dicts.append(sentence_dict)
     
-    r = open(os.path.join(dirname, 'results'), "w")
+    r = open(os.path.join(dirname, 'results', preprocessed_file, "_r"), "w")
     r.write(all_ft_dicts + '\n')
     r.close()
 
@@ -948,11 +956,11 @@ practice_sentences = ["He then consequently ate five donuts in a row.",
 #     p.close()
 #     p.join()
 
-# with concurrent.futures.ProcessPoolExecutor() as executor:
-#     executor.map(MDA_analyzer, all_files)
+with concurrent.futures.ProcessPoolExecutor() as executor:
+    executor.map(MDA_analyzer, all_files)
 
-for file in all_files:
-    MDA_analyzer(file)
+# for file in all_files:
+#     MDA_analyzer(file)
 
 print(timedelta(seconds=time.time() - start_time))
 
