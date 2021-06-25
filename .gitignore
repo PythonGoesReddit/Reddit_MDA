@@ -3,5 +3,6 @@
 *.vscode
 *.Rhistory
 .Rproj.user
+.Rproject
 output.txt
 final-model_64.pt

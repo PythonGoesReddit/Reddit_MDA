@@ -27,8 +27,8 @@ import time
 import concurrent.futures
 from multiprocessing import Pool, Manager
 import psutil
-from flair.models import SequenceTagger
-from flair.data import Sentence
+#from flair.models import SequenceTagger
+#from flair.data import Sentence
 from datetime import timedelta
 start_time = time.time()
 
@@ -939,7 +939,7 @@ practice_sentences = ["He then consequently ate five donuts in a row.",
 "Go buy donuts now else there won't be any left.", "I want something else.", 
 "Go eat a donut instead of complaining.", "I would much rather have a donut now than later."]
 
-#tester(practice_sentences, "conjuncts_045")
+tester(practice_sentences, "conjuncts_045")
 
 # if __name__ == "__main__":
     
@@ -956,8 +956,8 @@ practice_sentences = ["He then consequently ate five donuts in a row.",
 #     p.close()
 #     p.join()
 
-with concurrent.futures.ProcessPoolExecutor() as executor:
-    executor.map(MDA_analyzer, all_files)
+# with concurrent.futures.ProcessPoolExecutor() as executor:
+#     executor.map(MDA_analyzer, all_files)
 
 # for file in all_files:
 #     MDA_analyzer(file)
