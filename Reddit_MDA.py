@@ -36,7 +36,7 @@ dirname = os.path.dirname(__file__)
 data_folder = os.path.join(dirname, 'sample_data')
 all_files = [os.path.join("sample_data", file) for file in os.listdir(data_folder) if os.path.splitext(file)[1] == ".json"]
 
-tagger_FLAIR = SequenceTagger.load("final-model_64.pt")
+#tagger_FLAIR = SequenceTagger.load("final-model_64.pt")
 
 
 # Preprocessing functions
