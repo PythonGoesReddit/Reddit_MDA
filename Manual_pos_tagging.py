@@ -21,7 +21,7 @@ with open(filepath) as f:
         untagged = [[x[0],"_"] for x in tagged]
         link_id = data["link_id"]
         sentence_no = data["sentence_no"]
-        p.write("\t".join(lin_id, sentence_no, untagged)+"\n")
+        p.write(link_id + "	" + str(sentence_no) + "	" + str(untagged) +"\n")
     p.close()
     p = open("Tagged_JSONS/RC_2005-12_tagged_manual_Batch2.txt", "w")
     for x in range(100,200):
@@ -30,7 +30,7 @@ with open(filepath) as f:
         untagged = [[x[0],"_"] for x in tagged]
         link_id = data["link_id"]
         sentence_no = data["sentence_no"]
-        p.write("\t".join(lin_id, sentence_no, untagged)+"\n")
+        p.write(link_id + "\t" + str(sentence_no) + "\t" + str(untagged) +"\n")
     p.close()
     p = open("Tagged_JSONS/RC_2005-12_tagged_manual_Batch3.txt", "w")
     for x in range(200,300):
@@ -39,7 +39,7 @@ with open(filepath) as f:
         untagged = [[x[0],"_"] for x in tagged]
         link_id = data["link_id"]
         sentence_no = data["sentence_no"]
-        p.write("\t".join(lin_id, sentence_no, untagged)+"\n")
+        p.write(link_id + "\t" + str(sentence_no) + "\t" + str(untagged) +"\n")
     p.close()       
     p = open("Tagged_JSONS/RC_2005-12_tagged_manual_Batch4.txt", "w")
     for x in range(300,400):
@@ -48,7 +48,7 @@ with open(filepath) as f:
         untagged = [[x[0],"_"] for x in tagged]
         link_id = data["link_id"]
         sentence_no = data["sentence_no"]
-        p.write("\t".join(lin_id, sentence_no, untagged)+"\n")
+        p.write(link_id + "\t" + str(sentence_no) + "\t" + str(untagged) +"\n")
     p.close()
     p = open("Tagged_JSONS/RC_2005-12_tagged_manual_Batch5.txt", "w")
     for x in range(400,500):
@@ -57,7 +57,7 @@ with open(filepath) as f:
         untagged = [[x[0],"_"] for x in tagged]
         link_id = data["link_id"]
         sentence_no = data["sentence_no"]
-        p.write("\t".join(lin_id, sentence_no, untagged)+"\n")
+        p.write(link_id + "\t" + str(sentence_no) + "\t" + str(untagged) +"\n")
     p.close()       
                   
             
