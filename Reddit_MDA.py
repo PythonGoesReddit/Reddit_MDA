@@ -81,10 +81,11 @@ def open_reddit_json(filename):
 
                 sentence_counter = 0
                 for sentence in nltk.tokenize.sent_tokenize(body): #separates into sentences
-                    sentence_counter +=1 #keep track of which sentence it is (1st, 2nd, etc.)
-                    sentence_dict = {"body": sentence, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}
-                    sentence_dict["features"] = s.copy()
-                    prepped_json[str(base + "_" + str(link_id) + "_" + str(sentence_counter))] = sentence_dict #creates a dict within a dict, so that the key (filename, linkid, sentence number) calls the whole dict
+                    if sentence.strip(string.punctuation): 
+                        sentence_counter +=1 #keep track of which sentence it is (1st, 2nd, etc.)
+                        sentence_dict = {"body": sentence, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}
+                        sentence_dict["features"] = s.copy()
+                        prepped_json[str(base + "_" + str(link_id) + "_" + str(sentence_counter))] = sentence_dict #creates a dict within a dict, so that the key (filename, linkid, sentence number) calls the whole dict
 
             except json.decoder.JSONDecodeError:
                 errors +=1 #keeps track of how many errors are encountered/lines skipped
