@@ -1,0 +1,55 @@
+Notes on MCA
+
+In order to reduce the data load, we need to find an efficient way of doing MCA over LOTS of texts.
+This should be alright, because MCA is just CA over the indicator or Burt matrix of the data (http://statmath.wu.ac.at/courses/CAandRelMeth/CARME5.pdf).
+The Burt matrix is a JxJ matrix with all levels of all variables = J (does this mean there has to be a level for each occurrence AND each non-occurrence?)
+It should be possible to continuously update this matrix as new texts are processed.
+Existing implementations of MCA in Python do not seem to directly work, but we can dynamically update the Burt matrix and then do CA on it.
+The code below (https://github.com/MaxHalford/prince#correspondence-analysis-ca) does just that.
+I have used a dummy Burt matrix with large numbers in the cells (hundreds of billions), and that does not seem to cause computational problems.
+According Wikipedia (https://en.wikipedia.org/wiki/Multiple_correspondence_analysis):
+"Analyzing the Burt table is a more natural generalization of simple correspondence analysis, and individuals or the means of groups of individuals can be added as supplementary points to the graphical display."
+
+import pandas as pd
+
+pd.set_option('display.float_format', lambda x: '{:.6f}'.format(x))
+
+X = pd.DataFrame(
+    data=[
+      [1190000000000,0,0,0,0,270000000000,280000000000,300000000000,220000000000,120000000000],
+      [0,3220000000000,0,0,0,380000000000,740000000000,840000000000,960000000000,300000000000],
+      [0,0,2040000000000,0,0,30000000000,480000000000,630000000000,730000000000,170000000000],
+      [0,0,0,1780000000000,0,30000000000,210000000000,230000000000,790000000000,520000000000],
+      [0,0,0,0,480000000000,0,30000000000,50000000000,110000000000,290000000000],
+      [270000000000,280000000000,30000000000,30000000000,0,710000000000,0,0,0,0],
+      [280000000000,740000000000,480000000000,210000000000,30000000000,0,1740000000000,0,0,0],
+      [300000000000,840000000000,630000000000,230000000000,50000000000,0,0,2030000000000,0,0],
+      [220000000000,960000000000,730000000000,790000000000,110000000000,0,0,0,2810000000000,0],
+      [120000000000,300000000000,170000000000,520000000000,290000000000,0,0,0,0,1400000000000]
+    ],
+    columns=pd.Series(['V1-1', 'V1-2', 'V1-3', 'V1-4', 'V1-5', 'V2-1', 'V2-2', 'V2-3', 'V2-4', 'V2-5']),
+    index=pd.Series(['V1-1', 'V1-2', 'V1-3', 'V1-4', 'V1-5', 'V2-1', 'V2-2', 'V2-3', 'V2-4', 'V2-5'])
+)
+
+import prince
+ca = prince.CA(
+    n_components=2,
+    n_iter=3,
+    copy=True,
+    check_input=True,
+    engine='auto',
+    random_state=42
+)
+X.columns.rename('Variables', inplace=True)
+X.index.rename('Variables', inplace=True)
+ca = ca.fit(X)
+
+ax = ca.plot_coordinates(
+     X=X,
+     ax=None,
+     figsize=(6, 6),
+     x_component=0,
+     y_component=1,
+     show_row_labels=True,
+     show_col_labels=True
+)
