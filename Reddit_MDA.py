@@ -1,6 +1,5 @@
 # 06.05.21 - K Q: Do we need if __name__ == "__main__" for multiprocessing? 
 # Open Q: Will commas be removed by the tagger?
-# Open Q (HM): What about quoted material from previous comments/posts? Should we exclude it, and if yes, how?
 # Should we transform all 'word_tuple's into 'tagged_sentence[index]'? Or does it improve readability?
 # Remove emojis in the clean sentence function?
 
@@ -291,9 +290,6 @@ copulalist = ["be", "am", "is", "was", "were", "been", "being", "appear", "appea
               "sound", "sounds", "sounding", "sounded", "smell", "smells", "smelled", "smelling", "become", "becomes", "became", "becoming", "turn", 
               "turns", "turning", "turned", "turn", "grow", "grows", "grew", "growing", "growed", "grown", "get", "gets", "getting", "gotten", 
               "got", "look", "looks", "looking", "looked", "taste", "tastes", "tasted", "tasting", "feel", "feels", "feeled", "felt", "feeling"] 
-            # AB: are these missing on purpose: "turnt", "grown", "gets", "getting", "gotten"?
-            # HM: nope, sorry! added the missing ones. There are also some more marginal verbs which I didn't include, but I don't think 
-            # we need to worry about these
 
 
 #POS-functions
@@ -302,9 +298,6 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
     "pverbdo_012", "passagentl_017", "passby_018", "mainvbe_019", "whclause_023", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
     "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
     "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''
-    ## already checked: "vpast_001", "pverbdo_012", "passagentl_017", "passby_018", "whclause_023", "vinfinitive_024", "vimperative_205", "vpresentpart_025", "vpresentwhiz_028", "vpastpart_026", "vpastwhiz_027", "vpresent_003", 
-    ##          "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "vpastperfect_002b", "vpresperfect_002a", "mainvbe_019", "contractions_059", "thatdel_060", "vsplitinf_062", "vsplitaux_063", 
-    ## still needs checking: 
       
     word_tuple = tagged_sentence[index]
     if word_tuple[1] == "VBD":
@@ -764,9 +757,6 @@ def analyze_conjunction(index, tagged_sentence, features_dict): ## 1. Gustavo 2.
         features_dict["coordnonp_065"] += 1
     elif word_tuple[0] == "and" and tagged_sentence[index+1][0] in conjunctslist:
         features_dict["coordnonp_065"] += 1
-
-     
-    # still missing: "coordnonp_065" (only for 'and' followed by adverbial subordinator or conjunct, depend on other features)
 
 
 def analyze_determiner(index, tagged_sentence, features_dict): ## 1. Rafaela 2. Gustavo
