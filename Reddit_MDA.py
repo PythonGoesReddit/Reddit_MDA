@@ -114,8 +114,9 @@ def analyze_sentence(preprocessed_json):
  
         s["conjuncts_045"] = sentence.count("that is,") #Will only catch sentences with proper punctuation but it's a start
         
-        s["lengthening_206"] = sentence.count(r"[a-zA-Z]{4,20}") # HM: unsure whether this works, I settled on a minimum of four occurences of the same letter (to avoid matches for "www.")
-
+        s["lengthening_206"] = len(re.findall(r"([a-zA-Z])\1{4,20}", sentence))k 
+        ## I settled on a minimum of four occurences of the same letter (to avoid matches for "www.") (HM)
+        
         for emphatic in [" for sure", " a lot", " such a ", " such an ", " just ", " really", " most ", " more "]: 
         # AB: This whole category strikes me as ill-conceived. Almost all items can, and often do, serve other functions than emphatics:
         # AB: "such a(n)" as anaphoric determinatives ("But such an approach is not easily implemented."),
