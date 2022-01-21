@@ -114,7 +114,7 @@ def analyze_sentence(preprocessed_json):
  
         s["conjuncts_045"] = sentence.count("that is,") #Will only catch sentences with proper punctuation but it's a start
         
-        s["lengthening_206"] = len(re.findall(r"([a-zA-Z])\1{4,20}", sentence))k 
+        s["lengthening_206"] = len([X for X in re.findall(r"([a-zA-Z])\1{3,1000}", sentence) if not "www." in X])
         ## I settled on a minimum of four occurences of the same letter (to avoid matches for "www.") (HM)
         
         for emphatic in [" for sure", " a lot", " such a ", " such an ", " just ", " really", " most ", " more "]: 
