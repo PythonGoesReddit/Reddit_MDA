@@ -1,13 +1,7 @@
 # 06.05.21 - K Q: Do we need if __name__ == "__main__" for multiprocessing? 
 # Open Q: Will commas be removed by the tagger?
-# Open Q (HM): What about quoted material from previous comments/posts? Should we exclude it, and if yes, how?
 # Should we transform all 'word_tuple's into 'tagged_sentence[index]'? Or does it improve readability?
-# Remove emojis in the clean sentence function?
-
-    ## NEEDED: feature 7: emoticons 
-    ## NEEDED: feature 10: strategic lengthening 
-    ## NEEDED: feature 11: alternating uppercase-lowercase 
-    ## NEEDED: function for feature 12: community-specific acronyms/lexical items (such as 'op')
+# Remove emojis and creative spellings (including lenghtenings) in the clean sentence function?
 
 #New comments
 # 10.06.21: Flair tagger seems to be much slower (>30min for 3 files for me). Should we separate tagging and feature collection? 
@@ -81,10 +75,11 @@ def open_reddit_json(filename):
 
                 sentence_counter = 0
                 for sentence in nltk.tokenize.sent_tokenize(body): #separates into sentences
-                    sentence_counter +=1 #keep track of which sentence it is (1st, 2nd, etc.)
-                    sentence_dict = {"body": sentence, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}
-                    sentence_dict["features"] = s.copy()
-                    prepped_json[str(base + "_" + str(link_id) + "_" + str(sentence_counter))] = sentence_dict #creates a dict within a dict, so that the key (filename, linkid, sentence number) calls the whole dict
+                    if sentence.strip(string.punctuation): 
+                        sentence_counter +=1 #keep track of which sentence it is (1st, 2nd, etc.)
+                        sentence_dict = {"body": sentence, "author": author, "link_id": link_id, "sentence_no": sentence_counter, "subreddit": subreddit}
+                        sentence_dict["features"] = s.copy()
+                        prepped_json[str(base + "_" + str(link_id) + "_" + str(sentence_counter))] = sentence_dict #creates a dict within a dict, so that the key (filename, linkid, sentence number) calls the whole dict
 
             except json.decoder.JSONDecodeError:
                 errors +=1 #keeps track of how many errors are encountered/lines skipped
@@ -97,7 +92,8 @@ def open_reddit_json(filename):
 def analyze_sentence(preprocessed_json):
     # AB: General comment: careful with the .count() function. It has no inherent concept of word boundaries, which will lead to false positives in some cases (see below)
     '''Takes the preprocessed json and adds to the features sub-dictionary the following keys and counts (values): "hashtag_201": no. of hashtags,
-    "question_208": no. of question marks, "exclamation_209": no of exclamation marks, "lenchar_210": len of sentence in char, "lenword_211": len of sentence in words, "conjuncts_045"'''
+    "question_208": no. of question marks, "exclamation_209": no of exclamation marks, "lenchar_210": len of sentence in char, "lenword_211": len of sentence in words, 
+    "conjuncts_045", "reddit_vocab".'''
 
     for id in preprocessed_json: 
         sentence_dict = preprocessed_json.get(id)
@@ -117,7 +113,10 @@ def analyze_sentence(preprocessed_json):
         s["exclamation_209"] = sentence.count("!") # AB: Same as above.
  
         s["conjuncts_045"] = sentence.count("that is,") #Will only catch sentences with proper punctuation but it's a start
-
+        
+        s["lengthening_206"] = len([X for X in re.findall(r"([a-zA-Z])\1{3,1000}", sentence) if not "www." in X])
+        ## I settled on a minimum of four occurences of the same letter (to avoid matches for "www.") (HM)
+        
         for emphatic in [" for sure", " a lot", " such a ", " such an ", " just ", " really", " most ", " more "]: 
         # AB: This whole category strikes me as ill-conceived. Almost all items can, and often do, serve other functions than emphatics:
         # AB: "such a(n)" as anaphoric determinatives ("But such an approach is not easily implemented."),
@@ -154,15 +153,31 @@ def analyze_sentence(preprocessed_json):
             s["advsubcond_037"] += 1
         s["lenchar_210"] = len(sentence) 
         s["lenword_211"] = len(sentence.split(" ")) 
+        
+        for emoticon in [":-)", ":)", ";-)", ":-P", ";-P", ":-p", ";-p", ":-(", ";-(", ":-O", "^^", "-.-", ":-$", ":-\\", ":-/", ":-|", ";-/", ";-\\",
+                        ":-[", ":-]", ":-§", "owo", "*.*"]: ## feel free to add to this list (HM) it probably reveals more about my out-of-date emoticon
+                                                            ## use than it does about current practices on reddit
+            s["emoticons_207"] += sentence.count(emoticon)
 
 
         words = sentence_dict["body"].split() #split into words for single word functions below
         for i in range(len(words)):
-            if words[i].lower().startswith("u/") or words[i].lower().startswith("r/"):
+            if words[i].lower() in ["op", "subreddit", "sub", "subreddits", "upvoted", "posted", "repost", "thread", "upvotes", "upvote",
+                    "redditor", "redditors", "post", "posts", "mod", "mods", "flair",]:
+                s["reddit_vocab_216"] += 1 ## feature 216: community-specific acronyms/lexical items, 
+                # keyword generated by comparing raw Reddit texts from 2013 to Frown corpus, and taken from Mahler (2020) (HM)
+            
+            if words[i].lower().startswith("u/"):
                 s["link_202"] += 1 
+                words[i] = "username" ## added these replacement statements to ease the later processing - and also for anonymisation (HM)
+                
+            if words[i].lower().startswith("r/"):
+                s["link_202"] += 1 
+                words[i] = "subredditname" ## added these replacement statements to ease the later processing (HM)
 
             if "http" in words[i].lower() or "www" in words[i].lower():
                 s["interlink_203"] += 1 
+                words[i] = "url" ## added these replacement statements to ease the later processing (HM)
 
             if not i == 0:
                 if words[i].isupper() and not words[i]=="I":
@@ -172,9 +187,10 @@ def analyze_sentence(preprocessed_json):
                     s["caps_204"] += 1  
 
 def clean_sentence(sentence):
-    '''Takes a sentence and returns it in all lowercase, with deviant/creative spelling normalized, 
-    with punctuation removed, and emojis removed.'''
+    '''Takes a sentence and returns it in all lowercase, with punctuation removed, and emojis removed.'''
     sentence = str(sentence).strip(string.punctuation).lower()
+    ## emoticons already counted (but not removed) in the analyse_sentence function
+    ## links and URLs counted AND removed in the analyse_sentence function
     return sentence    
 
  
@@ -210,7 +226,20 @@ def tag_sentence(sentence):
 #     return tagged_sentence        
 
 ## Definition of global variables incl. stopword lists and checkword lists for following POS-functions & feature dict
-s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, "profirpers_006": 0, "prosecpers_007": 0,"prothirdper_008": 0, "proit_009": 0, "prodemons_010": 0, "proindef_011": 0, "pverbdo_012": 0, "whquest_013": 0, "nominalis_014": 0, "gerund_015": 0,"nouns_016": 0, "passagentl_017": 0, "passby_018": 0, "mainvbe_019": 0, "exthere_020": 0, "thatvcom_021": 0, "thatacom_022": 0, "whclause_023": 0, "vinfinitive_024": 0, "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0, "thatresub_029": 0, "thatreobj_030": 0, "whresub_031": 0, "whreobj_032": 0, "whrepied_033": 0, "sentencere_034": 0, "advsubcause_035": 0, "advsubconc_036": 0, "advsubcond_037": 0, "advsubother_038": 0, "prepositions_039": 0, "adjattr_040": 0, "adjpred_041": 0, "adverbs_042": 0, "ttratio_043": 0, "wordlength_044": 0, "conjuncts_045": 0, "downtoners_046": 0, "hedges_047": 0, "amplifiers_048": 0, "emphatics_049": 0, "discpart_050": 0, "demonstr_051": 0, "modalsposs_052": 0, "modalsness_053": 0, "modalspred_054": 0, "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "vseemappear_058": 0, "contractions_059": 0, "thatdel_060": 0, "strandprep_061": 0, "vsplitinf_062": 0, "vsplitaux_063": 0, "coordphras_064": 0, "coordnonp_065": 0, "negsyn_066": 0,  "negana_067": 0, "hashtag_201": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_205": 0, "question_208": 0, "exclamation_209": 0, "lenchar_210": 0, "lenword_211": 0, "comparatives_syn_212": 0, "superlatives_syn_213": 0, "comparatives_ana_214": 0, "superlatives_ana_215":0}
+s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, 
+     "profirpers_006": 0, "prosecpers_007": 0,"prothirdper_008": 0, "proit_009": 0, "prodemons_010": 0, "proindef_011": 0, 
+     "pverbdo_012": 0, "whquest_013": 0, "nominalis_014": 0, "gerund_015": 0,"nouns_016": 0, "passagentl_017": 0, "passby_018": 0, 
+     "mainvbe_019": 0, "exthere_020": 0, "thatvcom_021": 0, "thatacom_022": 0, "whclause_023": 0, "vinfinitive_024": 0, 
+     "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0, "thatresub_029": 0, "thatreobj_030": 0, 
+     "whresub_031": 0, "whreobj_032": 0, "whrepied_033": 0, "sentencere_034": 0, "advsubcause_035": 0, "advsubconc_036": 0, 
+     "advsubcond_037": 0, "advsubother_038": 0, "prepositions_039": 0, "adjattr_040": 0, "adjpred_041": 0, "adverbs_042": 0, 
+     "ttratio_043": 0, "wordlength_044": 0, "conjuncts_045": 0, "downtoners_046": 0, "hedges_047": 0, "amplifiers_048": 0, 
+     "emphatics_049": 0, "discpart_050": 0, "demonstr_051": 0, "modalsposs_052": 0, "modalsness_053": 0, "modalspred_054": 0, 
+     "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "vseemappear_058": 0, "contractions_059": 0, "thatdel_060": 0, 
+     "strandprep_061": 0, "vsplitinf_062": 0, "vsplitaux_063": 0, "coordphras_064": 0, "coordnonp_065": 0, "negsyn_066": 0, 
+     "negana_067": 0, "hashtag_201": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_205": 0, "lengthening_206":0,
+     "emoticons_207":0, "question_208": 0, "exclamation_209": 0, "lenchar_210": 0, "lenword_211": 0, "comparatives_syn_212": 0, 
+     "superlatives_syn_213": 0, "comparatives_ana_214": 0, "superlatives_ana_215":0, "reddit_vocab_216":0}
 placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "around", 
                  "ashore", "astern", "away", "behind", "below", "beneath", "beside", "downhill",
                  "downstairs", "downstream", "east", "far", "hereabouts", "indoors", "inland", "inshore",
@@ -290,9 +319,6 @@ copulalist = ["be", "am", "is", "was", "were", "been", "being", "appear", "appea
               "sound", "sounds", "sounding", "sounded", "smell", "smells", "smelled", "smelling", "become", "becomes", "became", "becoming", "turn", 
               "turns", "turning", "turned", "turn", "grow", "grows", "grew", "growing", "growed", "grown", "get", "gets", "getting", "gotten", 
               "got", "look", "looks", "looking", "looked", "taste", "tastes", "tasted", "tasting", "feel", "feels", "feeled", "felt", "feeling"] 
-            # AB: are these missing on purpose: "turnt", "grown", "gets", "getting", "gotten"?
-            # HM: nope, sorry! added the missing ones. There are also some more marginal verbs which I didn't include, but I don't think 
-            # we need to worry about these
 
 
 #POS-functions
@@ -301,9 +327,6 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
     "pverbdo_012", "passagentl_017", "passby_018", "mainvbe_019", "whclause_023", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
     "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
     "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''
-    ## already checked: "vpast_001", "pverbdo_012", "passagentl_017", "passby_018", "whclause_023", "vinfinitive_024", "vimperative_205", "vpresentpart_025", "vpresentwhiz_028", "vpastpart_026", "vpastwhiz_027", "vpresent_003", 
-    ##          "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "vpastperfect_002b", "vpresperfect_002a", "mainvbe_019", "contractions_059", "thatdel_060", "vsplitinf_062", "vsplitaux_063", 
-    ## still needs checking: 
       
     word_tuple = tagged_sentence[index]
     if word_tuple[1] == "VBD":
@@ -763,9 +786,6 @@ def analyze_conjunction(index, tagged_sentence, features_dict): ## 1. Gustavo 2.
         features_dict["coordnonp_065"] += 1
     elif word_tuple[0] == "and" and tagged_sentence[index+1][0] in conjunctslist:
         features_dict["coordnonp_065"] += 1
-
-     
-    # still missing: "coordnonp_065" (only for 'and' followed by adverbial subordinator or conjunct, depend on other features)
 
 
 def analyze_determiner(index, tagged_sentence, features_dict): ## 1. Rafaela 2. Gustavo
