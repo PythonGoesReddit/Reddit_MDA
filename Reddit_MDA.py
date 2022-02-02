@@ -1,7 +1,6 @@
 # 06.05.21 - K Q: Do we need if __name__ == "__main__" for multiprocessing? 
 # Open Q: Will commas be removed by the tagger?
 # Should we transform all 'word_tuple's into 'tagged_sentence[index]'? Or does it improve readability?
-# Remove emojis and creative spellings (including lenghtenings) in the clean sentence function?
 
 #New comments
 # 10.06.21: Flair tagger seems to be much slower (>30min for 3 files for me). Should we separate tagging and feature collection? 
@@ -176,13 +175,16 @@ def analyze_sentence(preprocessed_json):
 
         words = sentence_dict["body"].split() #split into words for single word functions below
         
-        ## Insert here: calculation of average word length (wordlength_044)
-        ## sum_wordlength = 0
-        ## for word in words:
-        ##     wordlenght = len(word)
-        ##     sum_wordlength = sum_wordlength + wordlength
-        ## s["wordlength_044"] = sum_wordlength
-        
+        sum_wordlen = 0
+        for word in words:
+            word = re.sub(r'[^\w\s]','', word)
+            wordlen = len(word)
+            print(str(word) + "   has the length: " + str(wordlen))
+            sum_wordlen = sum_wordlen + wordlen
+            print("The current sum of word lenghts is: " + str(sum_wordlen))
+            print("The number of words in this sentence is: " + str(len(words)))
+        s["wordlength_044"] = (sum_wordlen/len(words)) # this works fine but the output might look weird since the words are here separated differently than they are by the tagger
+
         ## Insert here: calculation of type-token ratio (ttratio_043) 
         
         for i in range(len(words)):
@@ -583,10 +585,10 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
         
     
 
-def analyze_modal(index, tagged_sentence, features_dict): ## 1. Axel 2. Hanna
+def analyze_modal(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "modalsposs_052", "modalsness_053", "modalspred_054", "contractions_059", "vsplitaux_063".'''
-    word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    word_tuple = tagged_sentence[index]
     if word_tuple[0] in ["can","may","might","could"]:
         features_dict["modalsposs_052"] += 1
     elif word_tuple[0] in ["ought","should","must"]:
@@ -612,12 +614,12 @@ def analyze_modal(index, tagged_sentence, features_dict): ## 1. Axel 2. Hanna
         else:
             move_on = False
     
-def analyze_adverb(index, tagged_sentence, features_dict): ## 1. Hanna 2. Raffaela 3. Axel
+def analyze_adverb(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "advplace_004", "advtime_005", "adverbs_042", "conjuncts_045",
     "downtoners_046", "hedges_047", "amplifiers_048", "discpart_050", "contractions_059", "negana_067".'''
     features_dict["adverbs_042"] += 1
-    word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    word_tuple = tagged_sentence[index]
 
     if word_tuple[0] == "not":
         features_dict["negana_067"] += 1
@@ -636,8 +638,6 @@ def analyze_adverb(index, tagged_sentence, features_dict): ## 1. Hanna 2. Raffae
         features_dict["conjuncts_045"] += 1
     elif index == 0 and word_tuple[0] in discpart:
         features_dict["discpart_050"] += 1
-    ## we also look for discourse particles (feature 050) in the particle-section, this is to make sure that
-    ## we actually catch all of them in case they are tagged differently (HM)
     
 #    if word_tuple[0] == "rather" and index == 0: # if-statement rather than if-else, because "rather"
 #        if tagged_sentence[index+1][0] == ",": #punctuation will be removed already, right? (KM) then how do we find this without the comma? (HM) # AB: no, tagger keeps punctuation
@@ -696,7 +696,7 @@ def analyze_preposition(index, tagged_sentence, features_dict): ## 1. Gustavo 2.
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "advsubcause_035", "advsubconc_036", "advsubcond_037", "advsubother_038", "prepositions_039", 
     "conjuncts_045", "hedges_047", "strandprep_061".'''
-    word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    word_tuple = tagged_sentence[index]
     if not word_tuple[0] in ["because", "unless", "whilst", "while", "though", "tho", "although", "that", "since", "whereupon", "whereas", "whereby"] + timelist + placelist: 
         features_dict["prepositions_039"] += 1 # AB: I am excluding conjunctions and time/place adverbials here, as they count towards other features
     if word_tuple[0] in ["because", "becuase", "beacuse", "cause", "'cause", "cos", "'cos", "coz", "'coz", "caus", "'caus", "cuz", "'cuz", "bcoz", "bcuz", "bcos", "bcause", "bcaus"] and tagged_sentence[index+1][0] != "of":
@@ -706,9 +706,8 @@ def analyze_preposition(index, tagged_sentence, features_dict): ## 1. Gustavo 2.
         features_dict["advsubconc_036"] += 1 #AB: I added "though" tagged as "RB" ("Are you sure though?") to the dicpart list, so it contributes to feature
         # AB: "discpart_050" through the analyze_adverb function
         
-    elif word_tuple[0] == "that" and tagged_sentence[index-1][0] in ["such", "so"]: #and not tagged_sentence[index+1][1] in ["JJ", "JJR", "JJS", "NN", "NNS", "NNP", "NNPS"]:
-        features_dict["advsubother_038"] += 1 # AB: Above, the condition that no Adj or N can follow (used by Biber) has been commented out because our tagger allows us to
-        # AB: make the kind of differentiation intended (between "that" as a complementizer and as a determinative/demonstrative PN). This means we avoid many false negatives.
+    elif word_tuple[0] == "that" and tagged_sentence[index-1][0] in ["such", "so"]:
+        features_dict["advsubother_038"] += 1 
 
     elif word_tuple[0] == "of" and tagged_sentence[index-1][0] in ["kind", "sort"] and not tagged_sentence[index-2][1] in ["JJ", "JJR", "JJS", "DT", "PRP$"]:
         if not tagged_sentence[index-2][0] in ["what", "whatever", "whichever"]:
@@ -760,10 +759,10 @@ def analyze_pronoun(index, tagged_sentence, features_dict): ## 1. Hanna 2. Gusta
     elif word_tuple[0] == "that" and tagged_sentence[index+1][0] == "'s": ## should this be 's or s ? Does the apostrophe get removed? (HM)
         features_dict["prodemons_010"] += 1
 
-def analyze_conjunction(index, tagged_sentence, features_dict): ## 1. Gustavo 2. Raffaela
+def analyze_conjunction(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "hedges_047", "coordphras_064", "coordnonp_065".'''
-    word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    word_tuple = tagged_sentence[index]
 
     if word_tuple[0] == "and": 
         if tagged_sentence[index-1][1].startswith("NN") and tagged_sentence[index+1][1].startswith("NN"):
@@ -779,7 +778,7 @@ def analyze_conjunction(index, tagged_sentence, features_dict): ## 1. Gustavo 2.
                 features_dict["coordnonp_065"] += 1
             elif tagged_sentence[index+1][1] in subjpro or tagged_sentence[index+1][1] in DEM: # So far, this identification of demonstrative pronoun is likely to be too crude. Maybe re-use function for feature 10?
                 #I've added the function from feature 10 here. (GK)
-                if tagged_sentence[index+1][0] == "and":
+                if tagged_sentence[index+1][0] == "and":  ## I don't understand this part - why should the item follwing "and" also be "and"?
                     features_dict["coordnonp_065"] += 1
                 elif tagged_sentence[index+1][1] in ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "MD", "WP"]:
                     features_dict["coordnonp_065"] += 1
@@ -810,10 +809,10 @@ def analyze_conjunction(index, tagged_sentence, features_dict): ## 1. Gustavo 2.
         features_dict["coordnonp_065"] += 1
 
 
-def analyze_determiner(index, tagged_sentence, features_dict): ## 1. Rafaela 2. Gustavo
+def analyze_determiner(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "demonstr_051", "negsyn_066".'''
-    word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    word_tuple = tagged_sentence[index]
 
     if word_tuple[0] in DEM:
         features_dict["demonstr_051"] += 1
@@ -831,9 +830,7 @@ def analyze_wh_word(index, tagged_sentence, features_dict): ## 1. Kyla 2. Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "whquest_013", "thatvcom_021", "thatacom_022", "whrepied_033", "sentencere_034", "thatresub_029", "thatreobj_030", 
     "whresub_031", "whreobj_032".'''
-    word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    ## I changed the structure of the function so that we first distinguish between 'that' and all other items
-    ## and then between WHO and WHP-items. I hope this makes sense?
+    word_tuple = tagged_sentence[index]
     
     #21 that verb complements (e.g., / said that he went) 
     # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions) 
@@ -898,14 +895,13 @@ def analyze_wh_word(index, tagged_sentence, features_dict): ## 1. Kyla 2. Hanna
        
 
 
-def analyze_there(index, tagged_sentence, features_dict): ## 1. noone 2. Gustavo
+def analyze_there(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "exthere_020".'''
     if tagged_sentence[index][1] == "EX":
         features_dict["exthere_020"] += 1
-    # depending on the accuracy of the tagger for this feature, it may be necessary to add further restraints
     
-def analyze_particle(index, tagged_sentence, features_dict): ## 1. Hanna 2. Gustavo
+def analyze_particle(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "discpart_050".'''
     word_tuple = tagged_sentence[index]
