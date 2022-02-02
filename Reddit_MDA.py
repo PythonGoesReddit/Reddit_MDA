@@ -115,7 +115,21 @@ def analyze_sentence(preprocessed_json):
         s["conjuncts_045"] = sentence.count("that is,") #Will only catch sentences with proper punctuation but it's a start
         
         s["lengthening_206"] = len([X for X in re.findall(r"([a-zA-Z])\1{3,1000}", sentence) if not "www." in X])
-        ## I settled on a minimum of four occurences of the same letter (to avoid matches for "www.") (HM)
+        # try: alternative regex: r"([a-zA-Z])\1{3,1000}" - this probably does not solve the problem of picking the first character of the string
+        # try: for letter in [a-z]
+        # try: iterating over characters in the string and comparing them to the previous character
+        #for c in list(sentence):
+            #if words[i].lower() in ["
+            #move_on = True
+            #insert_adv = False
+            #x = 0
+            #while move_on:
+                #x += 1
+                #if sentence[x] == c
+                    #move_on = True
+                    #features_dict["lengthening"] += 1
+                #elif:
+                    #move_on = False
         
         for emphatic in [" for sure", " a lot", " such a ", " such an ", " just ", " really", " most ", " more "]: 
         # AB: This whole category strikes me as ill-conceived. Almost all items can, and often do, serve other functions than emphatics:
@@ -128,6 +142,8 @@ def analyze_sentence(preprocessed_json):
         # AB: That, to me, only leaves "for sure" as a clear-cut count case.
         # AB: One option would be to expend a whole lot of effort trying to get at the specifically emphatic cases of all the items in the list
         # AB: The other might be dropping this feature.
+        # HM: I think I agree with Axel's judgement here. I suggest reducing this class to only "for sure" + "really" and maybe add "definitely"?
+        # HM: or maybe combine amplifiers and emphatics into one category? The distinction between the two is not clear to me anyway.
             s["emphatics_049"] += sentence.count(emphatic)
         s["emphatics_049"] -= sentence.count(" a lot of ") # AB: removing all the "a lot of" cases post-hoc. Biber does not do this, but I think it makes sense, because they are simple quantifiers, not emphatics
         if sentence.startswith("for sure"): # AB: Catch cases of sentence-initial "for sure" that have been excluded through the insertion of spaces above
@@ -155,12 +171,20 @@ def analyze_sentence(preprocessed_json):
         s["lenword_211"] = len(sentence.split(" ")) 
         
         for emoticon in [":-)", ":)", ";-)", ":-P", ";-P", ":-p", ";-p", ":-(", ";-(", ":-O", "^^", "-.-", ":-$", ":-\\", ":-/", ":-|", ";-/", ";-\\",
-                        ":-[", ":-]", ":-§", "owo", "*.*"]: ## feel free to add to this list (HM) it probably reveals more about my out-of-date emoticon
-                                                            ## use than it does about current practices on reddit
+                        ":-[", ":-]", ":-§", "owo", "*.*", ";)", ":P", ":p", ";P", ";p", ":(", ";(", ":O", ":o", ":|", ";/", ";\\", ":[", ":]", ":§"]:
             s["emoticons_207"] += sentence.count(emoticon)
 
-
         words = sentence_dict["body"].split() #split into words for single word functions below
+        
+        ## Insert here: calculation of average word length (wordlength_044)
+        ## sum_wordlength = 0
+        ## for word in words:
+        ##     wordlenght = len(word)
+        ##     sum_wordlength = sum_wordlength + wordlength
+        ## s["wordlength_044"] = sum_wordlength
+        
+        ## Insert here: calculation of type-token ratio (ttratio_043) 
+        
         for i in range(len(words)):
             if words[i].lower() in ["op", "subreddit", "sub", "subreddits", "upvoted", "posted", "repost", "thread", "upvotes", "upvote",
                     "redditor", "redditors", "post", "posts", "mod", "mods", "flair",]:
@@ -239,7 +263,7 @@ s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_0
      "strandprep_061": 0, "vsplitinf_062": 0, "vsplitaux_063": 0, "coordphras_064": 0, "coordnonp_065": 0, "negsyn_066": 0, 
      "negana_067": 0, "hashtag_201": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_205": 0, "lengthening_206":0,
      "emoticons_207":0, "question_208": 0, "exclamation_209": 0, "lenchar_210": 0, "lenword_211": 0, "comparatives_syn_212": 0, 
-     "superlatives_syn_213": 0, "comparatives_ana_214": 0, "superlatives_ana_215":0, "reddit_vocab_216":0}
+     "superlatives_syn_213": 0, "comparatives_ana_214": 0, "superlatives_ana_215":0, "reddit_vocab_216":0, "vprogressive_217": 0}
 placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "around", 
                  "ashore", "astern", "away", "behind", "below", "beneath", "beside", "downhill",
                  "downstairs", "downstream", "east", "far", "hereabouts", "indoors", "inland", "inshore",
@@ -349,23 +373,24 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
                     pass
             
     elif word_tuple[1] == "VBG":
-        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP) and tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]: #gerund or present participle.. is this ok? or do we have to separate these 
-            # AB: In Biber, this is in fact only for present participial clauses, a fairly narrow range of ING-forms. I implement it accordingly and would suggest a separate class of features for progressives (which Biber really does not seem to have considered in the 80s)
-            # HM: I agree that it would be good to have a separate count for progressives, but how can we implement this given that our tag-set only has one tag for all ING-forms? Preceded by BE?
-            features_dict["vpresentpart_025"] += 1
+        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP) and tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]:
+            features_dict["vpresentpart_025"] += 1 # supposed to catch present participial clauses
         elif tagged_sentence[index-1][1] == "NN":
             features_dict["vpresentwhiz_028"] += 1 
             # Iffy, because catches things like "with prices going up", which is not a case of WHIZ deletion (AB)
             # I agree, we might have to drop this one. Also catches stuff like "or is the passage saying something different" (HM)
+        elif tagged_sentence[index-1][0] in belist:
+            features_dict["vprogressive_217"] += 1 ## new feature added to catch finite progressive verb phrases, e.g. I am laughing (HM)
+        elif (tagged_sentence[index-2][0] in belist) and (tagged_sentence[index-1][1] == "RB"):
+            features_dict["vprogressive_217"] += 1 ## new feature added to catch finite progressive verb phrases, e.g. You are not/always laughing (HM)            
     elif word_tuple[1] == "VBN":
         if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
-            if tagged_sentence[index+1][1] in ["IN", "RB", "TO"]: # Again, in Biber this is present participial clauses only. Biber (1988:233) notes for both that "these forms were edited by hand." So we may consider scrapping them, if automated accuracy is not sufficient.
+            if tagged_sentence[index+1][1] in ["IN", "RB", "TO"]: # Biber (1988:233) notes for both that "these forms were edited by hand." So we may consider scrapping them, if automated accuracy is not sufficient.
                 features_dict["vpastpart_026"] += 1 ## this one seems accurate enough to me (HM)
         elif tagged_sentence[index-1][1] in ["NN", "NNP"] or tagged_sentence[index-1][0] in QUANPRO:
             if tagged_sentence[index+1][1] in ["IN", "RBR", "RB", "RBS"] or tagged_sentence[index+1][0] in belist:
                 features_dict["vpastwhiz_027"] += 1 
                 # This reproduces the search strategy from Biber, but strikes me as extremely iffy. Needs further quality control.
-                # I can't check this right now due to tagger problems, revisit later! (HM)
     elif word_tuple[1] in ["VBP","VBZ"]:
         features_dict["vpresent_003"] += 1
     if word_tuple[0].startswith("seem") or word_tuple[0].startswith("appear"):
@@ -412,7 +437,7 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
                 # see comment above on vpastperfect_002b (HM)
                 move_on =  False
                 
-    elif word_tuple[0] in belist: # Something that is very obviously missing from Biber's list and also our features right now is progressive. Here would be the place to include them.
+    elif word_tuple[0] in belist:
         if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]: # Biber also includes prepositions, but this seems to me to allow for too many false positives (AB)
             ## Why doesn't Biber also include adverbs here? "I AM REALLY interested"/"He is truly a liar" are also cases of BE as main verb.
             features_dict["mainvbe_019"] += 1
@@ -499,16 +524,14 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
     if word_tuple[0].startswith("'"):
         features_dict["contractions_059"] += 1
 
-    
-    ## for now I implemented this with a preliminary list of verbs in each class - change this condition once lemmatisation is implemented (HM)
     if word_tuple[0] in publiclist:
         features_dict["vpublic_055"] += 1
-        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]: ## 60-1 pub/priv/sua + demonstrative pronoun/subjpro (I we he she they)
+        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]:
             features_dict["thatdel_060"] += 1
-        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"): ## 60-2 pub/priv/sua + PRO/N + AUX/V
+        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"):
             if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
                 features_dict["thatdel_060"] += 1
-        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]: ## 60-3 pub/priv/sua + adj/adv/det/posspro + (Adj) + N + AUX/V
+        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]:
             if tagged_sentence[index + 2][1].startswith("NN"):
                 if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
                     features_dict["thatdel_060"] += 1
@@ -563,7 +586,6 @@ def analyze_verb(index, tagged_sentence, features_dict):  ## 1. Axel 2. Hanna
 def analyze_modal(index, tagged_sentence, features_dict): ## 1. Axel 2. Hanna
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "modalsposs_052", "modalsness_053", "modalspred_054", "contractions_059", "vsplitaux_063".'''
-    ## Several of the features that were origianlly intended for analyze_modal have been moved to analyze_verb instead.
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
     if word_tuple[0] in ["can","may","might","could"]:
         features_dict["modalsposs_052"] += 1
@@ -602,16 +624,16 @@ def analyze_adverb(index, tagged_sentence, features_dict): ## 1. Hanna 2. Raffae
     if word_tuple[0] == "n't":
         features_dict["negana_067"] += 1
         features_dict["contractions_059"] += 1
-    elif word_tuple[0] in placelist: ## added some more ideas to the list above (HM)
+    elif word_tuple[0] in placelist:
         features_dict["advplace_004"] += 1
-    elif word_tuple[0] in timelist: ## added some more ideas to the list above (HM)
+    elif word_tuple[0] in timelist:
         features_dict["advtime_005"] += 1
-    elif word_tuple[0] in downtonerlist: ## added some more ideas to the list above (HM)
+    elif word_tuple[0] in downtonerlist:
         features_dict["downtoners_046"] += 1
     elif word_tuple[0] in amplifierlist:
         features_dict["amplifiers_048"] += 1 
     elif word_tuple[0] in conjunctslist:
-        features_dict["conjuncts_045"] += 1 # so far, this list only includes "eg" not "e.g.", since that would probably be split by the tagger? AB: Added "e.g." to the list
+        features_dict["conjuncts_045"] += 1
     elif index == 0 and word_tuple[0] in discpart:
         features_dict["discpart_050"] += 1
     ## we also look for discourse particles (feature 050) in the particle-section, this is to make sure that
@@ -873,7 +895,6 @@ def analyze_wh_word(index, tagged_sentence, features_dict): ## 1. Kyla 2. Hanna
             elif tagged_sentence[index+1][1].startswith("V"):
                 if tagged_sentence[index+1][0] in belist or tagged_sentence[index+1][0] in havelist or tagged_sentence[index+1][0] in dolist:
                     features_dict["whquest_013"] += 1
-                    ## I changed this code to look for the first index position instead of sentence-final punctuation, since the tagger will separate the sentences.
        
 
 
@@ -887,15 +908,11 @@ def analyze_there(index, tagged_sentence, features_dict): ## 1. noone 2. Gustavo
 def analyze_particle(index, tagged_sentence, features_dict): ## 1. Hanna 2. Gustavo
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "discpart_050".'''
-    word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
-    ## we also look for particles in the adverb-section, this is to make sure that
-    ## we actually catch all of them in case they are tagged differently (HM)
+    word_tuple = tagged_sentence[index]
     if index == 0 and word_tuple[0] in discpart:
         features_dict["discpart_050"] += 1
     else:
         pass
-    
-## still missing: the two features that run on the whole sentence: 43 type/token ratio and 44 word length
     
 # Output functions
 ## NEEDED: function to write meta-info for each text 
