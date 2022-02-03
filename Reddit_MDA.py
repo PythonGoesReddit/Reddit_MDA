@@ -110,8 +110,6 @@ def analyze_sentence(preprocessed_json):
         s["question_208"] = sentence.count("?") # AB: Currently, something like "WHY????" will be counted as four questions. Arguably, a regex with r"\?+" would be better?
 
         s["exclamation_209"] = sentence.count("!") # AB: Same as above.
- 
-        s["conjuncts_045"] = sentence.count("that is,") #Will only catch sentences with proper punctuation but it's a start
         
         s["lengthening_206"] = len([X for X in re.findall(r"([a-zA-Z])\1{3,1000}", sentence) if not "www." in X])
         # try: alternative regex: r"([a-zA-Z])\1{3,1000}" - this probably does not solve the problem of picking the first character of the string
@@ -156,6 +154,10 @@ def analyze_sentence(preprocessed_json):
 
         for conjunct in ["on the contrary", "on the other hand", "for example", "for instance", "by contrast", "by comparison", "in comparison", "in contrast", "in particular", "in addition", "in conclusion", "in consequence", "in sum", "in summary", "in any event", "in any case", "in other words", "as a result", "as a consequence"]:
             s["conjuncts_045"] += sentence.count(conjunct) # AB: I have not inserted any spaces above because the likelihood of false positives in all cases seems very low
+
+        for conjunct in ["that is,", "else,", "altogether,", "rather,"]: #Will only catch sentences with proper punctuation but it's a start
+            if sentence.startswith(conjunct):
+                s["conjuncts_045"] += 1
 
         for advsub in ["inasmuch as", "forasmuch as", "insofar as", "insomuch as", " as long as ", " as soon as "]:
             s["advsubother_038"] += sentence.count(advsub)
@@ -282,9 +284,11 @@ secondpersonlist = ["you", "yourself", "your", "yourselves"]
 thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "himself","herself", "themselves"]
 indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "everything", "nobody", "none", "nothing", "nowhere", "somebody", "someone", "something"]
 conjunctslist = ["alternatively", "altogether", "consequently", "conversely", "eg", "e.g.", "else", "furthermore",
-                 "hence", "however", "ie", "instead", "likewise", "moreover", "namely", "nevertheless",
+                 "hence", "however", "ie", "i.e.", "instead", "likewise", "moreover", "namely", "nevertheless",
                  "nonetheless", "notwithstanding", "otherwise", "rather", "similarly", "therefore", "thus", "viz"]
-conjunctsmultilist = ["on the contrary", "on the other hand", "for example", "for instance", "by contrast", "by comparison", "in comparison", "in contrast", "in particular", "in addition", "in conclusion", "in consequence", "in sum", "in summary", "in any event", "in any case", "in other words", "as a result", "as a consequence"]
+conjunctsmultilist = ["on the contrary", "on the other hand", "for example", "for instance", "by contrast", "by comparison", 
+                      "in comparison", "in contrast", "in particular", "in addition", "in conclusion", "in consequence", "in sum",
+                      "in summary", "in any event", "in any case", "in other words", "as a result", "as a consequence"]
 punct_final = [".", "!", "?", ":", ";"] # here, Biber also includes the long dash -- , but I am unsure how this would be rendered
 belist = ["be", "am", "are", "is", "was", "were", "been", "being", "'m", "'re",] # I have added the contracted forms of am and are (AB)
 havelist = ["have", "has", "had", "having"]
@@ -595,7 +599,7 @@ def analyze_modal(index, tagged_sentence, features_dict):
         features_dict["modalsness_053"] += 1
     elif word_tuple[0] in ["will","would","shall","'ll","'d"]: 
         features_dict["modalspred_054"] += 1
-    if word_tuple[0].startswith("'"): ## the tagger will not remove apostrophes!
+    if word_tuple[0].startswith("'"):
         features_dict["contractions_059"] += 1
         
     move_on = True
@@ -638,19 +642,8 @@ def analyze_adverb(index, tagged_sentence, features_dict):
         features_dict["conjuncts_045"] += 1
     elif index == 0 and word_tuple[0] in discpart:
         features_dict["discpart_050"] += 1
-    
-#    if word_tuple[0] == "rather" and index == 0: # if-statement rather than if-else, because "rather"
-#        if tagged_sentence[index+1][0] == ",": #punctuation will be removed already, right? (KM) then how do we find this without the comma? (HM) # AB: no, tagger keeps punctuation
-#            features_dict["conjuncts_045"] += 1  ## we could try it simply without the comma and see how messy the output is
-#        elif tagged_sentence[index+1][1] in ["CC", "CD", "DT", "EX", "IN", "LS", "MD", "NN", "NNS", "NNP", "NNPS", "PDT", "PRP", "PRP$", "RP", "TO", "UH", "VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "WDT", "WP", "WP$", "WRB"]:
-#            features_dict["conjuncts_045"] += 1 
-#    elif word_tuple[0] == "else" and index == 0 and tagged_sentence[index+1][0] == ",": #again, commas (KM) #AB: Should not be a problem.
-#            features_dict["conjuncts_045"] += 1
-#    elif word_tuple[0] == "altogether" and index == 0 and tagged_sentence[index+1] == ",":
-#            features_dict["conjuncts_045"] += 1
-
  
-def analyze_adjective(index, tagged_sentence, features_dict): ## 1. Kyla 2. Raffaela 3. Axel
+def analyze_adjective(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "adjattr_040", "adjpred_041", "emphatics_049", "comparatives_212", "superlatives_213".'''
     if tagged_sentence[index][1] == "JJR":
@@ -661,13 +654,7 @@ def analyze_adjective(index, tagged_sentence, features_dict): ## 1. Kyla 2. Raff
         features_dict["comparatives_ana_214"] += 1
     elif tagged_sentence[index-1][0] == "most":
         features_dict["superlatives_ana_215"] += 1
-    ## AB: I am rewriting the part that checks for attributive versus predicative adjectives, as I think this will improve clarity.
-    ## AB: The important statent in Biber (1989: 238) is that "any ADJ not identified as predicative" is treated as attributive.
-    ## AB: So this means we only need to specify a condition for all predicative adjectives. When True: adj_pred + =1, when False: adj_attr += 1
-    ## AB: Also note there is a logical inconsistency in Biber's condition "BE + ADJ (+ADV) + xxx": The optional ADV should go before the ADJ
-    ## AB: I am, in fact, going to simplify our lookup, subject to durther discussion:
-    ## AB: Any adjective preceded by an optional sequence of adverbs of any length, which in turn is preceded by a form of BE
-    ## AB: (plus potentially other copular verbs like "feel", "look", "become") is predicative; anything else is attributive
+        
     adj_type = "attr"
     x = index-1
     while adj_type == "attr" and tagged_sentence[x][1].startswith("R"):
@@ -678,21 +665,11 @@ def analyze_adjective(index, tagged_sentence, features_dict): ## 1. Kyla 2. Raff
         features_dict["adjattr_040"] += 1
     elif adj_type == "pred":
         features_dict["adjpred_041"] += 1
-#    if tagged_sentence[index-1][0] in belist:
-#        if tagged_sentence[index+1][1].startswith("JJ") or tagged_sentence[index+1][1].startswith("NN"):
-#            features_dict["adjattr_040"] += 1
-#
-#        elif not tagged_sentence[index+1][1].startswith("RB"): ##!!! Check not-statement (KM)
-#            features_dict["adjpred_041"] += 1
-#
-#        if tagged_sentence[index+1][1].startswith("JJ") and not tagged_sentence[index+2][1].startswith("JJ") and not tagged_sentence[index+2][1].startswith("NN"): #Would it not be okay to have JJ in position +1 and +2? 
-#            features_dict["adjpred_041"] += 1        
-    if tagged_sentence[index-1][0] in ["real", "so"]: #and tagged_sentence[index][1] == "JJ":
-        #I think this should work but should double check because it was catching junk at some point (KM)
-        # AB: Turned this into an if rather than elif. Also, I think the part to the right of the boolean "and" is not needed?
+        
+    if tagged_sentence[index-1][0] in ["real", "so"]:
         features_dict["emphatics_049"] += 1
       
-def analyze_preposition(index, tagged_sentence, features_dict): ## 1. Gustavo 2. ?
+def analyze_preposition(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "advsubcause_035", "advsubconc_036", "advsubcond_037", "advsubother_038", "prepositions_039", 
     "conjuncts_045", "hedges_047", "strandprep_061".'''
@@ -717,10 +694,10 @@ def analyze_preposition(index, tagged_sentence, features_dict): ## 1. Gustavo 2.
         features_dict["strandprep_061"] += 1
 
 
-def analyze_noun(index, tagged_sentence, features_dict): ## 1. Rafaela 2. Hanna
+def analyze_noun(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "nominalis_014", "gerund_015", "nouns_016".'''
-    word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
+    word_tuple = tagged_sentence[index]
 
     if word_tuple[0].endswith("ing") or word_tuple[0].endswith("ings"):
         if word_tuple[1] not in notgerundlist:
@@ -730,7 +707,7 @@ def analyze_noun(index, tagged_sentence, features_dict): ## 1. Rafaela 2. Hanna
     else: 
         features_dict["nouns_016"] += 1
         
-def analyze_pronoun(index, tagged_sentence, features_dict): ## 1. Hanna 2. Gustavo
+def analyze_pronoun(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "profirpers_006", "prosecpers_007", "prothirper_008", "proit_009", "prodemons_010", "proindef_011".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
@@ -773,7 +750,7 @@ def analyze_conjunction(index, tagged_sentence, features_dict):
             features_dict["coordphras_064"] += 1
         elif tagged_sentence[index-1][1].startswith("VB") and tagged_sentence[index+1][1].startswith("VB"):
             features_dict["coordphras_064"] += 1
-        elif tagged_sentence[index-1][0] == ",": #commas taken out? (KM)
+        elif tagged_sentence[index-1][0] == ",":
             if tagged_sentence[index+1][0] in ["it", "so", "you", "then"]:
                 features_dict["coordnonp_065"] += 1
             elif tagged_sentence[index+1][1] in subjpro or tagged_sentence[index+1][1] in DEM: # So far, this identification of demonstrative pronoun is likely to be too crude. Maybe re-use function for feature 10?
@@ -792,7 +769,7 @@ def analyze_conjunction(index, tagged_sentence, features_dict):
             features_dict["coordnonp_065"] += 1
         elif tagged_sentence[index+1][0] in ["because", "although", "though", "if", "unless",] or tagged_sentence[index+1][0] in otheradvsublist: # added the otheradvsublist for this particular feature (GK)
             features_dict["coordnonp_065"] += 1
-        elif tagged_sentence[index+1][0] in conjunctslist or tagged_sentence[index+1][0] in conjunctsmultilist: # added the conjunctsmultilist for the this particular feature (GK)
+        elif tagged_sentence[index+1][0] in conjunctslist:
             features_dict["coordnonp_065"] += 1
     #elif word_tuple[0] == "or":
         #if tagged_sentence[index-1][0] == "more" and tagged_sentence[index+1][0] == "less":
@@ -867,7 +844,7 @@ def analyze_wh_word(index, tagged_sentence, features_dict): ## 1. Kyla 2. Hanna
                 features_dict["whrepied_033"] += 1 #pied-piping relative clauses (e.g., the manner in which he was told) PREP + WHP in relative clauses
 
             if word_tuple[0] == "which" and tagged_sentence[index-1][0] == ",": #34. sentence relatives (e.g., Bob likes fried mangoes, which is the most disgusting thing I've ever heard of) Biber: (These forms are edited by hand to exclude non-restrictive relative clauses.)
-                features_dict["sentencere_034"] += 1  ### this only works if the tagger does not delete commas (HM)
+                features_dict["sentencere_034"] += 1
 
             #31. WH relative clauses on subject position (e.g., the man who likes popcorn) xxx + yyy + N + WHP + (ADV) + AUX/V (where xxx is NOT any form of the verbs ASK or TELL; to exclude indirect WH questions like Tom asked the man who went to the store)
             if tagged_sentence[index-1][1].startswith("N"):
