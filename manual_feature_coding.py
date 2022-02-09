@@ -74,6 +74,8 @@ feats = {"vpast_001": "SIMPLE PAST VERB FORMS",
 "interlink_203": "INTERNAL URLS",
 "caps_204": "WORDS IN ALL CAPS",
 "vimperative_205": "IMPERATIVE VERB FORMS",
+"lengthening_206": "STRATEGIC LENGTHENING",
+"emoticons_207": "EMOTICONS",
 "question_208": "QUESTION MARKS",
 "exclamation_209": "EXCLAMATION MARKS",
 "lenchar_210": "LENGTH OF THE SENTENCE IN CHARACTERS",
@@ -81,7 +83,10 @@ feats = {"vpast_001": "SIMPLE PAST VERB FORMS",
 "comparatives_syn_212": "SYNTHETIC COMPARATIVES (ADJ-ER)",
 "superlatives_syn_213": "SYNTHETIC COMPARATIVES (MORE + ADJ)",
 "comparatives_ana_214": "SYNTHETIC SUPERLATIVES (ADJ-EST)",
-"superlatives_ana_215":"SYNTHETIC SUPERLATIVES (MOST + ADJ)"}
+"superlatives_ana_215":"SYNTHETIC SUPERLATIVES (MOST + ADJ)",
+"reddit_vocab_216": "COMMUNITY-SPECIFIC ACRONYMS OR LEXICAL ITEMS", 
+"vprogressive_217": "VERB PHRASES IN PROGRESSIVE ASPECT",
+"emojis_218": "EMOJIS"}
 
 
 ### Asking user input about which feature to code.
