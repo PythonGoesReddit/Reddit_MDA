@@ -108,7 +108,7 @@ if os.path.exists("manual_coding_"+feats[feature]+".txt"):
         for line in p:
             already_coded.add(line.split("\t")[0])
 
-p = open("manual_coding_"+feature+".txt", "a")
+
 pos = 0
 neg = 0
 sents = 0
@@ -116,29 +116,29 @@ sents = 0
 
 input("Hit ENTER to begin. ")
 
-f = open("sample_sentences.txt", "r")
+with open("sample_sentences.txt", "r") as f:
+    with open("manual_coding_"+feature+".txt", "a") as p:
+        while (pos<10 and neg<10) or sents<100:
+            l = f.readline().split("\t")
+            if len(l) == 2 and not l[0] in already_coded:
+                ID = l[0]
+                s = l[1].strip("\n")
+                count = "x"
+                while not count.isdigit():
+                    print("\n\n<<<< "+s+" >>>>>")
+                    count = input("Type in how many instances of "+ feats[feature] + " are in this sentence.\n\n")
+                    if not count.isdigit():
+                        print("Sorry, input needs to be an integer.")
+                if count == "0":
+                    neg +=1
+                else:
+                    pos += 1
+                sents +=1
+                p.write(ID + "\t" + count+"\n")
+            elif len(l) == 2 and l[0] in already_coded:
+                pass
+            else:
+                break
 
-while (pos<10 and neg<10) or sents<100:
-    l = f.readline().split("\t")
-    if len(l) == 2 and not l[0] in already_coded:
-        ID = l[0]
-        s = l[1].strip("\n")
-        count = "x"
-        while not count.isdigit():
-            print("\n\n<<<< "+s+" >>>>>")
-            count = input("Type in how many instances of "+ feats[feature] + " are in this sentence.\n\n")
-            if not count.isdigit():
-                print("Sorry, input needs to be an integer.")
-        if count == "0":
-            neg +=1
-        else:
-            pos += 1
-        sents +=1
-        p.write(ID + "\t" + count+"\n")
-    elif len(l) == 2 and l[0] in already_coded:
-        pass
-    else:
-        break
 
-p.close()
         
