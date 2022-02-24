@@ -187,7 +187,8 @@ def analyze_sentence(preprocessed_json):
             word = re.sub(r'[^\w\s]','', word)
             wordlen = len(word)
             sum_wordlen = sum_wordlen + wordlen
-        s["wordlength_044"] = (sum_wordlen/len(words)) # this works fine but the output might look weird since the words are here separated differently than they are by the tagger
+        s["wordlength_044"] = (sum_wordlen/len(words)) 
+        # this works fine but the output might look weird since the words are here separated differently than they are by the tagger
 
         ## Insert here: calculation of type-token ratio (ttratio_043) 
         
@@ -221,6 +222,7 @@ def clean_sentence(sentence):
     '''Takes a sentence and returns it in all lowercase, with punctuation removed, and emojis removed.'''
     sentence = str(sentence).strip(string.punctuation).lower()
     ## emoticons already counted (but not removed) in the analyse_sentence function
+    ## emojis already counted (but not removed) in the analyse_sentence function
     ## links and URLs counted AND removed in the analyse_sentence function
     return sentence    
 
@@ -312,9 +314,8 @@ downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "on
 amplifierlist = ["absolutely", "altogether", "completely", "enormously", "entirely", "extremely", "fully", "greatly", "highly", 
                  "intensely", "perfectly", "strongly", "thoroughly", "totally", "utterly", "very"]
 asktelllist = ["ask", "asked", "asking", "asks", "tell", "telling", "tells", "told"] #this could also be accomplished with .startswith("ask"), .startswith("tell") or == "told" (KM)
-titlelist = ["mr", "ms", "mrs", "prof", "professor", "dr", "sir"] #??????? (KM)
-otheradvsublist = ["since", "while", "whilst", "whereupon", "whereas", "whereby", "such that", "so that", "such that", "inasmuch as", "forasmuch as", "insofar as", "insomuch as", "as long as", "as soon as"]
 titlelist = ["mr", "ms", "mrs", "prof", "professor", "dr", "sir"]
+otheradvsublist = ["since", "while", "whilst", "whereupon", "whereas", "whereby", "such that", "so that", "such that", "inasmuch as", "forasmuch as", "insofar as", "insomuch as", "as long as", "as soon as"]
 notgerundlist = ["nothing", "everything", "something", "anything", "thing", "things", "string", "strings"]
 publiclist = ["acknowledege", "acknowledges", "acknowledged", "acknowledging", "admit", "admits", "admitted", "admitting",
               "agree", "agrees", "agreed", "agreeing", "assert", "asserts", "asserted", "asserting", "claim", "claimed", 
@@ -420,10 +421,12 @@ def analyze_verb(index, tagged_sentence, features_dict):
                     features_dict["vsplitaux_063"] += 1
             elif tagged_sentence[x][1].startswith("R") and tagged_sentence[x][0] not in ["n't", "not"]: # Unfortunately, negators and adverbs have the same tags, so we manually exclude negators.
                 insert_adv = True
-            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P") or tagged_sentence[x][1].startswith("X"): # Currently excludes questions, in which the subject is between HAVE and the past participle. (AB)
+            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"):
+                move_on = True 
+                # HM: as intended by Biber (p. 223) we here also count questions with the word order HAD + NOUN/PRONOUN + VBN
+                # HM: this does, however, not catch all questions using the past perfect (e.g. does not count "had many people been to the store?" due to inserted adjective)
+            else: 
                 move_on =  False 
-                ## this actually exlcudes Biber's other condition for feature 2: to also count questions he includes HAVE + N/PRO + VBN (HM)
-                ## We should discuss whether we want that or not.
 
     elif word_tuple[0] in ["have", "'ve", "has"]: 
         move_on = True
@@ -440,10 +443,12 @@ def analyze_verb(index, tagged_sentence, features_dict):
                     features_dict["vsplitaux_063"] += 1
             elif tagged_sentence[x][1].startswith("R") and tagged_sentence[x][0] not in ["n't", "not"]:
                 insert_adv = True
-            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P") or tagged_sentence[x][1].startswith("X"): 
-                # Currently excludes questions, in which the subject is between HAVE and the past participle. (AB)
-                # see comment above on vpastperfect_002b (HM)
-                move_on =  False
+            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"): 
+                # HM: as intended by Biber (p. 223) we here also count questions with the word order HAVE + NOUN/PRONOUN + VBN
+                # HM: this does, however, not catch all questions using the present perfect (e.g. does not count "have many people been to the store?" due to inserted adjective)
+                move_on = True
+            else: 
+                move_on = False
                 
     elif word_tuple[0] in belist:
         if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
@@ -577,13 +582,6 @@ def analyze_verb(index, tagged_sentence, features_dict):
                 features_dict["whclause_023"] += 1
             else:
                 pass
-            
-    # -> also needed for features 23 and 60
-    # KM -> we also need this for feature 21. part a is down in analye_wh_word but parts b and c need to identify public/private/suasive verbs -- can we add that in this part when theyre identified?:
-    # (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/TJf/anrf){that-c\a\ises as complements to verbs which are not included in the above verb classes are not counted - see Quirk et al. 1985:1179ff.) 
-    # (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)(This algorithm allows an intervening prepositional phrase between a verb and its complement.)
-    #     Biber also checks for that-deletion, which is probably bad in terms of precision and recall. I currently have strong reservations against implementing his search, but have not come up with a better one yet. (AB)
-        
     
 
 def analyze_modal(index, tagged_sentence, features_dict):
@@ -699,7 +697,7 @@ def analyze_noun(index, tagged_sentence, features_dict):
 
     if word_tuple[0].endswith("ing") or word_tuple[0].endswith("ings"):
         if word_tuple[1] not in notgerundlist:
-            features_dict["gerund_015"] += 1 # this is edited manually by Biber
+            features_dict["gerund_015"] += 1
     elif word_tuple[0].endswith("tions") or word_tuple[0].endswith("tion") or word_tuple[0].endswith("ments") or word_tuple[0].endswith("ment") or word_tuple[0].endswith("ness") or word_tuple[0].endswith("ity") or word_tuple[0].endswith("nesses") or word_tuple[0].endswith("ities"):
         features_dict["nominalis_014"] += 1
     else: 
@@ -804,14 +802,25 @@ def analyze_wh_word(index, tagged_sentence, features_dict):
     "whresub_031", "whreobj_032".'''
     word_tuple = tagged_sentence[index]
     
-    #21 that verb complements (e.g., / said that he went) 
-    # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions) 
+    #21 that verb complements (e.g., / said that he went)  
     if tagged_sentence[index][0] == "that":
+    # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions)
         if tagged_sentence[index-1][0] in ALLP or tagged_sentence[index-1][0] in ["and", "nor", "but", "or", "who"]:
             if tagged_sentence[index+1][1].startswith("D") or tagged_sentence[index+1][1].startswith("PR") or tagged_sentence[index+1][0] == "there" or tagged_sentence[index+1][1].startswith("NNP") or tagged_sentence[index+1][1].startswith("NNS") or tagged_sentence[index+1][0] in titlelist:
                 features_dict["thatvcom_021"] += 1
-    # moved b and c of 21 to analyze_verb (because they need to identify certain types of verbs)
-
+    # (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/and)
+        elif (tagged_sentence[index-1][0] in suasivelist) or (tagged_sentence[index-1][0] in privatelist) or (tagged_sentence[index-1][0] in publiclist):
+            if not tagged_sentence[index+1][1].startswith("V"):
+                if tagged_sentence[index+1][0] not in [ALLP, "and"]:
+                    features_dict["thatvcom_021"] += 1
+        elif (tagged_sentence[index-1][0].startswith("seem")) or (tagged_sentence[index-1][0].startswith("appear")):
+            if not tagged_sentence[index+1][1].startswith("V"):
+                if tagged_sentence[index+1][0] not in [ALLP, "and"]:
+                    features_dict["thatvcom_021"] += 1            
+    # (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)
+    #     (This algorithm allows an intervening prepositional phrase between a verb and its complement.)  
+    ### HM: this is not implemented at the moment, since it seems very complicated and rather marginal. My guess is that we need to trash this whole feature anyway...
+    
     #29. that relative clauses on subject position (e.g., the dog that bit me) N -p (T#) + that + (ADV) + AUX/V {that relatives across intonation boundaries are identified by hand.)
     #30. that relative clauses on object position (e.g., the dog that I saw) N + (T#) + that + DET / SUBJPRO / POSSPRO / it / ADJ / plural noun/ proper noun / possessive noun / TITLE
         if tagged_sentence[index-1][1].startswith("NN"):
