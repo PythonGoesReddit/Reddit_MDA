@@ -123,27 +123,13 @@ def analyze_sentence(preprocessed_json):
 
         s["hashtag_201"] = len(re.findall(r"#\w+", sentence)) # AB: Used a regex here because otherwise sequences of "#" or individual "#" are going to inflate the count
 
-        s["question_208"] = sentence.count("?") # AB: Currently, something like "WHY????" will be counted as four questions. Arguably, a regex with r"\?+" would be better?
-
-        s["exclamation_209"] = sentence.count("!") # AB: Same as above.
+        if sentence.endswith("?"):
+            s["question_208"] += 1
+            
+        if sentence.endswith("!"):
+            s["exclamation_209"] += 1
         
         s["emojis_218"] = adv.extract_emoji(sentence)["overview"]["num_emoji"]
-        
-        #s["lengthening_206"] = len([X for X in re.findall(r"([a-zA-Z])\1{3,1000}", sentence) if not "www." in X])
-        # try: alternative regex: r"([a-zA-Z])\1{3,1000}" - this probably does not solve the problem of picking the first character of the string
-        # try: iterating over characters in the string and comparing them to the previous character
-        #for character in list(sentence):
-            #if words[i].lower() in ["
-            #move_on = True
-            #insert_adv = False
-            #x = 0
-            #while move_on:
-                #x += 1
-                #if sentence[x] == c
-                    #move_on = True
-                    #features_dict["lengthening"] += 1
-                #elif:
-                    #move_on = False
         
         for emphatic in [" for sure", " a lot", " such a ", " such an ", " just ", " really", " most ", " more "]: 
         # AB: This whole category strikes me as ill-conceived. Almost all items can, and often do, serve other functions than emphatics:
@@ -200,10 +186,7 @@ def analyze_sentence(preprocessed_json):
         for word in words:
             word = re.sub(r'[^\w\s]','', word)
             wordlen = len(word)
-            print(str(word) + "   has the length: " + str(wordlen))
             sum_wordlen = sum_wordlen + wordlen
-            print("The current sum of word lenghts is: " + str(sum_wordlen))
-            print("The number of words in this sentence is: " + str(len(words)))
         s["wordlength_044"] = (sum_wordlen/len(words)) # this works fine but the output might look weird since the words are here separated differently than they are by the tagger
 
         ## Insert here: calculation of type-token ratio (ttratio_043) 
