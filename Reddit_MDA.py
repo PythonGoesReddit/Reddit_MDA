@@ -22,6 +22,7 @@ from multiprocessing import Pool, Manager
 import psutil
 #from flair.models import SequenceTagger
 #from flair.data import Sentence
+import advertools as adv
 from datetime import timedelta
 start_time = time.time()
 
@@ -86,6 +87,21 @@ def open_reddit_json(filename):
         print("Total lines skipped = " + str(errors))
     return prepped_json
 
+def lengthening(word):
+    '''Takes a word as an argument. Returns True if any sequence of 3+
+    identical characters is in the word, with the exception of multiple
+    "w"s (to avoid false positives with websites). Else returns False.'''
+    count = 1
+    character = ""
+    for c in word:
+        if c == character and not c == "w":
+            count += 1
+            if count == 3:
+                return(True)
+        else:
+            count = 1
+            character = c
+    return(False)
 
 # Untagged feature extraction functions
 def analyze_sentence(preprocessed_json):
@@ -111,7 +127,9 @@ def analyze_sentence(preprocessed_json):
 
         s["exclamation_209"] = sentence.count("!") # AB: Same as above.
         
-        s["lengthening_206"] = len([X for X in re.findall(r"([a-zA-Z])\1{3,1000}", sentence) if not "www." in X])
+        s["emojis_218"] = adv.extract_emoji(sentence)["overview"]["num_emoji"]
+        
+        #s["lengthening_206"] = len([X for X in re.findall(r"([a-zA-Z])\1{3,1000}", sentence) if not "www." in X])
         # try: alternative regex: r"([a-zA-Z])\1{3,1000}" - this probably does not solve the problem of picking the first character of the string
         # try: iterating over characters in the string and comparing them to the previous character
         #for character in list(sentence):
@@ -191,6 +209,8 @@ def analyze_sentence(preprocessed_json):
         ## Insert here: calculation of type-token ratio (ttratio_043) 
         
         for i in range(len(words)):
+            if lengthening(words[i].lower()):
+                s["lengthening_206"] += 1
             if words[i].lower() in ["op", "subreddit", "sub", "subreddits", "upvoted", "posted", "repost", "thread", "upvotes", "upvote",
                     "redditor", "redditors", "post", "posts", "mod", "mods", "flair",]:
                 s["reddit_vocab_216"] += 1 
@@ -267,7 +287,8 @@ s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_0
      "strandprep_061": 0, "vsplitinf_062": 0, "vsplitaux_063": 0, "coordphras_064": 0, "coordnonp_065": 0, "negsyn_066": 0, 
      "negana_067": 0, "hashtag_201": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_205": 0, "lengthening_206":0,
      "emoticons_207":0, "question_208": 0, "exclamation_209": 0, "lenchar_210": 0, "lenword_211": 0, "comparatives_syn_212": 0, 
-     "superlatives_syn_213": 0, "comparatives_ana_214": 0, "superlatives_ana_215":0, "reddit_vocab_216":0, "vprogressive_217": 0}
+     "superlatives_syn_213": 0, "comparatives_ana_214": 0, "superlatives_ana_215":0, "reddit_vocab_216":0, "vprogressive_217": 0,
+     "emojis_218":0}
 placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "around", 
                  "ashore", "astern", "away", "behind", "below", "beneath", "beside", "downhill",
                  "downstairs", "downstream", "east", "far", "hereabouts", "indoors", "inland", "inshore",
