@@ -123,7 +123,7 @@ input("Hit ENTER to begin. ")
 
 with open("sample_sentences.txt", "r") as f:
     with open("manual_coding_"+feature+".txt", "a") as p:
-        while (pos<10 and neg<10) or sents<100:
+        while pos<10 or neg<10 or sents<100:
             l = f.readline().split("\t")
             if len(l) == 2 and not l[0] in already_coded:
                 ID = l[0]
