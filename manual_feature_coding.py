@@ -121,7 +121,7 @@ sents = 0
 
 input("Hit ENTER to begin. ")
 
-with open("sample_sentences.txt", "r") as f:
+with open("sample_sentences.txt", "r", encoding="utf-8", errors="ignore") as f:
     with open("manual_coding_"+feature+".txt", "a") as p:
         while pos<10 or neg<10 or sents<100:
             l = f.readline().split("\t")
