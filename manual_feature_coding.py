@@ -113,7 +113,7 @@ if os.path.exists("manual_coding_"+feats[feature]+".txt"):
         for line in p:
             already_coded.add(line.split("\t")[0])
 
-p = open("C:/Users/ratos/Documents/GitHub/Reddit_MDA/manual_coding_"+feature+".txt", "a")
+p = open("manual_coding_"+feature+".txt", "a")
 pos = 0
 neg = 0
 sents = 0
@@ -121,7 +121,7 @@ sents = 0
 
 input("Hit ENTER to begin. ")
 
-f = open("C:/Users/ratos/Documents/GitHub/Reddit_MDA/sample_sentences.txt", "r")
+f = open("sample_sentences.txt", "r")
 
 while (pos<10 and neg<10) or sents<100:
     l = f.readline().split("\t")
