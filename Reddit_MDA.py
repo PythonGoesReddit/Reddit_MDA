@@ -274,17 +274,17 @@ s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_0
      "emoticons_207":0, "question_208": 0, "exclamation_209": 0, "lenchar_210": 0, "lenword_211": 0, "comparatives_syn_212": 0, 
      "superlatives_syn_213": 0, "comparatives_ana_214": 0, "superlatives_ana_215":0, "reddit_vocab_216":0, "vprogressive_217": 0,
      "emojis_218":0}
-placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "around", 
+placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "anywhere", 
                  "ashore", "astern", "away", "behind", "below", "beneath", "beside", "downhill",
-                 "downstairs", "downstream", "east", "far", "hereabouts", "indoors", "inland", "inshore",
+                 "downstairs", "downstream", "east", "everywhere", "far", "here", "hereabouts", "indoors", "inland", "inshore",
                  "inside", "locally", "near", "nearby", "north", "nowhere", "outdoors", "outside", 
-                 "overboard", "overland", "overseas", "south", "underfoot", "underground", "underneath",
-                 "uphill", "upstairs", "upstream", "west"] ## some others that could be included: apart, back, here, out, there (HM)
-timelist = ["afterwards", "again", "earlier", "early", "eventually", "formerly",
+                 "overboard", "overland", "overseas", "somewhere", "south", "underfoot", "there", "underground", "underneath",
+                 "uphill", "upstairs", "upstream", "west"] 
+timelist = ["afterwards", "again", "always", "earlier", "early", "eventually", "formerly",
                 "immediately", "initially", "instantly", "late", "lately", "later", "momentarily", 
                 "now", "nowadays", "once", "originally", "presently", "previously", "recently", 
                 "shortly", "simultaneously", "soon", "subsequently", "today", "tomorrow", "tonight",
-                "yesterday"] # some others that could be included: then, always (HM), anymore, already, before, no longer usually, currently, every x (RT)
+                "yesterday"] # some others that could be included: anymore, already, before, no longer, usually, currently, every x (RT) 
 firstpersonlist = ["i", "me", "we", "us", "my", "our", "myself", "ourselves"]
 secondpersonlist = ["you", "yourself", "your", "yourselves"]
 thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "himself","herself", "themselves"]
@@ -307,7 +307,7 @@ WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", 
        "whenever", "whatever", "however"] 
 discpart = ["well", "now", "anyway", "anyhow", "anyways", "though"]
 QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
-QUANPRO = ["everybody", "somebody", "anybody", "everyone", "someone", "anyone", "everything", "something", "anything"]
+QUANPRO = ["everybody", "somebody", "anybody", "everyone", "someone", "anyone", "everything", "something", "anything", "anywhere"]
 ALLP = [".", "!", "?", ":", ";", ","]  # here, Biber also includes the long dash -- , but I am unsure how this would be rendered 
 downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "only", "partially", "partly", "practically", "scarcely", "slightly", "somewhat"]
                 # some others that could be included: a little, a bit, a tad (HM)
@@ -880,7 +880,8 @@ def analyze_there(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "exthere_020".'''
     if tagged_sentence[index][1] == "EX":
-        features_dict["exthere_020"] += 1
+        features_dict["exthere_020"] += 1 
+        
     
 def analyze_particle(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
