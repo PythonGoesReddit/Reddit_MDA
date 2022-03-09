@@ -113,11 +113,9 @@ if os.path.exists("manual_coding_"+feats[feature]+".txt"):
         for line in p:
             already_coded.add(line.split("\t")[0])
 
-p = open("C:/Users/ratos/Documents/GitHub/Reddit_MDA/manual_coding_"+feature+".txt", "a")
 pos = 0
 neg = 0
 sents = 0
-
 
 input("Hit ENTER to begin. ")
 
@@ -139,11 +137,11 @@ while (pos<10 and neg<10) or sents<100:
         else:
             pos += 1
         sents +=1
-        p.write(ID + "\t" + count+"\n")
+        with open("C:/Users/ratos/Documents/GitHub/Reddit_MDA/manual_coding_"+feature+".txt", "a") as p:
+            p.write(ID + "\t" + count+"\n")
     elif len(l) == 2 and l[0] in already_coded:
         pass
     else:
         break
 
-p.close()
         
