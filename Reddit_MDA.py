@@ -738,7 +738,7 @@ def analyze_conjunction(index, tagged_sentence, features_dict):
     word_tuple = tagged_sentence[index]
 
     if word_tuple[0] == "and": 
-        if tagged_sentence[index-1][1].startswith("NN") and tagged_sentence[index+1][1].startswith("NN"):
+        if tagged_sentence[index-1][1].startswith("N") and tagged_sentence[index+1][1].startswith("N"):
             features_dict["coordphras_064"] += 1
         elif tagged_sentence[index-1][1].startswith("RB") and tagged_sentence[index+1][1].startswith("RB"):
             features_dict["coordphras_064"] += 1
