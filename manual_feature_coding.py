@@ -5,8 +5,8 @@ feats = {"vpast_001": "SIMPLE PAST VERB FORMS", # done by HM
 "vpresperfect_002a": "PRESENT PERFECT VERB FORMS", # done by HM
 "vpastperfect_002b": "PAST PERFECT VERB FORMS", 
 "vpresent_003": "PRESENT TENSE VERB FORMS",
-"advplace_004": "PLACE ADVERBIALS", # only from placelist, didn't consider "in their asses"
-"advtime_005": "TIME ADVERBIALS", #
+"advplace_004": "PLACE ADVERBIALS", # RT
+"advtime_005": "TIME ADVERBIALS", # RT
 "profirpers_006": "FIRST PERSON PRONOUNS", # done by HM
 "prosecpers_007": "SECOND PERSON PRONOUNS", # done by HM
 "prothirdper_008": "THIRD PERSON PRONOUNS", # done by HM
@@ -15,7 +15,7 @@ feats = {"vpast_001": "SIMPLE PAST VERB FORMS", # done by HM
 "proindef_011": "INDEFINITE PRONOUNS",
 "pverbdo_012": "PRO-VERB DO",
 "whquest_013": "WH QUESTIONS",
-"nominalis_014": "NOMINALIZATION (-TION(S), -MENT(S), -NESS(ES), -ITY(IES)",
+"nominalis_014": "NOMINALIZATION (-TION(S), -MENT(S), -NESS(ES), -ITY(IES)", #RT
 "gerund_015": "GERUNDS",
 "nouns_016": "NOUNS",
 "passagentl_017": "AGENTLESS PASSIVES",
