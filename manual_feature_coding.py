@@ -1,16 +1,16 @@
 import os
 
 # List of all features:
-feats = {"vpast_001": "SIMPLE PAST VERB FORMS",
-"vpresperfect_002a": "PRESENT PERFECT VERB FORMS",
+feats = {"vpast_001": "SIMPLE PAST VERB FORMS", # done by HM
+"vpresperfect_002a": "PRESENT PERFECT VERB FORMS", # done by HM
 "vpastperfect_002b": "PAST PERFECT VERB FORMS", 
 "vpresent_003": "PRESENT TENSE VERB FORMS",
-"advplace_004": "PLACE ADVERBIALS",
-"advtime_005": "TIME ADVERBIALS",
-"profirpers_006": "FIRST PERSON PRONOUNS",
-"prosecpers_007": "SECOND PERSON PRONOUNS",
-"prothirdper_008": "THIRD PERSON PRONOUNS",
-"proit_009": "PRONOUN IT",
+"advplace_004": "PLACE ADVERBIALS", # only from placelist, didn't consider "in their asses"
+"advtime_005": "TIME ADVERBIALS", #
+"profirpers_006": "FIRST PERSON PRONOUNS", # done by HM
+"prosecpers_007": "SECOND PERSON PRONOUNS", # done by HM
+"prothirdper_008": "THIRD PERSON PRONOUNS", # done by HM
+"proit_009": "PRONOUN IT", # done by HM
 "prodemons_010": "DEMONSTRATIVE PRONOUNS",
 "proindef_011": "INDEFINITE PRONOUNS",
 "pverbdo_012": "PRO-VERB DO",
@@ -21,7 +21,7 @@ feats = {"vpast_001": "SIMPLE PAST VERB FORMS",
 "passagentl_017": "AGENTLESS PASSIVES",
 "passby_018": "BY-PASSIVES",
 "mainvbe_019": "MAIN VERB BE",
-"exthere_020": "EXISTENTIAL THERE",
+"exthere_020": "EXISTENTIAL THERE", # done by HM
 "thatvcom_021": "THAT AS A VERBAL COMPLEMENT",
 "thatacom_022": "THAT AS AN ADJECTIVAL COMPLEMENT",
 "whclause_023": "WH CLAUSES",
@@ -69,15 +69,15 @@ feats = {"vpast_001": "SIMPLE PAST VERB FORMS",
 "coordnonp_065": "CLAUSAL COORDINATION ('AND' CONNECTING TWO CLAUSES)",
 "negsyn_066": "SNYTHETIC NEGATION (NO + QUANT/ADJ/N, NEITHER, NOR)",
 "negana_067": "ANALYTIC NEGATION (NOT, N'T)",
-"hashtag_201": "HASHTAGS",
-"link_202": "EXTERNAL URLS",
+"hashtag_201": "HASHTAGS", # done by HM
+"link_202": "EXTERNAL URLS", # done by HM
 "interlink_203": "INTERNAL URLS",
 "caps_204": "WORDS IN ALL CAPS",
 "vimperative_205": "IMPERATIVE VERB FORMS",
 "lengthening_206": "STRATEGIC LENGTHENING",
 "emoticons_207": "EMOTICONS",
-"question_208": "QUESTION MARKS",
-"exclamation_209": "EXCLAMATION MARKS",
+"question_208": "QUESTION MARKS", # done by HM
+"exclamation_209": "EXCLAMATION MARKS", # done by HM
 "lenchar_210": "LENGTH OF THE SENTENCE IN CHARACTERS",
 "lenword_211": "LENGTH OF THE SENTENCE IN WORDS",
 "comparatives_syn_212": "SYNTHETIC COMPARATIVES (ADJ-ER)",
@@ -113,7 +113,7 @@ if os.path.exists("manual_coding_"+feats[feature]+".txt"):
         for line in p:
             already_coded.add(line.split("\t")[0])
 
-
+p = open("C:/Users/ratos/Documents/GitHub/Reddit_MDA/manual_coding_"+feature+".txt", "a")
 pos = 0
 neg = 0
 sents = 0
@@ -121,29 +121,29 @@ sents = 0
 
 input("Hit ENTER to begin. ")
 
-with open("sample_sentences.txt", "r", encoding="utf-8", errors="ignore") as f:
-    with open("manual_coding_"+feature+".txt", "a") as p:
-        while pos<10 or neg<10 or sents<100:
-            l = f.readline().split("\t")
-            if len(l) == 2 and not l[0] in already_coded:
-                ID = l[0]
-                s = l[1].strip("\n")
-                count = "x"
-                while not count.isdigit():
-                    print("\n\n<<<< "+s+" >>>>>")
-                    count = input("Type in how many instances of "+ feats[feature] + " are in this sentence.\n\n")
-                    if not count.isdigit():
-                        print("Sorry, input needs to be an integer.")
-                if count == "0":
-                    neg +=1
-                else:
-                    pos += 1
-                sents +=1
-                p.write(ID + "\t" + count+"\n")
-            elif len(l) == 2 and l[0] in already_coded:
-                pass
-            else:
-                break
+f = open("C:/Users/ratos/Documents/GitHub/Reddit_MDA/sample_sentences.txt", "r")
 
+while (pos<10 and neg<10) or sents<100:
+    l = f.readline().split("\t")
+    if len(l) == 2 and not l[0] in already_coded:
+        ID = l[0]
+        s = l[1].strip("\n")
+        count = "x"
+        while not count.isdigit():
+            print("\n\n<<<< "+s+" >>>>>")
+            count = input("Type in how many instances of "+ feats[feature] + " are in this sentence.\n\n")
+            if not count.isdigit():
+                print("Sorry, input needs to be an integer.")
+        if count == "0":
+            neg +=1
+        else:
+            pos += 1
+        sents +=1
+        p.write(ID + "\t" + count+"\n")
+    elif len(l) == 2 and l[0] in already_coded:
+        pass
+    else:
+        break
 
+p.close()
         

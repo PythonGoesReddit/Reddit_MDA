@@ -284,7 +284,7 @@ timelist = ["afterwards", "again", "earlier", "early", "eventually", "formerly",
                 "immediately", "initially", "instantly", "late", "lately", "later", "momentarily", 
                 "now", "nowadays", "once", "originally", "presently", "previously", "recently", 
                 "shortly", "simultaneously", "soon", "subsequently", "today", "tomorrow", "tonight",
-                "yesterday"] # some others that could be included: then, always (HM)
+                "yesterday"] # some others that could be included: then, always (HM), anymore, already, before, no longer usually, currently, every x (RT)
 firstpersonlist = ["i", "me", "we", "us", "my", "our", "myself", "ourselves"]
 secondpersonlist = ["you", "yourself", "your", "yourselves"]
 thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "himself","herself", "themselves"]
