@@ -103,27 +103,37 @@ print("\n\nOkay, "+feats[feature]+" it is!\n"\
       "You will be shown one sentence at a time.\n"\
       "Please enter the number of "+ feats[feature] + " you see in the sentence.\n\n")
 
+
+pos = 0
+neg = 0
+sents = 0
+
 ### Keeping track of sentences already coded for this feature.
 ### This allows the user to interrupt the script at any point
 ### and pick up where they left off later on.
 already_coded = set()
-if os.path.exists("manual_coding_"+feats[feature]+".txt"):
+if os.path.exists("manual_coding_"+feature+".txt"):
     print("I found a file with some coding done already. Picking up where you left off. ")
-    with open("manual_coding_"+feats[feature]+".txt", "r") as p:
+    with open("manual_coding_"+feature+".txt", "r") as p:
         for line in p:
+            print(line)
             already_coded.add(line.split("\t")[0])
+            if line.split("\t")[1].strip("\n") == "0":
+                neg += 1
+            else:
+                pos += 1
+            sents += 1
 
-p = open("manual_coding_"+feature+".txt", "a")
-pos = 0
-neg = 0
-sents = 0
+
+print(already_coded)
+
 
 
 input("Hit ENTER to begin. ")
 
 f = open("sample_sentences.txt", "r")
 
-while (pos<10 and neg<10) or sents<100:
+while pos<10 or neg<10 or sents<100:
     l = f.readline().split("\t")
     if len(l) == 2 and not l[0] in already_coded:
         ID = l[0]
@@ -139,7 +149,8 @@ while (pos<10 and neg<10) or sents<100:
         else:
             pos += 1
         sents +=1
-        p.write(ID + "\t" + count+"\n")
+        with open("manual_coding_"+feature+".txt", "a") as p:
+            p.write(ID + "\t" + count+"\n")
     elif len(l) == 2 and l[0] in already_coded:
         pass
     else:
