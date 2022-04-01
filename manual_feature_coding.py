@@ -131,7 +131,7 @@ print(already_coded)
 
 input("Hit ENTER to begin. ")
 
-f = open("sample_sentences.txt", "r")
+f = open("sample_sentences.txt", "r", encoding="utf-8", errors="ignore")
 
 while pos<10 or neg<10 or sents<100:
     l = f.readline().split("\t")
