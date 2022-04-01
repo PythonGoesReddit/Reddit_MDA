@@ -131,23 +131,10 @@ def analyze_sentence(preprocessed_json):
         
         s["emojis_218"] = adv.extract_emoji(sentence)["overview"]["num_emoji"]
         
-        for emphatic in [" for sure", " a lot", " such a ", " such an ", " just ", " really", " most ", " more "]: 
-        # AB: This whole category strikes me as ill-conceived. Almost all items can, and often do, serve other functions than emphatics:
-        # AB: "such a(n)" as anaphoric determinatives ("But such an approach is not easily implemented."),
-        # AB: "more/most" in adverb/adjective gradation ("more relevant") and general comparison ("more cases of the new covid mutant reported"), where they really aren't "emphatic"
-        # AB: "a lot" as prenominal quantifier ("a lot of talk"). There might be something to be said for this being treated as emphatic, but then so should "much," which it isn't
-        # AB: "just" is so versatile in situated use that any simple interpretation seems implausible
-        # AB: (and my default, acontextual interpretation would be more in the direction of downtoner, e.g. "just saying")
-        # AB: "really" is similar to "just" although perhaps a bit more clearly emphatic. But it can definitely meet other functions as well.
-        # AB: That, to me, only leaves "for sure" as a clear-cut count case.
-        # AB: One option would be to expend a whole lot of effort trying to get at the specifically emphatic cases of all the items in the list
-        # AB: The other might be dropping this feature.
-        # HM: I think I agree with Axel's judgement here. I suggest reducing this class to only "for sure" + "really" and maybe add "definitely"?
-        # HM: or maybe combine amplifiers and emphatics into one category? The distinction between the two is not clear to me anyway.
-            s["emphatics_049"] += sentence.count(emphatic)
-        s["emphatics_049"] -= sentence.count(" a lot of ") # AB: removing all the "a lot of" cases post-hoc. Biber does not do this, but I think it makes sense, because they are simple quantifiers, not emphatics
+        for emphatic in [" for sure"]: 
+            s["amplifiers_048"] += sentence.count(emphatic)
         if sentence.startswith("for sure"): # AB: Catch cases of sentence-initial "for sure" that have been excluded through the insertion of spaces above
-            s["emphatics_049"] += 1
+            s["amplifiers_048"] += 1
 
         for hedge in [" at about ", " something like ", " more or less", " kinda ", " sorta ", " almost ", " maybe "]:
             s["hedges_047"] += sentence.count(hedge)
@@ -189,8 +176,6 @@ def analyze_sentence(preprocessed_json):
             sum_wordlen = sum_wordlen + wordlen
         s["wordlength_044"] = (sum_wordlen/len(words)) 
         # this works fine but the output might look weird since the words are here separated differently than they are by the tagger
-
-        ## Insert here: calculation of type-token ratio (ttratio_043) 
         
         for i in range(len(words)):
             if lengthening(words[i].lower()):
@@ -267,7 +252,7 @@ s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_0
      "whresub_031": 0, "whreobj_032": 0, "whrepied_033": 0, "sentencere_034": 0, "advsubcause_035": 0, "advsubconc_036": 0, 
      "advsubcond_037": 0, "advsubother_038": 0, "prepositions_039": 0, "adjattr_040": 0, "adjpred_041": 0, "adverbs_042": 0, 
      "ttratio_043": 0, "wordlength_044": 0, "conjuncts_045": 0, "downtoners_046": 0, "hedges_047": 0, "amplifiers_048": 0, 
-     "emphatics_049": 0, "discpart_050": 0, "demonstr_051": 0, "modalsposs_052": 0, "modalsness_053": 0, "modalspred_054": 0, 
+     "discpart_050": 0, "demonstr_051": 0, "modalsposs_052": 0, "modalsness_053": 0, "modalspred_054": 0, 
      "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "vseemappear_058": 0, "contractions_059": 0, "thatdel_060": 0, 
      "strandprep_061": 0, "vsplitinf_062": 0, "vsplitaux_063": 0, "coordphras_064": 0, "coordnonp_065": 0, "negsyn_066": 0, 
      "negana_067": 0, "hashtag_201": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_205": 0, "lengthening_206":0,
@@ -311,9 +296,9 @@ QUANPRO = ["everybody", "somebody", "anybody", "everyone", "someone", "anyone", 
 ALLP = [".", "!", "?", ":", ";", ","]  # here, Biber also includes the long dash -- , but I am unsure how this would be rendered 
 downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "only", "partially", "partly", "practically", "scarcely", "slightly", "somewhat"]
                 # some others that could be included: a little, a bit, a tad (HM)
-amplifierlist = ["absolutely", "altogether", "completely", "enormously", "entirely", "extremely", "fully", "greatly", "highly", 
+amplifierlist = ["absolutely", "altogether", "completely", "definitely", "enormously", "entirely", "extremely", "fully", "greatly", "highly", 
                  "intensely", "perfectly", "strongly", "thoroughly", "totally", "utterly", "very"]
-asktelllist = ["ask", "asked", "asking", "asks", "tell", "telling", "tells", "told"] #this could also be accomplished with .startswith("ask"), .startswith("tell") or == "told" (KM)
+asktelllist = ["ask", "asked", "asking", "asks", "tell", "telling", "tells", "told"]
 titlelist = ["mr", "ms", "mrs", "prof", "professor", "dr", "sir"]
 otheradvsublist = ["since", "while", "whilst", "whereupon", "whereas", "whereby", "such that", "so that", "such that", "inasmuch as", "forasmuch as", "insofar as", "insomuch as", "as long as", "as soon as"]
 notgerundlist = ["nothing", "everything", "something", "anything", "thing", "things", "string", "strings"]
@@ -360,7 +345,7 @@ copulalist = ["be", "am", "is", "was", "were", "been", "being", "appear", "appea
 def analyze_verb(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: "vpast_001", "vpresperfect_002a", "vpastperfect_002b", "vpresent_003", 
     "pverbdo_012", "passagentl_017", "passby_018", "mainvbe_019", "whclause_023", "vinfinitive_024", "vpresentpart_025", "vpastpart_026", "vpastwhiz_027", "vpresentwhiz_028",
-    "emphatics_049", "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
+    "vpublic_055", "vprivate_056", "vsuasive_057", "vseemappear_058", "contractions_059", 
     "thatdel_060", "vsplitinf_062", "vsplitaux_063", "vimperative_205".'''
       
     word_tuple = tagged_sentence[index]
@@ -503,7 +488,7 @@ def analyze_verb(index, tagged_sentence, features_dict):
             if tagged_sentence[x][1].startswith("V"):
                 move_on = False
                 if negator == False:
-                    features_dict["emphatics_049"] += 1
+                    features_dict["amplifiers_048"] += 1
                 if insert_adv:
                     features_dict["vsplitaux_063"] += 1
             elif tagged_sentence[x][0] in ["not", "n't"]:
@@ -640,7 +625,7 @@ def analyze_adverb(index, tagged_sentence, features_dict):
  
 def analyze_adjective(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
-    "adjattr_040", "adjpred_041", "emphatics_049", "comparatives_212", "superlatives_213".'''
+    "adjattr_040", "adjpred_041", "comparatives_212", "superlatives_213".'''
     if tagged_sentence[index][1] == "JJR":
         features_dict["comparatives_syn_212"] += 1
     elif tagged_sentence[index][1] == "JJS":
@@ -660,9 +645,6 @@ def analyze_adjective(index, tagged_sentence, features_dict):
         features_dict["adjattr_040"] += 1
     elif adj_type == "pred":
         features_dict["adjpred_041"] += 1
-        
-    if tagged_sentence[index-1][0] in ["real", "so"]:
-        features_dict["emphatics_049"] += 1
       
 def analyze_preposition(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
