@@ -166,6 +166,7 @@ def analyze_sentence(preprocessed_json):
         for emoticon in [":-)", ":)", ";-)", ":-P", ";-P", ":-p", ";-p", ":-(", ";-(", ":-O", "^^", "-.-", ":-$", ":-\\", ":-/", ":-|", ";-/", ";-\\",
                         ":-[", ":-]", ":-§", "owo", "*.*", ";)", ":P", ":p", ";P", ";p", ":(", ";(", ":O", ":o", ":|", ";/", ";\\", ":[", ":]", ":§"]:
             s["emoticons_207"] += sentence.count(emoticon)
+            ## here: enter command to replace emojis. Otherwise they will be split and the letter will most likely be tagged as NOUN, which throws off some of the functions below.
 
         words = sentence_dict["body"].split() #split into words for single word functions below
         
@@ -373,8 +374,6 @@ def analyze_verb(index, tagged_sentence, features_dict):
             features_dict["vpresentpart_025"] += 1
         elif tagged_sentence[index-1][1] == "NN":
             features_dict["vpresentwhiz_028"] += 1 
-            # Iffy, because catches things like "with prices going up", which is not a case of WHIZ deletion (AB)
-            # I agree, we might have to drop this one. Also catches stuff like "or is the passage saying something different" (HM)
         elif tagged_sentence[index-1][0] in belist:
             features_dict["vprogressive_217"] += 1
         elif (tagged_sentence[index-2][0] in belist) and (tagged_sentence[index-1][1] == "RB"):
@@ -382,12 +381,12 @@ def analyze_verb(index, tagged_sentence, features_dict):
             features_dict["vsplitaux_063"] += 1
     elif word_tuple[1] == "VBN":
         if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
-            if tagged_sentence[index+1][1] in ["IN", "RB", "TO"]: # Biber (1988:233) notes for both that "these forms were edited by hand." So we may consider scrapping them, if automated accuracy is not sufficient.
+            if tagged_sentence[index+1][1] in ["IN", "RB", "TO"]: # Biber (1988:233) notes for both that "these forms were edited by hand."
                 features_dict["vpastpart_026"] += 1 ## this one seems accurate enough to me (HM)
         elif tagged_sentence[index-1][1] in ["NN", "NNP"] or tagged_sentence[index-1][0] in QUANPRO:
             if tagged_sentence[index+1][1] in ["IN", "RBR", "RB", "RBS"] or tagged_sentence[index+1][0] in belist:
                 features_dict["vpastwhiz_027"] += 1 
-                # This reproduces the search strategy from Biber, but strikes me as extremely iffy. Needs further quality control.
+
     elif word_tuple[1] in ["VBP","VBZ"]:
         features_dict["vpresent_003"] += 1
     if word_tuple[0].startswith("seem") or word_tuple[0].startswith("appear"):
@@ -404,7 +403,7 @@ def analyze_verb(index, tagged_sentence, features_dict):
                 features_dict["vpastperfect_002b"] += 1
                 if insert_adv:
                     features_dict["vsplitaux_063"] += 1
-            elif tagged_sentence[x][1].startswith("R") and tagged_sentence[x][0] not in ["n't", "not"]: # Unfortunately, negators and adverbs have the same tags, so we manually exclude negators.
+            elif tagged_sentence[x][1].startswith("R") and tagged_sentence[x][0] not in ["n't", "not"]:
                 insert_adv = True
             elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"):
                 move_on = True 
@@ -700,9 +699,6 @@ def analyze_pronoun(index, tagged_sentence, features_dict):
         features_dict["prothirdper_008"] += 1
     elif word_tuple[0] in indefpronounlist:
         features_dict["proindef_011"] += 1  
-    elif word_tuple[0] == "that" and index == 0: ## this was edited by hand by Biber
-        ## we might be able to simply drop the one above, I think the other criteria for feature 10 might already capture most instances (HM)
-        features_dict["prodemons_010"] += 1
 
     if word_tuple[0] in DEM:
         if tagged_sentence[index+1][0] == "and":
@@ -731,13 +727,7 @@ def analyze_conjunction(index, tagged_sentence, features_dict):
         elif tagged_sentence[index-1][0] == ",":
             if tagged_sentence[index+1][0] in ["it", "so", "you", "then"]:
                 features_dict["coordnonp_065"] += 1
-            elif tagged_sentence[index+1][1] in subjpro or tagged_sentence[index+1][1] in DEM: # So far, this identification of demonstrative pronoun is likely to be too crude. Maybe re-use function for feature 10?
-                #I've added the function from feature 10 here. (GK)
-                if tagged_sentence[index+1][0] == "and":  ## I don't understand this part - why should the item follwing "and" also be "and"?
-                    features_dict["coordnonp_065"] += 1
-                elif tagged_sentence[index+1][1] in ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "MD", "WP"]:
-                    features_dict["coordnonp_065"] += 1
-                elif index == (len(tagged_sentence)-1):
+            elif tagged_sentence[index+1][1] in subjpro or tagged_sentence[index+1][1] in DEM:
                     features_dict["coordnonp_065"] += 1                            
             elif tagged_sentence[index+1][0] == "there" and tagged_sentence[index+2][0] in belist:
                 features_dict["coordnonp_065"] += 1
@@ -818,11 +808,8 @@ def analyze_wh_word(index, tagged_sentence, features_dict):
             elif tagged_sentence[index+1][0] == "it" or tagged_sentence[index+1][0] in subjpro or tagged_sentence[index+1][0] in posspro:
                 features_dict["thatreobj_030"] += 1    
             
-        if tagged_sentence[index-1][1].startswith("J"): #This catches things like I'm sure that's a, there's nothing good that can come out of it, etc. Biber keeps mentioning tone boundaries but I dont understand how you could do that computationally (he refers to it as T#)
-            features_dict["thatacom_022"] += 1 #that adjective complements (e.g., I'm glad that you like it) ADJ + (T#) + that (complements across intonation boundaries were edited by hand)
-                ## we could try restricting the search further by limiting the element in front of the adjective to a copular (and adverb?), but that is then probably too narrow (HM)
-                ## further problem: this only catches instances in which 'that' is not dropped - what about "I am glad you liked it"? (HM)
-                ## maybe this is one of the features we should leave out? (HM)
+        if tagged_sentence[index-1][1].startswith("J"):
+            features_dict["thatacom_022"] += 1 
                 
     else:
         if word_tuple[0] in WHP: # WHP = ["who", "whom", "whose", "which"]
