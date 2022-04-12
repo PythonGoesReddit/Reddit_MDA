@@ -245,7 +245,7 @@ def tag_sentence(sentence):
 #     return tagged_sentence        
 
 ## Definition of global variables incl. stopword lists and checkword lists for following POS-functions & feature dict
-s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_005": 0, 
+s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_position_005a": 0, "advtime_durfreq_005b": 0, 
      "profirpers_006": 0, "prosecpers_007": 0,"prothirdper_008": 0, "proit_009": 0, "prodemons_010": 0, "proindef_011": 0, 
      "pverbdo_012": 0, "whquest_013": 0, "nominalis_014": 0, "gerund_015": 0,"nouns_016": 0, "passagentl_017": 0, "passby_018": 0, 
      "mainvbe_019": 0, "exthere_020": 0, "thatvcom_021": 0, "thatacom_022": 0, "whclause_023": 0, "vinfinitive_024": 0, 
@@ -261,16 +261,25 @@ s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_0
      "superlatives_syn_213": 0, "comparatives_ana_214": 0, "superlatives_ana_215":0, "reddit_vocab_216":0, "vprogressive_217": 0,
      "emojis_218":0}
 placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "anywhere", 
-                 "ashore", "astern", "away", "behind", "below", "beneath", "beside", "downhill",
-                 "downstairs", "downstream", "east", "everywhere", "far", "here", "hereabouts", "indoors", "inland", "inshore",
-                 "inside", "locally", "near", "nearby", "north", "nowhere", "outdoors", "outside", 
-                 "overboard", "overland", "overseas", "somewhere", "south", "underfoot", "there", "underground", "underneath",
-                 "uphill", "upstairs", "upstream", "west"] 
-timelist = ["afterwards", "again", "always", "earlier", "early", "eventually", "formerly",
+                 "ashore", "astern", "away", "behind", "below", "beneath", "between", "beyond",
+                 "beside", "down", "downhill", "downstairs", "downstream", "downwind", "east",
+                 "eastward", "eastwards", "elsewhere", "everywhere", "far", "here", "hereabouts",
+                 "indoors", "inland", "inshore", "inside", "locally", "near", "nearby", "north",
+                 "northward", "northwards", "nowhere", "offshore", "opposite", "outdoors", "outside", 
+                 "overboard", "overhead", "overland", "overseas", "somewhere", "south", "southward", "southwards",
+                 "there", "thereabouts", "through", "throughout", "under", "underfoot", "underground", "underneath",
+                 "uphill", "upstairs", "upstream", "west", "westward", "westwards", "within"] 
+timepoints = ["afterwards", "again", "already", "anymore", "before", "currently", "earlier", "early", "eventually",
+              "formerly", "finally", 
                 "immediately", "initially", "instantly", "late", "lately", "later", "momentarily", 
-                "now", "nowadays", "once", "originally", "presently", "previously", "recently", 
+                "now", "nowadays",  "originally", "presently", "previously", "promptly", "recently", 
                 "shortly", "simultaneously", "soon", "subsequently", "today", "tomorrow", "tonight",
-                "yesterday"] # some others that could be included: anymore, already, before, no longer, usually, currently, every x (RT) 
+                "yesterday"]
+timedurfreq = ["always", "annually", "ceaselessly", "commonly", "constantly", "continually", "continuously", "customarily",
+               "daily", "eternally", "evermore", "endlessly", "forever", "fortnightly", "frequently", "habitually", "hourly", "infrequently", "intermittently",
+               "irregularly", "invariably", "monthly", "never", "occasionally", "often", "oftentimes", "once", "periodically",
+               "perpetually", "persistently", "rarely", "repeatedly", "routinely", "seldom", "sometimes",
+               "twice", "unceasingly", "usually","weekly", "yearly"]
 firstpersonlist = ["i", "me", "we", "us", "my", "our", "myself", "ourselves"]
 secondpersonlist = ["you", "yourself", "your", "yourselves"]
 thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "himself","herself", "themselves"]
@@ -603,7 +612,6 @@ def analyze_adverb(index, tagged_sentence, features_dict):
     "downtoners_046", "hedges_047", "amplifiers_048", "discpart_050", "contractions_059", "negana_067".'''
     features_dict["adverbs_042"] += 1
     word_tuple = tagged_sentence[index]
-
     if word_tuple[0] == "not":
         features_dict["negana_067"] += 1
     if word_tuple[0] == "n't":
@@ -611,8 +619,10 @@ def analyze_adverb(index, tagged_sentence, features_dict):
         features_dict["contractions_059"] += 1
     elif word_tuple[0] in placelist:
         features_dict["advplace_004"] += 1
-    elif word_tuple[0] in timelist:
-        features_dict["advtime_005"] += 1
+    elif word_tuple[0] in timepoints:
+        features_dict["advtime_position_005a"] += 1
+    elif word_tuple[0] in timedurfreq:
+        features_dict["advtime_durfreq_005b"] += 1
     elif word_tuple[0] in downtonerlist:
         features_dict["downtoners_046"] += 1
     elif word_tuple[0] in amplifierlist:
