@@ -167,6 +167,8 @@ def analyze_sentence(preprocessed_json):
                         ":-[", ":-]", ":-§", "owo", "*.*", ";)", ":P", ":p", ";P", ";p", ":(", ";(", ":O", ":o", ":|", ";/", ";\\", ":[", ":]", ":§"]:
             s["emoticons_207"] += sentence.count(emoticon)
             ## here: enter command to replace emojis. Otherwise they will be split and the letter will most likely be tagged as NOUN, which throws off some of the functions below.
+            ### AB: This is not the place to do it, as whatever we do here will not persist into what is being piped to the tokenizer.
+            ### AB: I added the operation to the clean_sentence() function
 
         words = sentence_dict["body"].split() #split into words for single word functions below
         
@@ -207,6 +209,9 @@ def analyze_sentence(preprocessed_json):
 def clean_sentence(sentence):
     '''Takes a sentence and returns it in all lowercase, with punctuation removed, and emojis removed.'''
     sentence = str(sentence).strip(string.punctuation).lower()
+    for emoticon in [":-)", ":)", ";-)", ":-P", ";-P", ":-p", ";-p", ":-(", ";-(", ":-O", "^^", "-.-", ":-$", ":-\\", ":-/", ":-|", ";-/", ";-\\",
+                        ":-[", ":-]", ":-§", "owo", "*.*", ";)", ":P", ":p", ";P", ";p", ":(", ";(", ":O", ":o", ":|", ";/", ";\\", ":[", ":]", ":§"]:
+        sentence = sentence.replace(emoticon, "")
     ## emoticons already counted (but not removed) in the analyse_sentence function
     ## emojis already counted (but not removed) in the analyse_sentence function
     ## links and URLs counted AND removed in the analyse_sentence function
