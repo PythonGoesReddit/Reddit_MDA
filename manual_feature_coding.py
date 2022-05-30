@@ -6,7 +6,8 @@ feats = {"vpast_001": "SIMPLE PAST VERB FORMS", # done by HM
 "vpastperfect_002b": "PAST PERFECT VERB FORMS", 
 "vpresent_003": "PRESENT TENSE VERB FORMS",
 "advplace_004": "PLACE ADVERBIALS", # RT
-"advtime_005": "TIME ADVERBIALS", # RT
+"advtime_position_005a": "TIME ADVERBIALS - POINTS IN TIME",
+"advtime_durfreq_005b": "TIME ADVERBIALS - DURATION AND FREQUENCY",
 "profirpers_006": "FIRST PERSON PRONOUNS", # done by HM
 "prosecpers_007": "SECOND PERSON PRONOUNS", # done by HM
 "prothirdper_008": "THIRD PERSON PRONOUNS", # done by HM

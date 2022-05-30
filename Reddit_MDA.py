@@ -183,8 +183,9 @@ def analyze_sentence(preprocessed_json):
         for i in range(len(words)):
             if lengthening(words[i].lower()):
                 s["lengthening_206"] += 1
-            if words[i].lower() in ["op", "subreddit", "sub", "subreddits", "upvoted", "posted", "repost", "thread", "upvotes", "upvote",
-                    "redditor", "redditors", "post", "posts", "mod", "mods", "flair",]:
+            if words[i].lower() in ["op", "subreddit", "sub", "subreddits", "upvoted", "posted", "repost", "thread", "upvotes", "upvote", "upvoting"
+                    "reddit", "redditor", "redditors", "post", "posts", "mod", "mods", "flair", "karma", "downmod", "downmodding", "downvote", 
+                    "downvoting", "modding"]:
                 s["reddit_vocab_216"] += 1 
             
             if words[i].lower().startswith("u/"):
