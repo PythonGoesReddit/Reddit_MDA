@@ -836,7 +836,8 @@ def analyze_wh_word(index, tagged_sentence, features_dict):
                 features_dict["sentencere_034"] += 1
 
             #31. WH relative clauses on subject position (e.g., the man who likes popcorn) xxx + yyy + N + WHP + (ADV) + AUX/V (where xxx is NOT any form of the verbs ASK or TELL; to exclude indirect WH questions like Tom asked the man who went to the store)
-            if tagged_sentence[index-1][1].startswith("N"):
+            ##AB: Added the condition for ASK and TELL
+            if tagged_sentence[index-1][1].startswith("N") and tagged_sentence[index-2][0] not in ["tell", "tells", "told", "telling", "ask", "asks", "asked", "asking"]:
                 if tagged_sentence[index+1][1].startswith("R"):
                     if (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
                         features_dict["whresub_031"] += 1
@@ -846,6 +847,10 @@ def analyze_wh_word(index, tagged_sentence, features_dict):
         
             #32. WH relative clauses on object positions (e.g., the man who Sally likes) xxx + yyy + N + WHP + zzz (where xxx is NOT any form of the verbs ASK or TELL, to exclude indirect WH questions, and zzz is not ADV, AUX or V, to exclude relativization on subject position)
             #right now, only wh-words at least two words from the front and 2 from the end will be caught here (KM) -> won't catch ex "boys who Sally likes" (is that grammatically acceptable??) also won't catch passives, ex "the men who are liked by Sally" (kind of awkward tbh) (KM)
+            #AB: The two words from the end is not a problem, since an object RC has, by definition a minimum of two items after the relativizer (subject and verb)
+            #AB: I am hard-put to find a more felicitous example than "boys who Sally likes" that would pose a problem with the 2 words at the beginning either, so happy to disregard the issue.
+            #AB: Edit: Does the problem at beginning or end not disappear entirely with out added "x"es?
+            #AB: The example "the men who are liked by Sally" is an RC with the relatizive in subject gap and as such is appropriately captured under 031.
             if not tagged_sentence[index-2][0].startswith("ask") and not tagged_sentence[index-2][0].startswith("tell") and not tagged_sentence[index-2][0] == "told": 
                 if not tagged_sentence[index+1][1].startswith("R") and not tagged_sentence[index+1][1].startswith("V") and not tagged_sentence[index+1][1].startswith("MD"):
                     features_dict["whreobj_032"] += 1 
