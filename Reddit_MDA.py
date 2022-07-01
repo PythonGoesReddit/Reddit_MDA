@@ -26,9 +26,9 @@ import advertools as adv
 from datetime import timedelta
 start_time = time.time()
 
-dirname = os.path.dirname(__file__)
-data_folder = os.path.join(dirname, 'sample_data')
-all_files = [os.path.join("sample_data", file) for file in os.listdir(data_folder) if os.path.splitext(file)[1] == ".json"]
+#dirname = os.path.dirname(__file__)
+#data_folder = os.path.join(dirname, 'sample_data')
+#all_files = [os.path.join("sample_data", file) for file in os.listdir(data_folder) if os.path.splitext(file)[1] == ".json"]
 
 #tagger_FLAIR = SequenceTagger.load("final-model_64.pt")
 
@@ -666,7 +666,7 @@ def analyze_preposition(index, tagged_sentence, features_dict):
     "advsubcause_035", "advsubconc_036", "advsubcond_037", "advsubother_038", "prepositions_039", 
     "conjuncts_045", "hedges_047", "strandprep_061".'''
     word_tuple = tagged_sentence[index]
-    if not word_tuple[0] in ["because", "unless", "whilst", "while", "though", "tho", "although", "that", "since", "whereupon", "whereas", "whereby"] + timelist + placelist: 
+    if not word_tuple[0] in ["because", "unless", "whilst", "while", "though", "tho", "although", "that", "since", "whereupon", "whereas", "whereby"] + timepoints + timedurfreq + placelist: 
         features_dict["prepositions_039"] += 1 
     if word_tuple[0] in ["because", "becuase", "beacuse", "cause", "'cause", "cos", "'cos", "coz", "'coz", "caus", "'caus", "cuz", "'cuz", "bcoz", "bcuz", "bcos", "bcause", "bcaus"] and tagged_sentence[index+1][0] != "of":
         features_dict["advsubcause_035"] += 1 
@@ -944,7 +944,14 @@ practice_sentences = ["He then consequently ate five donuts in a row.",
 "Go buy donuts now else there won't be any left.", "I want something else.", 
 "Go eat a donut instead of complaining.", "I would much rather have a donut now than later."]
 
-tester(practice_sentences, "conjuncts_045")
+#tester(practice_sentences, "conjuncts_045")
+
+
+def process_sent(sent, feat):
+    tagged_sentence = tag_sentence(sent)
+    features_dict = s.copy()
+    POS_tagger(tagged_sentence, features_dict)
+    return features_dict[feat]
 
 # if __name__ == "__main__":
     
