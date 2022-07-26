@@ -14,15 +14,15 @@ import json
 import os
 import nltk
 import string
-#import flair
+import flair
 import re
 import time
 import concurrent.futures
 from multiprocessing import Pool, Manager
 import psutil
-#from flair.models import SequenceTagger
-#from flair.data import Sentence
-import advertools as adv
+from flair.models import SequenceTagger
+from flair.data import Sentence
+# import advertools as adv
 from datetime import timedelta
 start_time = time.time()
 
@@ -30,7 +30,7 @@ start_time = time.time()
 #data_folder = os.path.join(dirname, 'sample_data')
 #all_files = [os.path.join("sample_data", file) for file in os.listdir(data_folder) if os.path.splitext(file)[1] == ".json"]
 
-#tagger_FLAIR = SequenceTagger.load("final-model_64.pt")
+tagger_FLAIR = SequenceTagger.load("C:/Users/gusta/Documents/GitHub/Reddit_MDA/RedditTaggerFinal150.pt")
 
 
 # Preprocessing functions
@@ -223,32 +223,32 @@ def clean_sentence(sentence):
 # To use the nltk tagger: import nltk and (first time only) nltk.download("tagsets")
 # Can also look up nltk tags with (ex): nltk.help.upenn_tagset('NNS')
 
-def tag_sentence(sentence):
-    '''Takes a sentence, cleans it with clean_sentence, and tags it using the NLTK averaged_perceptron_tagger. 
-    Adds a look ahead/behind buffer of three items of type ("X", "X") to prevent negative indices and IndexErrors
-    Returns a list of tuples of (word, pos_tag).'''
-    cleaned_sentence = clean_sentence(sentence)
-    tokens = nltk.word_tokenize(cleaned_sentence)
-    tagged_sentence = nltk.pos_tag(tokens)
-    empty_look = [("X", "X"), ("X", "X"), ("X", "X")]
-    tagged_sentence = empty_look + tagged_sentence + empty_look 
-    return tagged_sentence
+# def tag_sentence(sentence):
+#     '''Takes a sentence, cleans it with clean_sentence, and tags it using the NLTK averaged_perceptron_tagger. 
+#     Adds a look ahead/behind buffer of three items of type ("X", "X") to prevent negative indices and IndexErrors
+#     Returns a list of tuples of (word, pos_tag).'''
+#     cleaned_sentence = clean_sentence(sentence)
+#     tokens = nltk.word_tokenize(cleaned_sentence)
+#     tagged_sentence = nltk.pos_tag(tokens)
+#     empty_look = [("X", "X"), ("X", "X"), ("X", "X")]
+#     tagged_sentence = empty_look + tagged_sentence + empty_look 
+#     return tagged_sentence
 
 # The function below is the newer FLAIR POS tagger. It uses the tagger_FLAIR, loaded in line 43 of the code. (GK) 
 
-#def tag_sentence(sentence):
-#    '''Takes a sentence, cleans it with clean_sentence, and tags it using the FLAIR POS tagger. 
-#    Adds a look ahead/behind buffer of three items of type ("X", "X") to prevent negative indices and IndexErrors
-#    Returns a list of tuples of (word, pos_tag).'''
-#    cleaned_sentence = clean_sentence(sentence)
-#    flair_sentence = Sentence(cleaned_sentence)
-#    tagger_FLAIR.predict(flair_sentence)
-#    token_list = []
-#    for entity in flair_sentence.get_spans('pos'):
-#        token_list.append(tuple([entity.text] + [entity.tag]))
-#    empty_look = [("X", "X"), ("X", "X"), ("X", "X")]
-#    tagged_sentence = empty_look + token_list + empty_look 
-#    return tagged_sentence        
+def tag_sentence(sentence):
+    '''Takes a sentence, cleans it with clean_sentence, and tags it using the FLAIR POS tagger. 
+    Adds a look ahead/behind buffer of three items of type ("X", "X") to prevent negative indices and IndexErrors
+    Returns a list of tuples of (word, pos_tag).'''
+    cleaned_sentence = clean_sentence(sentence)
+    flair_sentence = Sentence(cleaned_sentence)
+    tagger_FLAIR.predict(flair_sentence)
+    token_list = []
+    for label in flair_sentence.get_labels('pos'):
+        token_list.append(tuple([label.data_point.text] + [label.value])) 
+    empty_look = [("X", "X"), ("X", "X"), ("X", "X")]
+    tagged_sentence = empty_look + token_list + empty_look 
+    return tagged_sentence   
 
 ## Definition of global variables incl. stopword lists and checkword lists for following POS-functions & feature dict
 s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_003": 0, "advplace_004": 0, "advtime_position_005a": 0, "advtime_durfreq_005b": 0, 

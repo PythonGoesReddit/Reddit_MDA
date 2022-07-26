@@ -8,3 +8,4 @@ output.txt
 final-model_64.pt
 Flair_Tagger.py
 Reddit_MDA_tagger.py
+RedditTaggerFinal150.pt
