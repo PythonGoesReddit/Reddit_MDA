@@ -22,7 +22,7 @@ from multiprocessing import Pool, Manager
 import psutil
 from flair.models import SequenceTagger
 from flair.data import Sentence
-# import advertools as adv
+import advertools as adv
 from datetime import timedelta
 start_time = time.time()
 
@@ -223,16 +223,16 @@ def clean_sentence(sentence):
 # To use the nltk tagger: import nltk and (first time only) nltk.download("tagsets")
 # Can also look up nltk tags with (ex): nltk.help.upenn_tagset('NNS')
 
-# def tag_sentence(sentence):
-#     '''Takes a sentence, cleans it with clean_sentence, and tags it using the NLTK averaged_perceptron_tagger. 
-#     Adds a look ahead/behind buffer of three items of type ("X", "X") to prevent negative indices and IndexErrors
-#     Returns a list of tuples of (word, pos_tag).'''
-#     cleaned_sentence = clean_sentence(sentence)
-#     tokens = nltk.word_tokenize(cleaned_sentence)
-#     tagged_sentence = nltk.pos_tag(tokens)
-#     empty_look = [("X", "X"), ("X", "X"), ("X", "X")]
-#     tagged_sentence = empty_look + tagged_sentence + empty_look 
-#     return tagged_sentence
+#def tag_sentence(sentence):
+#    '''Takes a sentence, cleans it with clean_sentence, and tags it using the NLTK averaged_perceptron_tagger. 
+#    Adds a look ahead/behind buffer of three items of type ("X", "X") to prevent negative indices and IndexErrors
+#    Returns a list of tuples of (word, pos_tag).'''
+#    cleaned_sentence = clean_sentence(sentence)
+#    tokens = nltk.word_tokenize(cleaned_sentence)
+#    tagged_sentence = nltk.pos_tag(tokens)
+#    empty_look = [("X", "X"), ("X", "X"), ("X", "X")]
+#    tagged_sentence = empty_look + tagged_sentence + empty_look 
+#    return tagged_sentence
 
 # The function below is the newer FLAIR POS tagger. It uses the tagger_FLAIR, loaded in line 43 of the code. (GK) 
 
