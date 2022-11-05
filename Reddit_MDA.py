@@ -183,7 +183,7 @@ def analyze_sentence(preprocessed_json):
         for i in range(len(words)):
             if lengthening(words[i].lower()):
                 s["lengthening_206"] += 1
-            if words[i].lower() in ["op", "subreddit", "sub", "subreddits", "upvoted", "posted", "repost", "thread", "upvotes", "upvote", "upvoting"
+            if words[i].lower() in ["op", "subreddit", "sub", "subreddits", "upvoted", "posted", "repost", "thread", "upvotes", "upvote", "upvoting",
                     "reddit", "redditor", "redditors", "post", "posts", "mod", "mods", "flair", "karma", "downmod", "downmodding", "downvote", 
                     "downvoting", "modding"]:
                 s["reddit_vocab_216"] += 1 
@@ -700,6 +700,9 @@ def analyze_noun(index, tagged_sentence, features_dict):
     else: 
         features_dict["nouns_016"] += 1
         
+    if word_tuple[0] in indefpronounlist:
+        features_dict["proindef_011"] += 1
+        
 def analyze_pronoun(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "profirpers_006", "prosecpers_007", "prothirper_008", "proit_009", "prodemons_010", "proindef_011".'''
@@ -723,6 +726,10 @@ def analyze_pronoun(index, tagged_sentence, features_dict):
             features_dict["prodemons_010"] += 1
         elif index == (len(tagged_sentence)-1):
             features_dict["prodemons_010"] += 1
+        ## this next condition for demonstrative pronouns in object position ("I like this") was not part of Biber's original code (HM)
+        elif tagged_sentence[index-1][1] in ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ"]:
+            if tagged_sentence[index+1][1] not in ["NN", "NNS"]:
+                features_dict["prodemons_010"] += 1        
     elif word_tuple[0] == "that" and tagged_sentence[index+1][0] == "'s":
         features_dict["prodemons_010"] += 1
 
@@ -781,6 +788,21 @@ def analyze_determiner(index, tagged_sentence, features_dict):
             features_dict["negsyn_066"] += 1
         elif tagged_sentence[index+1][0] in QUAN:
             features_dict["negsyn_066"] += 1
+            
+    ### copied from the section on pronouns (in case demonstrative pronouns are tagged as determiners) 
+    if word_tuple[0] in DEM:
+        if tagged_sentence[index+1][0] == "and":
+            features_dict["prodemons_010"] += 1
+        elif tagged_sentence[index+1][1] in ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "MD", "WP"]:
+            features_dict["prodemons_010"] += 1
+        elif index == (len(tagged_sentence)-1):
+            features_dict["prodemons_010"] += 1
+        ## this next condition for demonstrative pronouns in object position ("I like this") was not part of Biber's original code
+        elif tagged_sentence[index-1][1] in ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ"]:
+            if tagged_sentence[index+1][1] not in ["NN", "NNS"]:
+                features_dict["prodemons_010"] += 1
+    elif word_tuple[0] == "that" and tagged_sentence[index+1][0] == "'s":
+        features_dict["prodemons_010"] += 1    
 
 def analyze_wh_word(index, tagged_sentence, features_dict):
     # Check: Ft 32 (Biber's way of finding this seems like it could be optimized)
@@ -864,7 +886,6 @@ def analyze_wh_word(index, tagged_sentence, features_dict):
                 if tagged_sentence[index+1][0] in belist or tagged_sentence[index+1][0] in havelist or tagged_sentence[index+1][0] in dolist:
                     features_dict["whquest_013"] += 1
        
-
 
 def analyze_there(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
