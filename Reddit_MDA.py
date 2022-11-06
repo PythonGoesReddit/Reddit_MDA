@@ -354,7 +354,8 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
 copulalist = ["be", "am", "is", "was", "were", "been", "being", "appear", "appears", "appeared", "appearing", "seem", "seems", "seemed", "seeming", 
               "sound", "sounds", "sounding", "sounded", "smell", "smells", "smelled", "smelling", "become", "becomes", "became", "becoming", "turn", 
               "turns", "turning", "turned", "turn", "grow", "grows", "grew", "growing", "growed", "grown", "get", "gets", "getting", "gotten", 
-              "got", "look", "looks", "looking", "looked", "taste", "tastes", "tasted", "tasting", "feel", "feels", "feeled", "felt", "feeling"] 
+              "got", "look", "looks", "looking", "looked", "taste", "tastes", "tasted", "tasting", "feel", "feels", "feeled", "felt", "feeling",
+              "'m", "m", "'s", "s", "'re", "re"] 
 
 
 #POS-functions
