@@ -110,8 +110,8 @@ def analyze_sentence(preprocessed_json):
     "question_208": no. of question marks, "exclamation_209": no of exclamation marks, "lenchar_210": len of sentence in char, "lenword_211": len of sentence in words, 
     "conjuncts_045", "reddit_vocab".'''
 
-    for id in preprocessed_json: 
-        sentence_dict = preprocessed_json.get(id)
+    for key in preprocessed_json: 
+        sentence_dict = preprocessed_json.get(key)
         sentence = sentence_dict["body"].lower() # AB: lowercasing spelling here, as most code below presupposes all lowercase.
         # AB: For individual items in the .count() functions, there is a tradeoff between " ITEM " and "ITEM".
         # AB: Without spaces, there may be unexpected false positives (e.g. "such a" counting "such astronomical costs" etc.)
@@ -183,7 +183,7 @@ def analyze_sentence(preprocessed_json):
         for i in range(len(words)):
             if lengthening(words[i].lower()):
                 s["lengthening_206"] += 1
-            if words[i].lower() in ["op", "subreddit", "sub", "subreddits", "upvoted", "posted", "repost", "thread", "upvotes", "upvote", "upvoting",
+            if words[i].strip(string.punctuation).lower() in ["op", "subreddit", "sub", "subreddits", "upvoted", "posted", "repost", "thread", "upvotes", "upvote", "upvoting",
                     "reddit", "redditor", "redditors", "post", "posts", "mod", "mods", "flair", "karma", "downmod", "downmodding", "downvote", 
                     "downvoting", "modding"]:
                 s["reddit_vocab_216"] += 1 
@@ -941,8 +941,8 @@ def MDA_analyzer(filepath):
     analyze_sentence(preprocessed_file) #updates raw-sentence based counts (i.e. punctuation marks, length)
     all_ft_dicts = []
 
-    for id in preprocessed_file: #loops through all individual sentences in the file one by one
-        sentence_dict = preprocessed_file.get(id) #retrieves entire dictionary and all sub-dicts for the given sentence
+    for key in preprocessed_file: #loops through all individual sentences in the file one by one
+        sentence_dict = preprocessed_file.get(key) #retrieves entire dictionary and all sub-dicts for the given sentence
         sentence = sentence_dict["body"] #retrieves sentence only (str)) 
         features_dict = sentence_dict["features"] #retrieves s for the given sentence
         tagged_sentence = tag_sentence(sentence) #tags sentence, returning list of tuples with (word, pos)
