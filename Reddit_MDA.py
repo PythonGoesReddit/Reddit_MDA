@@ -110,8 +110,8 @@ def analyze_sentence(preprocessed_json):
     "question_208": no. of question marks, "exclamation_209": no of exclamation marks, "lenchar_210": len of sentence in char, "lenword_211": len of sentence in words, 
     "conjuncts_045", "reddit_vocab".'''
 
-    for key in preprocessed_json: 
-        sentence_dict = preprocessed_json.get(key)
+    for id in preprocessed_json: 
+        sentence_dict = preprocessed_json.get(id)
         sentence = sentence_dict["body"].lower() # AB: lowercasing spelling here, as most code below presupposes all lowercase.
         # AB: For individual items in the .count() functions, there is a tradeoff between " ITEM " and "ITEM".
         # AB: Without spaces, there may be unexpected false positives (e.g. "such a" counting "such astronomical costs" etc.)
@@ -163,8 +163,8 @@ def analyze_sentence(preprocessed_json):
         s["lenchar_210"] = len(sentence) 
         s["lenword_211"] = len(sentence.split(" ")) 
         
-        for emoticon in [":-)", ":)", ";-)", ":-P", ";-P", ":-p", ";-p", ":-(", ";-(", ":-O", "^^", "-.-", ":-$", ":-\\", ":-/", ":-|", ";-/", ";-\\",
-                        ":-[", ":-]", ":-§", "owo", "*.*", ";)", ":P", ":p", ";P", ";p", ":(", ";(", ":O", ":o", ":|", ";/", ";\\", ":[", ":]", ":§"]:
+        for emoticon in [":-)", ":)", ";-)", ":-p", ";-p", ":-(", ";-(", ":-o", "^^", "-.-", ":-$", ":-\\", ":-/", ":-|", ";-/", ";-\\",
+                        ":-[", ":-]", ":-§", "owo", "*.*", ";)", ":p", ";p", ":(", ";(", ":o", ":|", ";/", ";\\", ":[", ":]", ":§", ":-d"]:
             s["emoticons_207"] += sentence.count(emoticon)
             ## here: enter command to replace emojis. Otherwise they will be split and the letter will most likely be tagged as NOUN, which throws off some of the functions below.
             ### AB: This is not the place to do it, as whatever we do here will not persist into what is being piped to the tokenizer.
@@ -183,7 +183,7 @@ def analyze_sentence(preprocessed_json):
         for i in range(len(words)):
             if lengthening(words[i].lower()):
                 s["lengthening_206"] += 1
-            if words[i].strip(string.punctuation).lower() in ["op", "subreddit", "sub", "subreddits", "upvoted", "posted", "repost", "thread", "upvotes", "upvote", "upvoting",
+            if words[i].lower() in ["op", "subreddit", "sub", "subreddits", "upvoted", "posted", "repost", "thread", "upvotes", "upvote", "upvoting"
                     "reddit", "redditor", "redditors", "post", "posts", "mod", "mods", "flair", "karma", "downmod", "downmodding", "downvote", 
                     "downvoting", "modding"]:
                 s["reddit_vocab_216"] += 1 
@@ -210,8 +210,8 @@ def analyze_sentence(preprocessed_json):
 def clean_sentence(sentence):
     '''Takes a sentence and returns it in all lowercase, with punctuation removed, and emojis removed.'''
     sentence = str(sentence).strip(string.punctuation).lower()
-    for emoticon in [":-)", ":)", ";-)", ":-P", ";-P", ":-p", ";-p", ":-(", ";-(", ":-O", "^^", "-.-", ":-$", ":-\\", ":-/", ":-|", ";-/", ";-\\",
-                        ":-[", ":-]", ":-§", "owo", "*.*", ";)", ":P", ":p", ";P", ";p", ":(", ";(", ":O", ":o", ":|", ";/", ";\\", ":[", ":]", ":§"]:
+    for emoticon in [":-)", ":)", ";-)", ":-p", ";-p", ":-(", ";-(", ":-o", "^^", "-.-", ":-$", ":-\\", ":-/", ":-|", ";-/", ";-\\",
+                        ":-[", ":-]", ":-§", "owo", "*.*", ";)", ":p", ";p", ":(", ";(", ":o", ":|", ";/", ";\\", ":[", ":]", ":§", ":-d"]:
         sentence = sentence.replace(emoticon, "")
     ## emoticons already counted (but not removed) in the analyse_sentence function
     ## emojis already counted (but not removed) in the analyse_sentence function
@@ -354,8 +354,7 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
 copulalist = ["be", "am", "is", "was", "were", "been", "being", "appear", "appears", "appeared", "appearing", "seem", "seems", "seemed", "seeming", 
               "sound", "sounds", "sounding", "sounded", "smell", "smells", "smelled", "smelling", "become", "becomes", "became", "becoming", "turn", 
               "turns", "turning", "turned", "turn", "grow", "grows", "grew", "growing", "growed", "grown", "get", "gets", "getting", "gotten", 
-              "got", "look", "looks", "looking", "looked", "taste", "tastes", "tasted", "tasting", "feel", "feels", "feeled", "felt", "feeling",
-              "'m", "m", "'s", "s", "'re", "re"] 
+              "got", "look", "looks", "looking", "looked", "taste", "tastes", "tasted", "tasting", "feel", "feels", "feeled", "felt", "feeling"] 
 
 
 #POS-functions
@@ -701,9 +700,6 @@ def analyze_noun(index, tagged_sentence, features_dict):
     else: 
         features_dict["nouns_016"] += 1
         
-    if word_tuple[0] in indefpronounlist:
-        features_dict["proindef_011"] += 1
-        
 def analyze_pronoun(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "profirpers_006", "prosecpers_007", "prothirper_008", "proit_009", "prodemons_010", "proindef_011".'''
@@ -727,10 +723,6 @@ def analyze_pronoun(index, tagged_sentence, features_dict):
             features_dict["prodemons_010"] += 1
         elif index == (len(tagged_sentence)-1):
             features_dict["prodemons_010"] += 1
-        ## this next condition for demonstrative pronouns in object position ("I like this") was not part of Biber's original code (HM)
-        elif tagged_sentence[index-1][1] in ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ"]:
-            if tagged_sentence[index+1][1] not in ["NN", "NNS"]:
-                features_dict["prodemons_010"] += 1        
     elif word_tuple[0] == "that" and tagged_sentence[index+1][0] == "'s":
         features_dict["prodemons_010"] += 1
 
@@ -789,21 +781,6 @@ def analyze_determiner(index, tagged_sentence, features_dict):
             features_dict["negsyn_066"] += 1
         elif tagged_sentence[index+1][0] in QUAN:
             features_dict["negsyn_066"] += 1
-            
-    ### copied from the section on pronouns (in case demonstrative pronouns are tagged as determiners) 
-    if word_tuple[0] in DEM:
-        if tagged_sentence[index+1][0] == "and":
-            features_dict["prodemons_010"] += 1
-        elif tagged_sentence[index+1][1] in ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "MD", "WP"]:
-            features_dict["prodemons_010"] += 1
-        elif index == (len(tagged_sentence)-1):
-            features_dict["prodemons_010"] += 1
-        ## this next condition for demonstrative pronouns in object position ("I like this") was not part of Biber's original code
-        elif tagged_sentence[index-1][1] in ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ"]:
-            if tagged_sentence[index+1][1] not in ["NN", "NNS"]:
-                features_dict["prodemons_010"] += 1
-    elif word_tuple[0] == "that" and tagged_sentence[index+1][0] == "'s":
-        features_dict["prodemons_010"] += 1    
 
 def analyze_wh_word(index, tagged_sentence, features_dict):
     # Check: Ft 32 (Biber's way of finding this seems like it could be optimized)
@@ -888,6 +865,7 @@ def analyze_wh_word(index, tagged_sentence, features_dict):
                     features_dict["whquest_013"] += 1
        
 
+
 def analyze_there(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "exthere_020".'''
@@ -941,8 +919,8 @@ def MDA_analyzer(filepath):
     analyze_sentence(preprocessed_file) #updates raw-sentence based counts (i.e. punctuation marks, length)
     all_ft_dicts = []
 
-    for key in preprocessed_file: #loops through all individual sentences in the file one by one
-        sentence_dict = preprocessed_file.get(key) #retrieves entire dictionary and all sub-dicts for the given sentence
+    for id in preprocessed_file: #loops through all individual sentences in the file one by one
+        sentence_dict = preprocessed_file.get(id) #retrieves entire dictionary and all sub-dicts for the given sentence
         sentence = sentence_dict["body"] #retrieves sentence only (str)) 
         features_dict = sentence_dict["features"] #retrieves s for the given sentence
         tagged_sentence = tag_sentence(sentence) #tags sentence, returning list of tuples with (word, pos)
