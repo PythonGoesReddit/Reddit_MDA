@@ -183,7 +183,7 @@ def analyze_sentence(preprocessed_json):
         for i in range(len(words)):
             if lengthening(words[i].lower()):
                 s["lengthening_206"] += 1
-            if words[i].lower() in ["op", "subreddit", "sub", "subreddits", "upvoted", "posted", "repost", "thread", "upvotes", "upvote", "upvoting"
+            if words[i].lower() in ["op", "subreddit", "sub", "subreddits", "upvoted", "posted", "repost", "thread", "upvotes", "upvote", "upvoting",
                     "reddit", "redditor", "redditors", "post", "posts", "mod", "mods", "flair", "karma", "downmod", "downmodding", "downvote", 
                     "downvoting", "modding"]:
                 s["reddit_vocab_216"] += 1 
@@ -452,6 +452,10 @@ def analyze_verb(index, tagged_sentence, features_dict):
     elif word_tuple[0] in belist:
         if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
             features_dict["mainvbe_019"] += 1
+        ## allow for one intervening adverb for mainvbe_019
+        elif tagged_sentence[index+1][1] == "RB" and tagged_sentence[index+2][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
+            features_dict["mainvbe_019"] += 1
+            
         else:
             move_on = True
             insert_adv = False
@@ -520,7 +524,7 @@ def analyze_verb(index, tagged_sentence, features_dict):
                         ## - followed by a placeholder: DO this/that/it/so.
                         ## I implemented this belows. Awaits evaluation from someone else.
     if word_tuple[0] in dolist:
-        if tagged_sentence[index+1][1] == "X":
+        if tagged_sentence[index+1][1] == "X" or tagged_sentence[index+1][0] in ALLP:
             features_dict["pverbdo_012"] += 1
         elif tagged_sentence[index+1][0] in ["too", "this", "that", "it", "so"]:
             if tagged_sentence[index+2][1] == "X" or tagged_sentence[index+2][0] in ALLP:
@@ -581,6 +585,15 @@ def analyze_verb(index, tagged_sentence, features_dict):
                 features_dict["whclause_023"] += 1
             else:
                 pass
+            
+    ## added this condition for mainvbe_019: in the structures represented below "'s" cannot be used as "has" and is almost certainly a shortening of "is"
+    ## 's is currently not included in the [belist] because of belonging to both HAVE and BE. 
+    if word_tuple[0] == "'s" or word_tuple[0] == "s":
+        if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
+            features_dict["mainvbe_019"] += 1
+        ## allow for one intervening adverb for mainvbe_019
+        elif tagged_sentence[index+1][1] == "RB" and tagged_sentence[index+2][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
+            features_dict["mainvbe_019"] += 1
     
 
 def analyze_modal(index, tagged_sentence, features_dict):
@@ -716,15 +729,27 @@ def analyze_pronoun(index, tagged_sentence, features_dict):
     elif word_tuple[0] in indefpronounlist:
         features_dict["proindef_011"] += 1  
 
-    if word_tuple[0] in DEM:
-        if tagged_sentence[index+1][0] == "and":
+    ## added this new code for demonstrative pronouns and demonstratives (HM)
+    if word_tuple[0] in ["this", "these", "those"]:
+        if tagged_sentence[index+1][1].startswith("NN"):
+            features_dict["demonstr_051"] += 1
+        elif tagged_sentence[index+1][1].startswith("JJ") and tagged_sentence[index+2][1].startswith("NN"):
+            features_dict["demonstr_051"] += 1
+        else:
             features_dict["prodemons_010"] += 1
-        elif tagged_sentence[index+1][1] in ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "MD", "WP"]:
+
+    if word_tuple [0] == "that":
+        if tagged_sentence[index+1][1].startswith("NN"):
+            features_dict["demonstr_051"] += 1
+        elif tagged_sentence[index+1][1].startswith("JJ") and tagged_sentence[index+2][1].startswith("NN"):
+            features_dict["demonstr_051"] += 1
+        elif tagged_sentence[index+1][0] == "X":
             features_dict["prodemons_010"] += 1
-        elif index == (len(tagged_sentence)-1):
+        elif tagged_sentence[index+1][1].startswith("JJ"):
+            features_dict["prodemons_010"] += 0
+        else:
             features_dict["prodemons_010"] += 1
-    elif word_tuple[0] == "that" and tagged_sentence[index+1][0] == "'s":
-        features_dict["prodemons_010"] += 1
+
 
 def analyze_conjunction(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
@@ -772,9 +797,29 @@ def analyze_determiner(index, tagged_sentence, features_dict):
     "demonstr_051", "negsyn_066".'''
     word_tuple = tagged_sentence[index]
 
-    if word_tuple[0] in DEM:
-        features_dict["demonstr_051"] += 1
-    elif word_tuple[0] == "neither" or word_tuple[0] == "nor":
+    ## added this new code for demonstrative pronouns and demonstratives (HM)
+    if word_tuple[0] in ["this", "these", "those"]:
+        if tagged_sentence[index+1][1].startswith("NN"):
+            features_dict["demonstr_051"] += 1
+        elif tagged_sentence[index+1][1].startswith("JJ") and tagged_sentence[index+2][1].startswith("NN"):
+            features_dict["demonstr_051"] += 1
+        else:
+            features_dict["prodemons_010"] += 1
+
+    if word_tuple [0] == "that":
+        if tagged_sentence[index+1][1].startswith("NN"):
+            features_dict["demonstr_051"] += 1
+        elif tagged_sentence[index+1][1].startswith("JJ") and tagged_sentence[index+2][1].startswith("NN"):
+            features_dict["demonstr_051"] += 1
+        elif tagged_sentence[index+1][0] == "X":
+            features_dict["prodemons_010"] += 1
+        elif tagged_sentence[index+1][1].startswith("JJ"):
+            features_dict["prodemons_010"] += 0
+        else:
+            features_dict["prodemons_010"] += 1
+        
+        
+    if word_tuple[0] == "neither" or word_tuple[0] == "nor":
         features_dict["negsyn_066"] += 1
     elif word_tuple[0] == "no":
         if tagged_sentence[index+1][1].startswith("NN") or tagged_sentence[index+1][1].startswith("JJ"):
