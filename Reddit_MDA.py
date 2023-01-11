@@ -138,7 +138,7 @@ def analyze_sentence(preprocessed_json):
 
         for hedge in [" at about ", " something like ", " more or less", " kinda ", " sorta ", " almost ", " maybe "]:
             s["hedges_047"] += sentence.count(hedge)
-        if sentence.startswith("at about ") or sentence.startswith("something like ") or sentence.startswith("more or less") or sentence.startswith("kinda ") or sentence.startswith("sorta "):
+        if sentence.startswith("at about ") or sentence.startswith("something like ") or sentence.startswith("more or less") or sentence.startswith("kinda ") or sentence.startswith("sorta ") or sentence.startswith("almost ") or sentence.startswith("kinda ") or sentence.startswith("sort of "):
         # AB: Catch sentence-initial cases excluded by spaces above
             s["hedges_047"] += 1
 
@@ -537,7 +537,7 @@ def analyze_verb(index, tagged_sentence, features_dict):
 
     if word_tuple[0] in publiclist:
         features_dict["vpublic_055"] += 1
-        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]:
+        if tagged_sentence[index + 1][0] in ["this", "these", "those", "I", "we", "he", "she", "they"]:
             features_dict["thatdel_060"] += 1
         elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"):
             if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
