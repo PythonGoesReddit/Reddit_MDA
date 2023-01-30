@@ -104,108 +104,104 @@ def lengthening(word):
     return(False)
 
 # Untagged feature extraction functions
-def analyze_sentence(preprocessed_json):
+def analyze_sentence(sent, features_dict):
     # AB: General comment: careful with the .count() function. It has no inherent concept of word boundaries, which will lead to false positives in some cases (see below)
     '''Takes the preprocessed json and adds to the features sub-dictionary the following keys and counts (values): "hashtag_201": no. of hashtags,
     "question_208": no. of question marks, "exclamation_209": no of exclamation marks, "lenchar_210": len of sentence in char, "lenword_211": len of sentence in words, 
     "conjuncts_045", "reddit_vocab".'''
 
-    for id in preprocessed_json: 
-        sentence_dict = preprocessed_json.get(id)
-        sentence = sentence_dict["body"].lower() # AB: lowercasing spelling here, as most code below presupposes all lowercase.
-        # AB: For individual items in the .count() functions, there is a tradeoff between " ITEM " and "ITEM".
-        # AB: Without spaces, there may be unexpected false positives (e.g. "such a" counting "such astronomical costs" etc.)
-        # AB: With spaces, we lose items in sentence-initial position and with following puncutation, e.g. "for instance,"
-        # AB: I have made decisions on an educated-guess case basis here, and they fall into three types:
-        # AB: a) keep "ITEM" because false positives are extremely unlikely (e.g. "in other words").
-        # AB: b) insert spaces, because " ITEM " is going to catch all relevant cases (e.g. " such a " 
-        s = sentence_dict["features"]
+    sentence = sent.lower() # AB: lowercasing spelling here, as most code below presupposes all lowercase.
+    # AB: For individual items in the .count() functions, there is a tradeoff between " ITEM " and "ITEM".
+    # AB: Without spaces, there may be unexpected false positives (e.g. "such a" counting "such astronomical costs" etc.)
+    # AB: With spaces, we lose items in sentence-initial position and with following puncutation, e.g. "for instance,"
+    # AB: I have made decisions on an educated-guess case basis here, and they fall into three types:
+    # AB: a) keep "ITEM" because false positives are extremely unlikely (e.g. "in other words").
+    # AB: b) insert spaces, because " ITEM " is going to catch all relevant cases (e.g. " such a " 
+    features_dict["hashtag_201"] = len(re.findall(r"#\w+", sentence)) # AB: Used a regex here because otherwise sequences of "#" or individual "#" are going to inflate the count
 
-        s["hashtag_201"] = len(re.findall(r"#\w+", sentence)) # AB: Used a regex here because otherwise sequences of "#" or individual "#" are going to inflate the count
+    if sentence.endswith("?"):
+        features_dict["question_208"] += 1
 
-        if sentence.endswith("?"):
-            s["question_208"] += 1
-            
-        if sentence.endswith("!"):
-            s["exclamation_209"] += 1
+    if sentence.endswith("!"):
+        features_dict["exclamation_209"] += 1
         
-        s["emojis_218"] = adv.extract_emoji(sentence)["overview"]["num_emoji"]
+    features_dict["emojis_218"] = adv.extract_emoji(sentence)["overview"]["num_emoji"]
         
-        for emphatic in [" for sure"]: 
-            s["amplifiers_048"] += sentence.count(emphatic)
-        if sentence.startswith("for sure"): # AB: Catch cases of sentence-initial "for sure" that have been excluded through the insertion of spaces above
-            s["amplifiers_048"] += 1
+    for emphatic in [" for sure"]: 
+        features_dict["amplifiers_048"] += sentence.count(emphatic)
+    if sentence.startswith("for sure"): # AB: Catch cases of sentence-initial "for sure" that have been excluded through the insertion of spaces above
+        features_dict["amplifiers_048"] += 1
 
-        for hedge in [" at about ", " something like ", " more or less", " kinda ", " sorta ", " almost ", " maybe "]:
-            s["hedges_047"] += sentence.count(hedge)
-        if sentence.startswith("at about ") or sentence.startswith("something like ") or sentence.startswith("more or less") or sentence.startswith("kinda ") or sentence.startswith("sorta ") or sentence.startswith("almost ") or sentence.startswith("kinda ") or sentence.startswith("sort of "):
+    for hedge in [" at about ", " something like ", " more or less", " kinda ", " sorta ", " almost ", " maybe "]:
+        features_dict["hedges_047"] += sentence.count(hedge)
+    if sentence.startswith("at about ") or sentence.startswith("something like ") or sentence.startswith("more or less") or sentence.startswith("kinda ") or sentence.startswith("sorta ") or sentence.startswith("almost ") or sentence.startswith("kinda ") or sentence.startswith("sort of "):
         # AB: Catch sentence-initial cases excluded by spaces above
-            s["hedges_047"] += 1
+        features_dict["hedges_047"] += 1
 
-        for conjunct in ["on the contrary", "on the other hand", "for example", "for instance", "by contrast", "by comparison", "in comparison",
-                         "in contrast", "in particular", "in addition", "in conclusion", "in consequence", "in sum", "in summary", "in any event",
-                         "in any case", "in other words", "as a result", "as a consequence"]:
-            s["conjuncts_045"] += sentence.count(conjunct) # AB: I have not inserted any spaces above because the likelihood of false positives in all cases seems very low
+    for conjunct in ["on the contrary", "on the other hand", "for example", "for instance", "by contrast", "by comparison", "in comparison",
+                     "in contrast", "in particular", "in addition", "in conclusion", "in consequence", "in sum", "in summary", "in any event",
+                     "in any case", "in other words", "as a result", "as a consequence"]:
+        features_dict["conjuncts_045"] += sentence.count(conjunct) # AB: I have not inserted any spaces above because the likelihood of false positives in all cases seems very low
 
-        for conjunct in ["that is,", "else,", "altogether,", "rather,"]: #Will only catch sentences with proper punctuation but it's a start
-            if sentence.startswith(conjunct):
-                s["conjuncts_045"] += 1
+    for conjunct in ["that is,", "else,", "altogether,", "rather,"]: #Will only catch sentences with proper punctuation but it's a start
+        if sentence.startswith(conjunct):
+            features_dict["conjuncts_045"] += 1
 
-        for advsub in ["inasmuch as", "forasmuch as", "insofar as", "insomuch as", " as long as ", " as soon as "]:
-            s["advsubother_038"] += sentence.count(advsub)
-        if sentence.startswith("as long as ") or sentence.startswith("as soon as "):
-            s["advsubother_038"] += 1
+    for advsub in ["inasmuch as", "forasmuch as", "insofar as", "insomuch as", " as long as ", " as soon as "]:
+        features_dict["advsubother_038"] += sentence.count(advsub)
+    if sentence.startswith("as long as ") or sentence.startswith("as soon as "):
+        features_dict["advsubother_038"] += 1
             
-        for advsubcond in [" if ", " unless ", " if, ", " unless, "]:
-            s["advsubcond_037"] += sentence.count(advsubcond)
-        if sentence.startswith("if ") or sentence.startswith("if, ") or sentence.startswith("unless ") or sentence.startswith("unless, "):
-            s["advsubcond_037"] += 1
-        s["lenchar_210"] = len(sentence) 
-        s["lenword_211"] = len(sentence.split(" ")) 
+    for advsubcond in [" if ", " unless ", " if, ", " unless, "]:
+        features_dict["advsubcond_037"] += sentence.count(advsubcond)
+    if sentence.startswith("if ") or sentence.startswith("if, ") or sentence.startswith("unless ") or sentence.startswith("unless, "):
+        features_dict["advsubcond_037"] += 1
+    features_dict["lenchar_210"] = len(sentence) 
+    features_dict["lenword_211"] = len(sentence.split(" ")) 
         
-        for emoticon in [":-)", ":)", ";-)", ":-p", ";-p", ":-(", ";-(", ":-o", "^^", "-.-", ":-$", ":-\\", ":-/", ":-|", ";-/", ";-\\",
-                        ":-[", ":-]", ":-§", "owo", "*.*", ";)", ":p", ";p", ":(", ";(", ":o", ":|", ";/", ";\\", ":[", ":]", ":§", ":-d"]:
-            s["emoticons_207"] += sentence.count(emoticon)
-            ## here: enter command to replace emojis. Otherwise they will be split and the letter will most likely be tagged as NOUN, which throws off some of the functions below.
-            ### AB: This is not the place to do it, as whatever we do here will not persist into what is being piped to the tokenizer.
-            ### AB: I added the operation to the clean_sentence() function
+    for emoticon in [":-)", ":)", ";-)", ":-p", ";-p", ":-(", ";-(", ":-o", "^^", "-.-", ":-$", ":-\\", ":-/", ":-|", ";-/", ";-\\",
+                    ":-[", ":-]", ":-§", "owo", "*.*", ";)", ":p", ";p", ":(", ";(", ":o", ":|", ";/", ";\\", ":[", ":]", ":§", ":-d"]:
+        features_dict["emoticons_207"] += sentence.count(emoticon)
+        ## here: enter command to replace emojis. Otherwise they will be split and the letter will most likely be tagged as NOUN, which throws off some of the functions below.
+        ### AB: This is not the place to do it, as whatever we do here will not persist into what is being piped to the tokenizer.
+        ### AB: I added the operation to the clean_sentence() function
 
-        words = sentence_dict["body"].split() #split into words for single word functions below
+    words = sent.split() #split into words for single word functions below
         
-        sum_wordlen = 0
-        for word in words:
-            word = re.sub(r'[^\w\s]','', word)
-            wordlen = len(word)
-            sum_wordlen = sum_wordlen + wordlen
-        s["wordlength_044"] = (sum_wordlen/len(words)) 
-        # this works fine but the output might look weird since the words are here separated differently than they are by the tagger
+    sum_wordlen = 0
+    for word in words:
+        word = re.sub(r'[^\w\s]','', word)
+        wordlen = len(word)
+        sum_wordlen = sum_wordlen + wordlen
+    features_dict["wordlength_044"] = (sum_wordlen/len(words)) 
+    # this works fine but the output might look weird since the words are here separated differently than they are by the tagger
         
-        for i in range(len(words)):
-            if lengthening(words[i].lower()):
-                s["lengthening_206"] += 1
-            if words[i].lower() in ["op", "subreddit", "sub", "subreddits", "upvoted", "posted", "repost", "thread", "upvotes", "upvote", "upvoting",
-                    "reddit", "redditor", "redditors", "post", "posts", "mod", "mods", "flair", "karma", "downmod", "downmodding", "downvote", 
-                    "downvoting", "modding"]:
-                s["reddit_vocab_216"] += 1 
+    for i in range(len(words)):
+        if lengthening(words[i].lower()):
+            features_dict["lengthening_206"] += 1
+        if words[i].lower() in ["op", "subreddit", "sub", "subreddits", "upvoted", "posted", "repost", "thread", "upvotes", "upvote", "upvoting",
+                "reddit", "redditor", "redditors", "post", "posts", "mod", "mods", "flair", "karma", "downmod", "downmodding", "downvote", 
+                "downvoting", "modding"]:
+            features_dict["reddit_vocab_216"] += 1 
             
-            if words[i].lower().startswith("u/"):
-                s["link_202"] += 1 
-                words[i] = "username" ## added these replacement statements to ease the later processing - and also for anonymisation (HM)
+        if words[i].lower().startswith("u/"):
+            features_dict["link_202"] += 1 
+            words[i] = "username" ## added these replacement statements to ease the later processing - and also for anonymisation (HM)
                 
-            if words[i].lower().startswith("r/"):
-                s["link_202"] += 1 
-                words[i] = "subredditname" ## added these replacement statements to ease the later processing (HM)
+        if words[i].lower().startswith("r/"):
+            features_dict["link_202"] += 1 
+            words[i] = "subredditname" ## added these replacement statements to ease the later processing (HM)
 
-            if "http" in words[i].lower() or "www" in words[i].lower():
-                s["interlink_203"] += 1 
-                words[i] = "url" ## added these replacement statements to ease the later processing (HM)
+        if "http" in words[i].lower() or "www" in words[i].lower():
+            features_dict["interlink_203"] += 1 
+            words[i] = "url" ## added these replacement statements to ease the later processing (HM)
 
-            if not i == 0:
-                if words[i].isupper() and not words[i]=="I":
-                    s["caps_204"] += 1
-            else:
-                if words[i].isupper() and not (words[i] in ["A", "I"]): 
-                    s["caps_204"] += 1  
+        if not i == 0:
+            if words[i].isupper() and not words[i]=="I":
+                features_dict["caps_204"] += 1
+        else:
+            if words[i].isupper() and not (words[i] in ["A", "I"]): 
+                features_dict["caps_204"] += 1  
 
 def clean_sentence(sentence):
     '''Takes a sentence and returns it in all lowercase, with punctuation removed, and emojis removed.'''
@@ -930,6 +926,9 @@ def analyze_particle(index, tagged_sentence, features_dict):
 # Output functions
 ## NEEDED: function to write meta-info for each text 
 
+### AB: Perhaps use a different name instead of "POS_tagger"?
+### AB: This name suggests that the tagging happens here,
+### AB: but it's really the POS-based extraction that is done in this function.
 def POS_tagger(tagged_sentence, features_dict):
     for index in range(3, len(tagged_sentence)-3): #based on POS, apply different function
         current_tag = tagged_sentence[index][1]
@@ -968,12 +967,13 @@ def MDA_analyzer(filepath):
         sentence_dict = preprocessed_file.get(id) #retrieves entire dictionary and all sub-dicts for the given sentence
         sentence = sentence_dict["body"] #retrieves sentence only (str)) 
         features_dict = sentence_dict["features"] #retrieves s for the given sentence
+        analyze_sentence(sentence, features_dict) # Updates features_dict with info for features extracted on raw sent
         tagged_sentence = tag_sentence(sentence) #tags sentence, returning list of tuples with (word, pos)
         POS_tagger(tagged_sentence, features_dict)
         all_ft_dicts.append(sentence_dict)
     
     r = open(os.path.join(dirname, 'results', preprocessed_file, "_r"), "w")
-    r.write(all_ft_dicts + '\n')
+    r.write(all_ft_dicts + '\n') #AB: So, all_ft_dicts is a list of dictionaries. Writing this to file as is will very likely look problematic.
     r.close()
 
 def tester(practice_sentences, feature):
@@ -991,10 +991,14 @@ practice_sentences = ["He then consequently ate five donuts in a row.",
 
 #tester(practice_sentences, "conjuncts_045")
 
-
+### AB: This function below is defined but does not seem to be called anywhere.
+### AB: It is used in the "feature_coding_accuracy2.py" script.
+### AB: In fact, this function seems to be what causes the issue of 0 counts
+### AB: for all features that are counted in the 
 def process_sent(sent, feat):
-    tagged_sentence = tag_sentence(sent)
     features_dict = s.copy()
+    analyze_sentence(sentence, features_dict)
+    tagged_sentence = tag_sentence(sent)
     POS_tagger(tagged_sentence, features_dict)
     return features_dict[feat]
 
