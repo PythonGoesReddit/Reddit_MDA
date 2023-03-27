@@ -383,6 +383,8 @@ def analyze_verb(index, tagged_sentence, features_dict):
     elif word_tuple[1] == "VBG":
         if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP) and tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]:
             features_dict["vpresentpart_025"] += 1
+        if (tagged_sentence[index-2][1] == "X" or tagged_sentence[index-2][0] in ALLP) and tagged_sentence[index-1][0] in ["while", "without", "when", "although","with"]:
+            features_dict["vpresentpart_025"] += 1
         elif tagged_sentence[index-1][1] == "NN":
             features_dict["vpresentwhiz_028"] += 1 
         elif tagged_sentence[index-1][0] in belist:
@@ -776,16 +778,8 @@ def analyze_conjunction(index, tagged_sentence, features_dict):
             features_dict["coordnonp_065"] += 1
         elif tagged_sentence[index+1][0] in conjunctslist:
             features_dict["coordnonp_065"] += 1
-
-
-    if word_tuple[0] == "and" and tagged_sentence[index+1][0] in WHP or tagged_sentence[index+1][0] in WHO:
-        features_dict["coordnonp_065"] += 1 
-    elif word_tuple[0] == "and" and tagged_sentence[index+1][0] in ["because", "although", "though", "if", "unless", "since", "while", "whilst", "whereas", "whereby"]:
-        features_dict["coordnonp_065"] += 1 
-    elif word_tuple[0] == "and" and tagged_sentence[index+1][0] in discpart:
-        features_dict["coordnonp_065"] += 1
-    elif word_tuple[0] == "and" and tagged_sentence[index+1][0] in conjunctslist:
-        features_dict["coordnonp_065"] += 1
+        elif tagged_sentence[index+1][0] in ["because", "although", "though", "if", "unless", "since", "while", "whilst", "whereas", "whereby"]:
+            features_dict["coordnonp_065"] += 1 
 
 
 def analyze_determiner(index, tagged_sentence, features_dict):
