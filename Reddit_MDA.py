@@ -313,7 +313,25 @@ amplifierlist = ["absolutely", "altogether", "completely", "definitely", "enormo
 asktelllist = ["ask", "asked", "asking", "asks", "tell", "telling", "tells", "told"]
 titlelist = ["mr", "ms", "mrs", "prof", "professor", "dr", "sir"]
 otheradvsublist = ["since", "while", "whilst", "whereupon", "whereas", "whereby", "such that", "so that", "such that", "inasmuch as", "forasmuch as", "insofar as", "insomuch as", "as long as", "as soon as"]
-notgerundlist = ["nothing", "everything", "something", "anything", "thing", "things", "string", "strings"]
+notgerundlist = ["nothing", "everything", "something", "anything", "thing", "things", 'airing,', 'acting,', 'aging', 'asking', 'ageing', 'awning', 'arming', 'aching', 'annoying', 'adducing', 'arching', 'angling', 'arguing', 'awarding', 'averting', 
+             'altering', 'assigning', 'annotating', 'approaching', 'advertising', 'approving', 'awakening', 'ap', 'nogging', 'neutering', 'nonbeing', 'naysaying', 'nurseling', 
+             'nosing', 'newspapering', 'nettling', 'nutting', 'notching', 'networking', 'niding', 'nooning', 'nithing', 'outing', 'oozing', 'offing', 'ongoing', 'ousting', 
+             'offering', 'outgoing', 'ordering', 'opening', 'overflowing', 'overtaking', 'overrating', 'overweening', 'officiating', 'overworking', 'oncoming', 'overfeeding', 
+             'outbuilding', 'overacting', 'outpouring', 'outfitting', 'overheating', 'overlapping', 'outcropping', 'pining', 'poking', 'paging', 'posing', 'prying', 'piling', 
+             'paving', 'paling', 'piping', 'puking', 'paring', 'ping', 'pacing', 'passing', 'phrasing', 'poaching', 'parting', 'posting', 'parking', 'pudding', 'patching', 
+             'pulling', 'pleasing', 'plumbing', 'quelling', 'quilting', 'quartering', 'quenching', 'qualifying', 'questioning', 'quintupling', 'quisling', 'quickening', 
+             'quadrupling', 'quarrying', 'quivering', 'queening', 'quilling', 'quicksilvering', 'ruling', 'roving', 'riding', 'rowing', 'rising', 'racing', 'ring', 'raving', 
+             'rating', 'roping', 'razing', 'renting', 'ripening', 'rotting', 'receding', 'riveting', 'ratting', 'reducing', 'revising', 'roofing', 'rumbling', 'raising', 'ranting', 
+             'rippling', 'sting', 'skiing', 'saying', 'saving', 'sewing', 'siding', 'swing', 'string', 'sizing', 'sling', 'seeing', 'spring', 'spying', 'stifling', 'shaking', 'shirting', 
+             'serving', 'shedding', 'sleeping', 'smacking', 'shooting', 'speeding', 'swerving', 'scudding', 'tiling', 'toying', 'thing', 'taking', 'ting', 'tuning', 'tying', 'typing', 
+             'timing', 'tubing', 'teaching', 'tracking', 'trailing', 'talking', 'tapping', 'tinting', 'trifling', 'tanning', 'tasting', 'tilling', 'turning', 'training', 'trolling', 
+             'trapping', 'urging', 'using', 'undoing', 'uprising', 'uniting', 'uplifting', 'undertaking', 'updating', 'upending', 'uncovering', 'upbraiding', 'underling', 'untying', 
+             'unfastening', 'unknowing', 'underclothing', 'unloading', 'unveiling', 'untangling', 'understanding', 'unfolding', 'unmasking', 'underrating', 'unsnarling', 'voting', 
+             'venting', 'veering', 'voicing', 'voiding', 'vending', 'vomiting', 'veiling', 'viewing', 'vaulting', 'visiting', 'vaccinating', 'veneering', 'vanishing', 'vocalizing', 
+             'vacationing', 'vaporing', 'viking', 'vanning', 'vesting', 'varnishing', 'visioning', 'vetchling', 'velveting', 'wading', 'wing', 'wiring', 'waving', 'wring', 'waxing', 
+             'waking', 'waning', 'wooing', 'wasting', 'wailing', 'worrying', 'wetting', 'weeping', 'wrecking', 'wearing', 'whacking', 'wigging', 'watching', 'wording', 'waiting', 'winking', 
+             'wavering', 'weighing', 'xeriscaping', 'xing', 'yearling', 'yearning', 'yachting', 'yelling', 'yelping', 'yielding', 'yawning', 'yodeling', 'yellowing', 'yeanling', 'youngling', 
+             'yedding', 'yeorling', 'zoning', 'zing', 'zincking', 'zincing']
 publiclist = ["acknowledege", "acknowledges", "acknowledged", "acknowledging", "admit", "admits", "admitted", "admitting",
               "agree", "agrees", "agreed", "agreeing", "assert", "asserts", "asserted", "asserting", "claim", "claimed", 
               "claims", "claiming", "complain", "complains", "complained", "complaining", "declare", "declared", "declares",
@@ -646,7 +664,8 @@ def analyze_adverb(index, tagged_sentence, features_dict):
         features_dict["amplifiers_048"] += 1 
     elif word_tuple[0] in conjunctslist:
         features_dict["conjuncts_045"] += 1
-    elif index == 0 and word_tuple[0] in discpart:
+    
+    if index == 0 and word_tuple[0] in discpart:
         features_dict["discpart_050"] += 1
  
 def analyze_adjective(index, tagged_sentence, features_dict):
@@ -704,7 +723,7 @@ def analyze_noun(index, tagged_sentence, features_dict):
     word_tuple = tagged_sentence[index]
 
     if word_tuple[0].endswith("ing") or word_tuple[0].endswith("ings"):
-        if word_tuple[1] not in notgerundlist:
+        if word_tuple[0] not in notgerundlist:
             features_dict["gerund_015"] += 1
     elif word_tuple[0].endswith("tions") or word_tuple[0].endswith("tion") or word_tuple[0].endswith("ments") or word_tuple[0].endswith("ment") or word_tuple[0].endswith("ness") or word_tuple[0].endswith("ity") or word_tuple[0].endswith("nesses") or word_tuple[0].endswith("ities"):
         features_dict["nominalis_014"] += 1
@@ -942,7 +961,7 @@ def POS_tagger(tagged_sentence, features_dict):
             analyze_wh_word(index, tagged_sentence, features_dict)
         elif current_tag.startswith("CC"):
             analyze_conjunction(index, tagged_sentence, features_dict)
-        elif current_tag.startswith("RP"):
+        elif current_tag.startswith("RP") or current_tag.startswith("UH"):  # "UH" is a Flair tagger that we hadn't considered before
             analyze_particle(index, tagged_sentence, features_dict)
         elif current_tag.startswith("DT"):
             analyze_determiner(index, tagged_sentence, features_dict)
