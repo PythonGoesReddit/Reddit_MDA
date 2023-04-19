@@ -313,7 +313,7 @@ amplifierlist = ["absolutely", "altogether", "completely", "definitely", "enormo
 asktelllist = ["ask", "asked", "asking", "asks", "tell", "telling", "tells", "told"]
 titlelist = ["mr", "ms", "mrs", "prof", "professor", "dr", "sir"]
 otheradvsublist = ["since", "while", "whilst", "whereupon", "whereas", "whereby", "such that", "so that", "such that", "inasmuch as", "forasmuch as", "insofar as", "insomuch as", "as long as", "as soon as"]
-notgerunds = ["nothing", "everything", "something", "anything", "thing", "things", 'airing', 'acting', 'aging', 'asking',  # some plurals are nonsensical but I didn't want to create that list by hand (RT)
+notgerundlist = ["nothing", "everything", "something", "anything", "thing", "things", 'airing', 'acting', 'aging', 'asking',  # some plurals are nonsensical but I didn't want to create that list by hand (RT)
               'ageing', 'awning', 'arming', 'aching', 'annoying', 'adducing', 'arching', 'angling', 'arguing', 'awarding', 'averting', 'altering', 
               'assigning', 'annotating', 'approaching', 'advertising', 'approving', 'awakening', 'appalling', 'assembling', 'bowing', 'boring', 'boding', 'baring', 'buying', 'boxing', 'being', 
               'bluing', 'baking', 'blowing', 'bending', 'briefing', 'braiding', 'booming', 'bustling', 'building', 'brooding', 'bathing', 'belching', 'blocking', 'blushing', 'banging', 
@@ -756,7 +756,8 @@ def analyze_preposition(index, tagged_sentence, features_dict):
             features_dict["hedges_047"] += 1
 
     if tagged_sentence[index+1][0] in ALLP or tagged_sentence[index+1][1] == "X":
-        features_dict["strandprep_061"] += 1
+        if tagged_sentence[index+1][1] not in ["that", "like"]: 
+            features_dict["strandprep_061"] += 1
 
 
 def analyze_noun(index, tagged_sentence, features_dict):
