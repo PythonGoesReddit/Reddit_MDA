@@ -506,7 +506,7 @@ def analyze_verb(index, tagged_sentence, features_dict):
                 move_on = True
             else: 
                 move_on = False
-    elif word_tuple[0] in belist and (index==0 or (index == 1 and tagged_sentence[index-1][1] == "WRB")): # Questions with BE
+    elif word_tuple[0] in belist and (index == 3 or (index == 4 and tagged_sentence[index-1][1] == "WRB")): # Questions with BE; the index positions take the three ("x", "x") tuples at the beginning of a sentence into account
          add_index = 0
          while add_index < 5 and (index + add_index) < (len(tagged_sentence)-1):
              add_index+=1
@@ -715,7 +715,7 @@ def analyze_adverb(index, tagged_sentence, features_dict):
     elif word_tuple[0] in conjunctslist:
         features_dict["conjuncts_045"] += 1
     
-    if index == 0 and word_tuple[0] in discpart:
+    if index == 3 and word_tuple[0] in discpart: # index == 3 is the first actual element in the sentence, after the three ("x", "x") tuples
         features_dict["discpart_050"] += 1
  
 def analyze_adjective(index, tagged_sentence, features_dict):
@@ -937,8 +937,12 @@ def analyze_wh_word(index, tagged_sentence, features_dict):
             if tagged_sentence[index-1][1] == "IN":
                 features_dict["whrepied_033"] += 1 #pied-piping relative clauses (e.g., the manner in which he was told) PREP + WHP in relative clauses
 
-            if word_tuple[0] == "which" and tagged_sentence[index-1][0] == ",": #34. sentence relatives (e.g., Bob likes fried mangoes, which is the most disgusting thing I've ever heard of) Biber: (These forms are edited by hand to exclude non-restrictive relative clauses.)
-                features_dict["sentencere_034"] += 1
+            if word_tuple[0] == "which":
+                if tagged_sentence[index-1][0] == ",": #34. sentence relatives (e.g., Bob likes fried mangoes, which is the most disgusting thing I've ever heard of) Biber: (These forms are edited by hand to exclude non-restrictive relative clauses.)
+                    features_dict["sentencere_034"] += 1
+                elif index == 3 and tagged_sentence[4][1].startswith("V"):
+                    if not tagged_sentence[4][0] in belist:
+                        features_dict["sentencere_034"] += 1
 
             #31. WH relative clauses on subject position (e.g., the man who likes popcorn) xxx + yyy + N + WHP + (ADV) + AUX/V (where xxx is NOT any form of the verbs ASK or TELL; to exclude indirect WH questions like Tom asked the man who went to the store)
             ##AB: Added the condition for ASK and TELL
@@ -982,7 +986,7 @@ def analyze_particle(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
     "discpart_050".'''
     word_tuple = tagged_sentence[index]
-    if index == 0 and word_tuple[0] in discpart:
+    if index == 3 and word_tuple[0] in discpart: # index == 3 is the first actual element in the sentence, after the three ("x", "x") tuples
         features_dict["discpart_050"] += 1
     else:
         pass
