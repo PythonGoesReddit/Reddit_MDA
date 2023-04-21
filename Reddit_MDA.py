@@ -506,7 +506,15 @@ def analyze_verb(index, tagged_sentence, features_dict):
                 move_on = True
             else: 
                 move_on = False
-                
+    elif word_tuple[0] in belist and (index==0 or (index == 1 and tagged_sentence[index-1][1] == "WRB")): # Questions with BE
+         add_index = 0
+         while add_index < 5 and (index + add_index) < (len(tagged_sentence)-1):
+             add_index+=1
+             if tagged_sentence[index+add_index][1] == "VBN":
+                 if tagged_sentence[index+add_index+1][0] == "by":
+                     features_dict["passby_018"] += 1
+                 else:
+                     features_dict["passagentl_017"] += 1    
     elif word_tuple[0] in belist:
         if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
             features_dict["mainvbe_019"] += 1
