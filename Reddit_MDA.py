@@ -30,7 +30,7 @@ start_time = time.time()
 #data_folder = os.path.join(dirname, 'sample_data')
 #all_files = [os.path.join("sample_data", file) for file in os.listdir(data_folder) if os.path.splitext(file)[1] == ".json"]
 
-tagger_FLAIR = SequenceTagger.load("C:/Users/gusta/Documents/GitHub/Reddit_MDA/RedditTaggerFinal150.pt")
+tagger_FLAIR = SequenceTagger.load("D:/example-pos/RedditTaggerFinal150.pt")
 
 
 # Preprocessing functions
@@ -1005,7 +1005,7 @@ practice_sentences = ["He then consequently ate five donuts in a row.",
 ### AB: for all features that are counted in the 
 def process_sent(sent, feat):
     features_dict = s.copy()
-    analyze_sentence(sentence, features_dict)
+    analyze_sentence(sent, features_dict)
     tagged_sentence = tag_sentence(sent)
     POS_tagger(tagged_sentence, features_dict)
     return features_dict[feat]

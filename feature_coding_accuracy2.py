@@ -1,5 +1,17 @@
 from collections import defaultdict
 import Reddit_MDA
+import os
+import torch
+import flair
+
+device = None
+if torch.cuda.is_available():
+    device = torch.device('cuda:0')
+else:
+    device = torch.device('cpu')
+
+flair.device = torch.device('cuda:0')
+print(flair.device)
 
 sents = {}
 
@@ -23,7 +35,12 @@ for feat in feats:
     false_pos = 0
     true_neg = 0
     false_neg = 0
-    with open("manual_coding_"+ feat + ".txt") as f:
+    if os.path.isfile("manual_coding_"+ feat + "_corrected.txt"):
+        filstring = "_corrected"
+    else:
+        filstring = ""
+
+    with open("manual_coding_"+ feat + filstring + ".txt") as f:
         for line in f:
             sent_count += 1
             numid = line.split("\t")[0]
@@ -38,7 +55,7 @@ for feat in feats:
                 false_pos += 1
             elif manual == 0 and auto == 0:
                 true_neg += 1
-            else:
+            else:   
                 false_neg += 1 
     if true_pos > 0:
         precision = true_pos/(true_pos+false_pos)
