@@ -385,7 +385,7 @@ def analyze_verb(index, tagged_sentence, features_dict):
             features_dict["vpresentpart_025"] += 1
         if (tagged_sentence[index-2][1] == "X" or tagged_sentence[index-2][0] in ALLP) and tagged_sentence[index-1][0] in ["while", "without", "when", "although","with"]:
             features_dict["vpresentpart_025"] += 1
-        elif tagged_sentence[index-1][1] == "NN":
+        elif tagged_sentence[index-1][1] == "NN" or tagged_sentence[index-1][1] == "NNS": 
             features_dict["vpresentwhiz_028"] += 1 
         elif tagged_sentence[index-1][0] in belist:
             features_dict["vprogressive_217"] += 1
@@ -706,6 +706,9 @@ def analyze_preposition(index, tagged_sentence, features_dict):
     if tagged_sentence[index+1][0] in ALLP or tagged_sentence[index+1][1] == "X":
         if tagged_sentence[index+1][1] not in ["that", "like"]: 
             features_dict["strandprep_061"] += 1
+    
+    if word_tuple[0] in otheradvsublist:
+        features_dict["advsubother_038"] += 1 
 
 
 def analyze_noun(index, tagged_sentence, features_dict):
@@ -900,9 +903,10 @@ def analyze_wh_word(index, tagged_sentence, features_dict):
             #AB: I am hard-put to find a more felicitous example than "boys who Sally likes" that would pose a problem with the 2 words at the beginning either, so happy to disregard the issue.
             #AB: Edit: Does the problem at beginning or end not disappear entirely with out added "x"es?
             #AB: The example "the men who are liked by Sally" is an RC with the relatizive in subject gap and as such is appropriately captured under 031.
-            if not tagged_sentence[index-2][0].startswith("ask") and not tagged_sentence[index-2][0].startswith("tell") and not tagged_sentence[index-2][0] == "told": 
+            if not tagged_sentence[index-3][0].startswith("ask") and not tagged_sentence[index-3][0].startswith("tell") and not tagged_sentence[index-3][0] == "told": 
                 if not tagged_sentence[index+1][1].startswith("R") and not tagged_sentence[index+1][1].startswith("V") and not tagged_sentence[index+1][1].startswith("MD"):
-                    features_dict["whreobj_032"] += 1 
+                    if tagged_sentence[index-1][1].startswith("N"):
+                        features_dict["whreobj_032"] += 1 
                 
         if word_tuple in WHO: # WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", "whichever", "whenever", "whatever", "however"]
             #13. direct WH-questions CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)
