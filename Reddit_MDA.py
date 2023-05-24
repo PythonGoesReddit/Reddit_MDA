@@ -686,6 +686,26 @@ def analyze_preposition(index, tagged_sentence, features_dict):
     "advsubcause_035", "advsubconc_036", "advsubcond_037", "advsubother_038", "prepositions_039", 
     "conjuncts_045", "hedges_047", "strandprep_061".'''
     word_tuple = tagged_sentence[index]
+    #21 that verb complements (e.g., / said that he went)  
+    if tagged_sentence[index][0] == "that":
+    # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions)
+        if tagged_sentence[index-1][0] in ALLP or tagged_sentence[index-1][0] in ["and", "nor", "but", "or", "who"]:
+            if tagged_sentence[index+1][1] in ["DT", "PRP", "NNS", "NNP"] or tagged_sentence[index+1][0] in titlelist or tagged_sentence[index+1][0] == "there":
+                features_dict["thatvcom_021"] += 1
+    # (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/and)
+        elif (tagged_sentence[index-1][0] in suasivelist) or (tagged_sentence[index-1][0] in privatelist) or (tagged_sentence[index-1][0] in publiclist):
+            if not tagged_sentence[index+1][1].startswith("V"):
+                if tagged_sentence[index+1][0] not in [ALLP, "and"]:
+                    features_dict["thatvcom_021"] += 1
+        elif (tagged_sentence[index-1][0].startswith("seem")) or (tagged_sentence[index-1][0].startswith("appear")):
+            if not tagged_sentence[index+1][1].startswith("V"):
+                if tagged_sentence[index+1][0] not in [ALLP, "and"]:
+                    features_dict["thatvcom_021"] += 1            
+    # (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)
+    #     (This algorithm allows an intervening prepositional phrase between a verb and its complement.)  
+    ### HM: this is not implemented at the moment, since it seems very complicated and rather marginal. My guess is that we need to trash this whole feature anyway...              
+        if tagged_sentence[index-1][1].startswith("J"):
+            features_dict["thatacom_022"] += 1 
     if not word_tuple[0] in ["because", "unless", "whilst", "while", "though", "tho", "although", "that", "since", "whereupon", "whereas", "whereby"] + timepoints + timedurfreq + placelist: 
         features_dict["prepositions_039"] += 1 
     if word_tuple[0] in ["because", "becuase", "beacuse", "cause", "'cause", "cos", "'cos", "coz", "'coz", "caus", "'caus", "cuz", "'cuz", "bcoz", "bcuz", "bcos", "bcause", "bcaus"] and tagged_sentence[index+1][0] != "of":
@@ -715,7 +735,9 @@ def analyze_noun(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "nominalis_014", "gerund_015", "nouns_016".'''
     word_tuple = tagged_sentence[index]
-
+    
+    if word_tuple[0] in indefpronounlist:
+        features_dict["proindef_011"] += 1
     if word_tuple[0].endswith("ing") or word_tuple[0].endswith("ings"):
         if word_tuple[0] not in notgerundlist:
             features_dict["gerund_015"] += 1
@@ -838,42 +860,18 @@ def analyze_wh_word(index, tagged_sentence, features_dict):
     "whresub_031", "whreobj_032".'''
     word_tuple = tagged_sentence[index]
     
-    #21 that verb complements (e.g., / said that he went)  
-    if tagged_sentence[index][0] == "that":
-    # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions)
-        if tagged_sentence[index-1][0] in ALLP or tagged_sentence[index-1][0] in ["and", "nor", "but", "or", "who"]:
-            if tagged_sentence[index+1][1].startswith("D") or tagged_sentence[index+1][1].startswith("PR") or tagged_sentence[index+1][0] == "there" or tagged_sentence[index+1][1].startswith("NNP") or tagged_sentence[index+1][1].startswith("NNS") or tagged_sentence[index+1][0] in titlelist:
-                features_dict["thatvcom_021"] += 1
-    # (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/and)
-        elif (tagged_sentence[index-1][0] in suasivelist) or (tagged_sentence[index-1][0] in privatelist) or (tagged_sentence[index-1][0] in publiclist):
-            if not tagged_sentence[index+1][1].startswith("V"):
-                if tagged_sentence[index+1][0] not in [ALLP, "and"]:
-                    features_dict["thatvcom_021"] += 1
-        elif (tagged_sentence[index-1][0].startswith("seem")) or (tagged_sentence[index-1][0].startswith("appear")):
-            if not tagged_sentence[index+1][1].startswith("V"):
-                if tagged_sentence[index+1][0] not in [ALLP, "and"]:
-                    features_dict["thatvcom_021"] += 1            
-    # (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)
-    #     (This algorithm allows an intervening prepositional phrase between a verb and its complement.)  
-    ### HM: this is not implemented at the moment, since it seems very complicated and rather marginal. My guess is that we need to trash this whole feature anyway...
-    
     #29. that relative clauses on subject position (e.g., the dog that bit me) N -p (T#) + that + (ADV) + AUX/V {that relatives across intonation boundaries are identified by hand.)
     #30. that relative clauses on object position (e.g., the dog that I saw) N + (T#) + that + DET / SUBJPRO / POSSPRO / it / ADJ / plural noun/ proper noun / possessive noun / TITLE
-        if tagged_sentence[index-1][1].startswith("NN"):
-            if tagged_sentence[index+1][1].startswith("RB"):
-                if (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
-                    features_dict["thatresub_029"] += 1 
-            elif tagged_sentence[index+1][1].startswith("VB") or tagged_sentence[index+1][1].startswith("MD"):
-                features_dict["thatresub_029"] += 1
-
-            elif tagged_sentence[index+1][1].startswith("DT") or tagged_sentence[index+1][1].startswith("JJ") or tagged_sentence[index+1][1] == "NNS" or tagged_sentence[index+1][1].startswith("NNP"):
-                features_dict["thatreobj_030"] += 1
-
-            elif tagged_sentence[index+1][0] == "it" or tagged_sentence[index+1][0] in subjpro or tagged_sentence[index+1][0] in posspro:
-                features_dict["thatreobj_030"] += 1    
-            
-        if tagged_sentence[index-1][1].startswith("J"):
-            features_dict["thatacom_022"] += 1 
+    if tagged_sentence[index-1][1].startswith("NN"):
+        if tagged_sentence[index+1][1].startswith("RB"):
+            if (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
+                features_dict["thatresub_029"] += 1 
+        elif tagged_sentence[index+1][1].startswith("VB") or tagged_sentence[index+1][1].startswith("MD"):
+            features_dict["thatresub_029"] += 1
+        elif tagged_sentence[index+1][1].startswith("DT") or tagged_sentence[index+1][1].startswith("JJ") or tagged_sentence[index+1][1] == "NNS" or tagged_sentence[index+1][1].startswith("NNP"):
+            features_dict["thatreobj_030"] += 1
+        elif tagged_sentence[index+1][0] == "it" or tagged_sentence[index+1][0] in subjpro or tagged_sentence[index+1][0] in posspro:
+            features_dict["thatreobj_030"] += 1    
                 
     else:
         if word_tuple[0] in WHP: # WHP = ["who", "whom", "whose", "which"]
@@ -908,15 +906,28 @@ def analyze_wh_word(index, tagged_sentence, features_dict):
                     if tagged_sentence[index-1][1].startswith("N"):
                         features_dict["whreobj_032"] += 1 
                 
-        if word_tuple in WHO: # WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", "whichever", "whenever", "whatever", "however"]
-            #13. direct WH-questions CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)
-            if tagged_sentence[index-1][1] == "X":  
+        if word_tuple[1] == "WRB":
+            #AB: we initially checked for surface membership in WHO, following Biber (line below). I explain why that's problematic
+            #AB: 13. direct WH-questions CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)
+            #AB: The comment above is Biber's definition. It leaves a couple of issues, mainly that "who" as interrogative particle is excluded.
+            #AB: We can instead use the tag "WRB" which consistently identifies interrogative particles, including "who" if and only if it is an interrogative particle.
+            #AB: We also want to look not only for sentence-initial uses, but for anything following clause-level punctuation. The "SYM" tag should be appropriate.
+            if tagged_sentence[index-1][1] in ["X", "SYM"]:  
                 if tagged_sentence[index+1][1] == "MD":
-                    features_dict["whquest_013"] += 1 
-            elif tagged_sentence[index+1][1].startswith("V"):
-                if tagged_sentence[index+1][0] in belist or tagged_sentence[index+1][0] in havelist or tagged_sentence[index+1][0] in dolist:
                     features_dict["whquest_013"] += 1
-       
+            	elif tagged_sentence[index+1][1].startswith("V"):
+                    if tagged_sentence[index+1][0] in belist or tagged_sentence[index+1][0] in havelist or tagged_sentence[index+1][0] in dolist:
+                        features_dict["whquest_013"] += 1
+                    elif word_tuple[0] == "who":
+                        features_dict["whquest_013"] += 1
+            ##AB: The lines of code below catch fringe cases with common insertions ("the fuck/hell", "on earth", etc.).
+            ##AB: These conditions only get checked under specific circumstances, so they should not be too expensive despite being verbose.
+                elif tagged_sentence[index+1] == "the" and tagged_sentence[index+2] in ["hell", "fuck"]:
+                    features_dict["whquest_013"] += 1
+                elif word_tuple[0] == "what" and tagged_sentence[index+1][0] == "about":
+                    features_dict["whquest_013"] += 1
+        
+            
 
 
 def analyze_there(index, tagged_sentence, features_dict):
