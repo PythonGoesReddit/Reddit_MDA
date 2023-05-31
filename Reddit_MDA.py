@@ -238,7 +238,7 @@ def tag_sentence(sentence):
     Returns a list of tuples of (word, pos_tag).'''
     cleaned_sentence = clean_sentence(sentence)
     flair_sentence = Sentence(cleaned_sentence)
-    tagger_FLAIR.predict(flair_sentence)
+    tagger_FLAIR.predict(flair_sentence, mini_batch_size=128)
     token_list = []
     for label in flair_sentence.get_labels('pos'):
         token_list.append(tuple([label.data_point.text] + [label.value])) 
@@ -915,11 +915,11 @@ def analyze_wh_word(index, tagged_sentence, features_dict):
             if tagged_sentence[index-1][1] in ["X", "SYM"]:  
                 if tagged_sentence[index+1][1] == "MD":
                     features_dict["whquest_013"] += 1
-            	elif tagged_sentence[index+1][1].startswith("V"):
-                    if tagged_sentence[index+1][0] in belist or tagged_sentence[index+1][0] in havelist or tagged_sentence[index+1][0] in dolist:
-                        features_dict["whquest_013"] += 1
-                    elif word_tuple[0] == "who":
-                        features_dict["whquest_013"] += 1
+            elif tagged_sentence[index+1][1].startswith("V"):
+                if tagged_sentence[index+1][0] in belist or tagged_sentence[index+1][0] in havelist or tagged_sentence[index+1][0] in dolist:
+                    features_dict["whquest_013"] += 1
+                elif word_tuple[0] == "who":
+                    features_dict["whquest_013"] += 1
             ##AB: The lines of code below catch fringe cases with common insertions ("the fuck/hell", "on earth", etc.).
             ##AB: These conditions only get checked under specific circumstances, so they should not be too expensive despite being verbose.
                 elif tagged_sentence[index+1] == "the" and tagged_sentence[index+2] in ["hell", "fuck"]:
