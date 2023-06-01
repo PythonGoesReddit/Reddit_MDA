@@ -738,7 +738,7 @@ def analyze_noun(index, tagged_sentence, features_dict):
     
     if word_tuple[0] in indefpronounlist:
         features_dict["proindef_011"] += 1
-    if word_tuple[0].endswith("ing") or word_tuple[0].endswith("ings"):
+    if word_tuple[0].endswith("ing"): # or word_tuple[0].endswith("ings"): # removing plural form since gerund nouns only accept sing
         if word_tuple[0] not in notgerundlist:
             features_dict["gerund_015"] += 1
     elif word_tuple[0].endswith("tions") or word_tuple[0].endswith("tion") or word_tuple[0].endswith("ments") or word_tuple[0].endswith("ment") or word_tuple[0].endswith("ness") or word_tuple[0].endswith("ity") or word_tuple[0].endswith("nesses") or word_tuple[0].endswith("ities"):
