@@ -741,7 +741,7 @@ def analyze_noun(index, tagged_sentence, features_dict):
     if word_tuple[0].endswith("ing"): # or word_tuple[0].endswith("ings"): # removing plural form since gerund nouns only accept sing
         if word_tuple[0] not in notgerundlist:
             features_dict["gerund_015"] += 1
-    elif word_tuple[0].endswith("tions") or word_tuple[0].endswith("tion") or word_tuple[0].endswith("ments") or word_tuple[0].endswith("ment") or word_tuple[0].endswith("ness") or word_tuple[0].endswith("ity") or word_tuple[0].endswith("nesses") or word_tuple[0].endswith("ities"):
+    elif word_tuple[0].endswith("tions") or [0].endswith("tion") or word_tuple[0].endswith("ments") or word_tuple[0].endswith("ment") or word_tuple[0].endswith("ness") or word_tuple[0].endswith("ity") or word_tuple[0].endswith("nesses") or word_tuple[0].endswith("ities"):
         features_dict["nominalis_014"] += 1
     else: 
         features_dict["nouns_016"] += 1
@@ -790,14 +790,58 @@ def analyze_conjunction(index, tagged_sentence, features_dict):
     word_tuple = tagged_sentence[index]
 
     if word_tuple[0] == "and": 
-        if tagged_sentence[index-1][1].startswith("N") and tagged_sentence[index+1][1].startswith("N"):
-            features_dict["coordphras_064"] += 1
-        elif tagged_sentence[index-1][1].startswith("RB") and tagged_sentence[index+1][1].startswith("RB"):
-            features_dict["coordphras_064"] += 1
-        elif tagged_sentence[index-1][1].startswith("JJ") and tagged_sentence[index+1][1].startswith("JJ"):
-            features_dict["coordphras_064"] += 1
-        elif tagged_sentence[index-1][1].startswith("VB") and tagged_sentence[index+1][1].startswith("VB"):
-            features_dict["coordphras_064"] += 1
+        if tagged_sentence[index-1][1].startswith("N"):
+            same_phrase_type = True
+            next_index = index + 1
+            while same_phrase_type:
+                next_word, next_tag = tagged_sentence[next_index]
+                if next_tag.startswith(("DT", "PR", "JJ", "CD")): 
+                    next_index += 1
+                elif next_tag.startswith("N"):
+                    features_dict["coordphras_064"] += 1
+                    same_phrase_type = False
+                else:
+                    same_phrase_type = False  
+        
+        elif tagged_sentence[index-1][1].startswith("RB"): 
+            same_phrase_type = True
+            next_index = index + 1
+            while same_phrase_type:
+                next_word, next_tag = tagged_sentence[next_index]
+                if next_tag.startswith(("JJ")): 
+                    next_index += 1
+                elif next_tag.startswith("RB"):
+                    features_dict["coordphras_064"] += 1
+                    same_phrase_type = False
+                else:
+                    same_phrase_type = False
+
+        elif tagged_sentence[index-1][1].startswith("V"): 
+            same_phrase_type = True
+            next_index = index + 1
+            while same_phrase_type:
+                next_word, next_tag = tagged_sentence[next_index]
+                if next_tag.startswith(("RB", "MD")): 
+                    next_index += 1
+                elif next_tag.startswith("V"):
+                    features_dict["coordphras_064"] += 1
+                    same_phrase_type = False
+                else:
+                    same_phrase_type = False
+                    
+        elif tagged_sentence[index-1][1].startswith("J"): 
+            same_phrase_type = True
+            next_index = index + 1
+            while same_phrase_type:
+                next_word, next_tag = tagged_sentence[next_index]
+                if next_tag.startswith(("RB", "DT", "PR", "CD")):
+                    next_index += 1
+                elif next_tag.startswith("J"):
+                    features_dict["coordphras_064"] += 1
+                    same_phrase_type = False
+                else:
+                    same_phrase_type = False
+
         elif tagged_sentence[index-1][0] == ",":
             if tagged_sentence[index+1][0] in ["it", "so", "you", "then"]:
                 features_dict["coordnonp_065"] += 1
