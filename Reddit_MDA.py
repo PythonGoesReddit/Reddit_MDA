@@ -196,11 +196,8 @@ def analyze_sentence(sent, features_dict):
             features_dict["interlink_203"] += 1 
             words[i] = "url" ## added these replacement statements to ease the later processing (HM)
 
-        if not i == 0:
-            if words[i].isupper() and not words[i]=="I":
-                features_dict["caps_204"] += 1
-        else:
-            if words[i].isupper() and not (words[i] in ["A", "I"]): 
+        if len(words) > 2:
+            if words[i].isupper() and words[i+1].isupper and words[i+2].isupper: 
                 features_dict["caps_204"] += 1  
 
 def clean_sentence(sentence):
@@ -381,10 +378,12 @@ def analyze_verb(index, tagged_sentence, features_dict):
                     pass
             
     elif word_tuple[1] == "VBG":
-        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP) and tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]:
-            features_dict["vpresentpart_025"] += 1
-        if (tagged_sentence[index-2][1] == "X" or tagged_sentence[index-2][0] in ALLP) and tagged_sentence[index-1][0] in ["while", "without", "when", "although","with"]:
-            features_dict["vpresentpart_025"] += 1
+        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
+            if tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]:
+                features_dict["vpresentpart_025"] += 1
+        if (tagged_sentence[index-2][1] == "X" or tagged_sentence[index-2][0] in ALLP):
+            if tagged_sentence[index-1][0] in ["while", "without", "when", "although","with"]:
+                features_dict["vpresentpart_025"] += 1
         elif tagged_sentence[index-1][1] == "NN" or tagged_sentence[index-1][1] == "NNS": 
             features_dict["vpresentwhiz_028"] += 1 
         elif tagged_sentence[index-1][0] in belist:
