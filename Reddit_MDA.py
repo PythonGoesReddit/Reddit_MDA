@@ -197,8 +197,8 @@ def analyze_sentence(sent, features_dict):
             words[i] = "url" ## added these replacement statements to ease the later processing (HM)
 
         if len(words) > 2:
-            if words[i].isupper() and words[i+1].isupper and words[i+2].isupper: 
-                features_dict["caps_204"] += 1  
+            if words[i].isupper() and words[i+1].isupper and words[i+2].isupper:
+                features_dict["caps_204"] += 1
 
 def clean_sentence(sentence):
     '''Takes a sentence and returns it in all lowercase, with punctuation removed, and emojis removed.'''
