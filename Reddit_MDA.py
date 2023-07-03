@@ -94,7 +94,7 @@ def lengthening(word):
     count = 1
     character = ""
     for c in word:
-        if c == character and not c == "w":
+        if c == character and c.isalpha() and not c == "w":
             count += 1
             if count == 3:
                 return(True)
@@ -344,7 +344,7 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
                "pronounced", "pronouncing", "propose", "proposes", "proposed", "proposing", "recommend", "recommends", "recommended",
                "recommending", "request", "requests", "requested", "requesting", "stipulate", "stipulates", "stipulated", "stipulating",
                "suggest", "suggests", "suggested", "suggesting", "urge", "urged", "urges", "urging"]
-copulalist = ["be", "am", "is", "was", "were", "been", "being", "appear", "appears", "appeared", "appearing", "seem", "seems", "seemed", "seeming", 
+copulalist = ["be", "am", "are", "is", "was", "were", "been", "being", "appear", "appears", "appeared", "appearing", "seem", "seems", "seemed", "seeming", 
               "sound", "sounds", "sounding", "sounded", "smell", "smells", "smelled", "smelling", "become", "becomes", "became", "becoming", "turn", 
               "turns", "turning", "turned", "turn", "grow", "grows", "grew", "growing", "growed", "grown", "get", "gets", "getting", "gotten", 
               "got", "look", "looks", "looking", "looked", "taste", "tastes", "tasted", "tasting", "feel", "feels", "feeled", "felt", "feeling"] 
@@ -671,10 +671,13 @@ def analyze_adjective(index, tagged_sentence, features_dict):
         
     adj_type = "attr"
     x = index-1
-    while adj_type == "attr" and tagged_sentence[x][1].startswith("R"):
-        x -= 1
-        if tagged_sentence[x][0] in copulalist:
+    while adj_type == "attr" and x > 0:
+        if tagged_sentence[x][1].startswith("R"):
+            x -= 1
+        elif tagged_sentence[x][0] in copulalist + ["'s", "'re", "'m"]:# Were the enclitic forms of BE purposely omitted from our copulalist?
             adj_type = "pred"
+        else:
+            x = 0
     if adj_type == "attr":
         features_dict["adjattr_040"] += 1
     elif adj_type == "pred":
