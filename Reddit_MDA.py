@@ -250,15 +250,15 @@ s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_0
      "mainvbe_019": 0, "exthere_020": 0, "thatvcom_021": 0, "thatacom_022": 0, "whclause_023": 0, "vinfinitive_024": 0, 
      "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0, "thatresub_029": 0, "thatreobj_030": 0, 
      "whresub_031": 0, "whreobj_032": 0, "whrepied_033": 0, "sentencere_034": 0, "advsubcause_035": 0, "advsubconc_036": 0, 
-     "advsubcond_037": 0, "advsubother_038": 0, "prepositions_039": 0, "adjattr_040": 0, "adjpred_041": 0, "adverbs_042": 0, 
-     "ttratio_043": 0, "wordlength_044": 0, "conjuncts_045": 0, "downtoners_046": 0, "hedges_047": 0, "amplifiers_048": 0, 
+     "advsubcond_037": 0, "advsubother_038": 0, "prepositions_039": 0, "adjattr_040a": 0, "adjpred_041a": 0, "adjattr_040b": 0, "adjpred_041b": 0,
+     "adverbs_042": 0, "ttratio_043": 0, "wordlength_044": 0, "conjuncts_045": 0, "downtoners_046": 0, "hedges_047": 0, "amplifiers_048": 0, 
      "discpart_050": 0, "demonstr_051": 0, "modalsposs_052": 0, "modalsness_053": 0, "modalspred_054": 0, 
      "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "vseemappear_058": 0, "contractions_059": 0, "thatdel_060": 0, 
-     "strandprep_061": 0, "vsplitinf_062": 0, "vsplitaux_063": 0, "coordphras_064": 0, "coordnonp_065": 0, "negsyn_066": 0, 
+     "strandprep_061": 0, "vsplitinf_062": 0, "vsplitaux_063": 0, "negsyn_066": 0, 
      "negana_067": 0, "hashtag_201": 0, "link_202": 0, "interlink_203": 0, "caps_204": 0, "vimperative_205": 0, "lengthening_206":0,
      "emoticons_207":0, "question_208": 0, "exclamation_209": 0, "lenchar_210": 0, "lenword_211": 0, "comparatives_syn_212": 0, 
      "superlatives_syn_213": 0, "comparatives_ana_214": 0, "superlatives_ana_215":0, "reddit_vocab_216":0, "vprogressive_217": 0,
-     "emojis_218":0}
+     "emojis_218":0, "coordAnd_219": 0, "coordBut_220": 0, "coordOr_221": 0}
 placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "anywhere", 
                  "ashore", "astern", "away", "behind", "below", "beneath", "between", "beyond",
                  "beside", "down", "downhill", "downstairs", "downstream", "downwind", "east",
@@ -633,7 +633,7 @@ def analyze_modal(index, tagged_sentence, features_dict):
 def analyze_adverb(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "advplace_004", "advtime_005", "adverbs_042", "conjuncts_045",
-    "downtoners_046", "hedges_047", "amplifiers_048", "discpart_050", "contractions_059", "negana_067".'''
+    "downtoners_046", "amplifiers_048", "discpart_050", "contractions_059", "negana_067".'''
     features_dict["adverbs_042"] += 1
     word_tuple = tagged_sentence[index]
     if word_tuple[0] == "not":
@@ -679,9 +679,20 @@ def analyze_adjective(index, tagged_sentence, features_dict):
         else:
             x = 0
     if adj_type == "attr":
-        features_dict["adjattr_040"] += 1
+        features_dict["adjattr_040a"] += 1
     elif adj_type == "pred":
-        features_dict["adjpred_041"] += 1
+        features_dict["adjpred_041a"] += 1
+    
+    adj_type = "pred"
+    forward = 1
+    while tagged_sentence[index+forward][1].startswith(("N","J")) or tagged_sentence[index+forward][0] == ",":
+        if tagged_sentence[index+forward][1].startswith("N"):
+            adj_type = "attr"
+        forward += 1
+    if adj_type == "attr":
+        features_dict["adjattr_040b"] += 1
+    elif adj_type == "pred":
+        features_dict["adjpred_041b"] += 1
       
 def analyze_preposition(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
@@ -788,79 +799,16 @@ def analyze_pronoun(index, tagged_sentence, features_dict):
 
 def analyze_conjunction(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
-    "hedges_047", "coordphras_064", "coordnonp_065".'''
+    "coordAnd_219", "coordBut_220", "coordOr_221"
+    '''
     word_tuple = tagged_sentence[index]
 
-    if word_tuple[0] == "and": 
-        if tagged_sentence[index-1][1].startswith("N"):
-            same_phrase_type = True
-            next_index = index + 1
-            while same_phrase_type:
-                next_word, next_tag = tagged_sentence[next_index]
-                if next_tag.startswith(("DT", "PR", "JJ", "CD")): 
-                    next_index += 1
-                elif next_tag.startswith("N"):
-                    features_dict["coordphras_064"] += 1
-                    same_phrase_type = False
-                else:
-                    same_phrase_type = False  
-        
-        elif tagged_sentence[index-1][1].startswith("RB"): 
-            same_phrase_type = True
-            next_index = index + 1
-            while same_phrase_type:
-                next_word, next_tag = tagged_sentence[next_index]
-                if next_tag.startswith(("JJ")): 
-                    next_index += 1
-                elif next_tag.startswith("RB"):
-                    features_dict["coordphras_064"] += 1
-                    same_phrase_type = False
-                else:
-                    same_phrase_type = False
-
-        elif tagged_sentence[index-1][1].startswith("V"): 
-            same_phrase_type = True
-            next_index = index + 1
-            while same_phrase_type:
-                next_word, next_tag = tagged_sentence[next_index]
-                if next_tag.startswith(("RB", "MD")): 
-                    next_index += 1
-                elif next_tag.startswith("V"):
-                    features_dict["coordphras_064"] += 1
-                    same_phrase_type = False
-                else:
-                    same_phrase_type = False
-                    
-        elif tagged_sentence[index-1][1].startswith("J"): 
-            same_phrase_type = True
-            next_index = index + 1
-            while same_phrase_type:
-                next_word, next_tag = tagged_sentence[next_index]
-                if next_tag.startswith(("RB", "DT", "PR", "CD")):
-                    next_index += 1
-                elif next_tag.startswith("J"):
-                    features_dict["coordphras_064"] += 1
-                    same_phrase_type = False
-                else:
-                    same_phrase_type = False
-
-        elif tagged_sentence[index-1][0] == ",":
-            if tagged_sentence[index+1][0] in ["it", "so", "you", "then"]:
-                features_dict["coordnonp_065"] += 1
-            elif tagged_sentence[index+1][1] in subjpro or tagged_sentence[index+1][1] in DEM:
-                    features_dict["coordnonp_065"] += 1                            
-            elif tagged_sentence[index+1][0] == "there" and tagged_sentence[index+2][0] in belist:
-                features_dict["coordnonp_065"] += 1
-        elif tagged_sentence[index-1][0] in punct_final: 
-            features_dict["coordnonp_065"] += 1
-        elif tagged_sentence[index+1][0] in WHP or tagged_sentence[index+1][0] in WHO or tagged_sentence[index+1][0] in discpart:
-            features_dict["coordnonp_065"] += 1
-        elif tagged_sentence[index+1][0] in ["because", "although", "though", "if", "unless",] or tagged_sentence[index+1][0] in otheradvsublist: # added the otheradvsublist for this particular feature (GK)
-            features_dict["coordnonp_065"] += 1
-        elif tagged_sentence[index+1][0] in conjunctslist:
-            features_dict["coordnonp_065"] += 1
-        elif tagged_sentence[index+1][0] in ["because", "although", "though", "if", "unless", "since", "while", "whilst", "whereas", "whereby"]:
-            features_dict["coordnonp_065"] += 1 
+    if word_tuple[0].lower() == "and": 
+        features_dict["coordAnd_219"] += 1
+    elif word_tuple[0].lower() == "but": 
+        features_dict["coordBut_220"] += 1
+    elif word_tuple[0].lower() == "or": 
+        features_dict["coordOr_221"] += 1
 
 
 def analyze_determiner(index, tagged_sentence, features_dict):
