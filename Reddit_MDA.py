@@ -395,10 +395,13 @@ def analyze_verb(index, tagged_sentence, features_dict):
         if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
             if tagged_sentence[index+1][1] in ["IN", "RB", "TO"]: # Biber (1988:233) notes for both that "these forms were edited by hand."
                 features_dict["vpastpart_026"] += 1 ## this one seems accurate enough to me (HM)
-        elif tagged_sentence[index-1][1] in ["NN", "NNP"] or tagged_sentence[index-1][0] in QUANPRO:
+        elif tagged_sentence[index-1][1].startswith("NN") or tagged_sentence[index-1][0] in QUANPRO:
             if tagged_sentence[index+1][1] in ["IN", "RBR", "RB", "RBS"] or tagged_sentence[index+1][0] in belist:
                 features_dict["vpastwhiz_027"] += 1 
-
+        elif tagged_sentence[index-1][0] == ",":
+                if tagged_sentence[index-2][1].startswith("NN") or tagged_sentence[index-1][0] in QUANPRO:
+                    if tagged_sentence[index+1][1] in ["IN", "RBR", "RB", "RBS"] or tagged_sentence[index+1][0] in belist:
+                        features_dict["vpastwhiz_027"] += 1 #YF: changed to catch cases where a comma is between the noun and the VBN, but may also include rubbish like "I hat gotten up, gone to the window..."                   
     elif word_tuple[1] in ["VBP","VBZ"]:
         features_dict["vpresent_003"] += 1
     if word_tuple[0].startswith("seem") or word_tuple[0].startswith("appear"):
