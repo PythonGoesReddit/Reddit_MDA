@@ -87,7 +87,10 @@ feats = {"vpast_001": "SIMPLE PAST VERB FORMS", # done by HM
 "superlatives_ana_215":"ANALYTICAL SUPERLATIVES (MOST + ADJ)",
 "reddit_vocab_216": "COMMUNITY-SPECIFIC ACRONYMS OR LEXICAL ITEMS", 
 "vprogressive_217": "VERB PHRASES IN PROGRESSIVE ASPECT",
-"emojis_218": "EMOJIS"}
+"emojis_218": "EMOJIS",
+"coordAnd_219": "ALL INSTANCES OF AND",
+"coordBut_220": "ALL INSTANCES OF BUT",
+"coordOr_221": "ALL INSTANCES OF OR"}
 
 
 ### Asking user input about which feature to code.
