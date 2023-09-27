@@ -35,12 +35,12 @@ for feat in feats:
     false_pos = 0
     true_neg = 0
     false_neg = 0
-    if os.path.isfile("manual_coding_"+ feat + "_corrected.txt"):
+    if os.path.isfile("Manual_coding_files\manual_coding_"+ feat + "_corrected.txt"):
         filstring = "_corrected"
     else:
         filstring = ""
 
-    with open("manual_coding_"+ feat + filstring + ".txt") as f:
+    with open("Manual_coding_files\manual_coding_"+ feat + filstring + ".txt") as f:
         for line in f:
             sent_count += 1
             numid = line.split("\t")[0]
