@@ -760,7 +760,7 @@ def analyze_noun(index, tagged_sentence, features_dict):
         
 def analyze_pronoun(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
-    "profirpers_006", "prosecpers_007", "prothirper_008", "proit_009", "prodemons_010", "proindef_011".'''
+    "profirpers_006", "prosecpers_007", "prothirdper_008", "proit_009", "prodemons_010", "proindef_011".'''
     word_tuple = tagged_sentence[index] #returns a tuple (word, POS)
 
     if word_tuple[0] == "it":
