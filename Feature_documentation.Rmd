@@ -1,0 +1,525 @@
+---
+title: "Feature_documentation"
+author: "Hanna Mahler"
+date: "2023-10-01"
+output: html_document
+---
+
+This R-Markdown contains a documentation of the linguistic features annotated by our Python script.
+Most of the features are taken from Biber (1988), some are adapted from Clarke & Grieve (2017), and some are our own additions. 
+
+For every feature we will first quote how it is defined in the original source (if known) and provide an example. We will then show how the feature is extracted in our code and what the extraction criteria are. If applicable, we will justify any deviations from the original source. We will also provide an accuracy measurement for each feature: an F-score that was calculated from the comparison of the automatic extraction with a manual coding of the feature in question.
+
+Features that were dropped from the analysis can be found at the end of the file.
+
+Note that the Python code included here is not meant to be run on its own. It is copied out of our main script "Reddit_MDA" and serves illustration purposes only.
+
+## Verbs in the past tense: vpast_001
+
+- Definition from Biber: "Any past tense form that occurs in the dictionary, or any word not otherwise identified that is longer than six letters and ends in ed%. Past tense forms have been edited by hand to distinguish between those forms with past participial functions and those with past tense functions." (1988: 223)
+- Example: 
+- Our search stragey: everything that received the tag "VBD" (verb in the past tense) within the function analyze_verb.
+```{python}
+    word_tuple = tagged_sentence[index]
+    if word_tuple[1] == "VBD":
+        features_dict["vpast_001"] += 1
+```
+
+- Accuracy: 
+
+## Verbs in the present perfect: vpresperfect_002a
+
+- Definition from Biber: 
+  "(a) HAVE + (ADV) + (ADV) + VBN 
+  (b) HAVE+ N/PRO + VBN (questions) 
+  (includes contracted forms of HAVE)" (1988: 223)
+- Example: 
+- Our search strategy: Biber's feature 2 "perfect aspect" does not distinguish between present perfect and past perfect. We therefore decided to split this up into two features (002a and 002b). For the present perfect we count combinations of ["have", "'ve", "has"] plus verbs with the tag "VBN" (past participle of verb) within the function analyze_verb. We are allowing for an unspecified number of intervening adverbs and nouns. 
+```{python}
+    elif word_tuple[0] in ["have", "'ve", "has"]: 
+        move_on = True
+        insert_adv = False
+        x = index
+        while move_on: 
+            x += 1
+            if tagged_sentence[x][1] == "VBN":
+                move_on = False
+                features_dict["vpresperfect_002a"] += 1
+                if insert_adv:
+                    features_dict["vsplitaux_063"] += 1
+            elif tagged_sentence[x][1].startswith("R") and tagged_sentence[x][0] not in ["n't", "not"]:
+                insert_adv = True
+            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"): 
+                move_on = True
+            else: 
+                move_on = False
+```
+
+- Accuracy: 
+
+
+## Verbs in the past perfect: vpastperfect_002b
+
+- Definition from Biber: 
+  "(a) HAVE + (ADV) + (ADV) + VBN 
+  (b) HAVE+ N/PRO +VBN (questions) 
+  (includes contracted forms of HAVE)" (1988: 223)
+- Example: 
+- Our search strategy: Biber's feature 2 "perfect aspect" does not distinguish between present perfect and past perfect. We therefore decided to split this up into two features (002a and 002b). For the past perfect we count combinations of ["had", "'d"] plus verbs with the tag "VBN" (past participle of verb) within the function analyze_verb. We are allowing for an unspecified number of intervening adverbs and nouns. 
+```{python}
+    if word_tuple[0] in ["had", "'d"]: 
+        move_on = True
+        insert_adv = False
+        x = index
+        while move_on:
+            x += 1
+            if tagged_sentence[x][1] == "VBN":
+                move_on = False
+                features_dict["vpastperfect_002b"] += 1
+                if insert_adv:
+                    features_dict["vsplitaux_063"] += 1
+            elif tagged_sentence[x][1].startswith("R") and tagged_sentence[x][0] not in ["n't", "not"]:
+                insert_adv = True
+            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"):
+                move_on = True 
+            else: 
+                move_on =  False 
+```
+
+- Accuracy: 
+
+## Verbs in the present tense: vpresent_003
+
+- Definition from Biber: "All VB (base form) or VBZ (third person singular present) verb forms in the dictionary, excluding infinitives." (1988: 224)
+- Example: 
+- Our search stragey: Within the function analyze_verb we are counting everything with the tag "VBP" (Verb, non-3rd person singular present ) or "VBZ" (Verb, 3rd person singular present ).
+```{python}
+    elif word_tuple[1] in ["VBP","VBZ"]:
+        features_dict["vpresent_003"] += 1
+```
+
+- Accuracy: 
+
+## Place adverbials: advplace_004
+
+- Definition from Biber: aboard, above, abroad, across, ahead, alongside, around, ashore, astern, away, behind, below, beneath, beside, downhill, downstairs, downstream, east, far, hereabouts, indoors, inland, inshore, inside, locally, near, nearby, north, nowhere, outdoors, outside, overboard, overland, overseas, south, underfoot, underground, underneath, uphill, upstairs, upstream, west (1988: 224)
+- Example: 
+- Our search stragey: Within the function analyze_adverb we are counting everything that is in our list of place adverbials, "placelist". This list is defined beforehand and contains all the items listed by Biber (no further additions).
+```{python}
+    elif word_tuple[0] in placelist:
+        features_dict["advplace_004"] += 1
+```
+
+- Accuracy: 
+
+## time adverbials on location in time: advtime_position_005a
+
+- Definition from Biber: "afterwards, again, earlier, early, eventually, formerly, immediately, initially, instantly, late, lately, later, momentarily, now, nowadays, once, originally, presently, previously, recently, shortly, simultaneously, soon, subsequently, today, tomorrow, tonight, yesterday" (1988: 224)
+- Example: 
+- Our search strategy: Biber's feature 5, "time adverbials" does not distinguish between adverbials relating to a specific point in time (e.g. "yesterday") and adverbials relating to the frequency of occurrence or duration of an event (e.g. "daily"). We therefore decided to split this feature into two, 005a and 005b. For advtime_position_005a we are looking for items that are in the list "timepoints" within the function analyze_adverb. This list was defined beforehand. 
+```{python}
+timepoints = ["afterwards", "again", "already", "anymore", "before", "currently", "earlier", "early", "eventually", "formerly", "finally", "immediately", "initially", "instantly", "late", "lately", "later", "momentarily", "now", "nowadays",  "originally", "presently", "previously", "promptly", "recently", "shortly", "simultaneously", "soon", "subsequently", "today", "tomorrow", "tonight", "yesterday"]
+
+    elif word_tuple[0] in timepoints:
+        features_dict["advtime_position_005a"] += 1
+```
+
+- Accuracy: 
+
+## time adverbials on frequency: advtime_durfreq_005b
+
+- Definition from Biber: "afterwards, again, earlier, early, eventually, formerly, immediately, initially, instantly, late, lately, later, momentarily, now, nowadays, once, originally, presently, previously, recently, shortly, simultaneously, soon, subsequently, today, tomorrow, tonight, yesterday" (1988: 224)
+- Example: 
+- Our search strategy: Biber's feature 5, "time adverbials" does not distinguish between adverbials relating to a specific point in time (e.g. "yesterday") and adverbials relating to the frequency of occurrence or duration of an event (e.g. "daily"). We therefore decided to split this feature into two, 005a and 005b. For advtime_durfreq_005b we are looking for items that are in the list "timedurfreq" within the function analyze_adverb. This list was defined beforehand. 
+```{python}
+timedurfreq = ["always", "annually", "ceaselessly", "commonly", "constantly", "continually", "continuously", "customarily", "daily", "eternally", "evermore", "endlessly", "forever", "fortnightly", "frequently", "habitually", "hourly", "infrequently", "intermittently", "irregularly", "invariably", "monthly", "never", "occasionally", "often", "oftentimes", "once", "periodically", "perpetually", "persistently", "rarely", "repeatedly", "routinely", "seldom", "sometimes", "twice", "unceasingly", "usually","weekly", "yearly"]
+
+    elif word_tuple[0] in timedurfreq:
+        features_dict["advtime_durfreq_005b"] += 1
+```
+
+- Accuracy: 
+
+## First-person pronouns: profirpers_006
+
+- Definition from Biber: "I, me, we, us, my, our, myself, ourselves (plus contracted forms)" (1988: 225)
+- Example: 
+- Our search strategy: Within the function analyze_pronoun we are looking for everything that is part of the list "firstpersonlist". This list was defined beforehand, it contains the same items as listed in Biber.
+```{python}
+firstpersonlist = ["i", "me", "we", "us", "my", "our", "myself", "ourselves"]
+
+    elif word_tuple[0] in firstpersonlist:
+        features_dict["profirpers_006"] += 1
+```
+
+- Accuracy: 
+
+## Second-person pronouns: prosecpers_007
+
+- Definition from Biber: "you, your, yourself, yourselves (plus contracted forms)" (1988: 225)
+- Example: 
+- Our search strategy: Within the function analyze_pronoun we are counting everything that is part of the lsit "secondpersonlist". This list was defined beforehand and contains the same items as mentioned in Biber.
+```{python}
+secondpersonlist = ["you", "yourself", "your", "yourselves"]
+
+    elif word_tuple[0] in secondpersonlist:
+        features_dict["prosecpers_007"] += 1
+```
+
+- Accuracy: 
+
+## Third-person pronouns: prothirper_008
+
+- Definition from Biber: "she, he, they, her, him, them, his, their, himself, herself, themselves (plus contracted forms)" (1988: 225)
+- Example: 
+- Our search strategy: Within the function analyze_pronoun we are counting everything that is in the list "thirdpersonlist". This list was defined beforehand and contains the same items as listed in Biber.
+```{python}
+thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "himself","herself", "themselves"]
+
+    elif word_tuple[0] in thirdpersonlist:
+        features_dict["prothirdper_008"] += 1
+```
+
+- Accuracy: 
+
+## Pronoun 'it': proit_009
+
+- Definition from Biber: none given, presumably surface form "it" (1988: 225-226)
+- Example: 
+- Our search strategy: Within the function analyze_pronoun we are counting everything with the surface form "it".
+```{python}
+    if word_tuple[0] == "it":
+        features_dict["proit_009"] += 1
+```
+
+- Accuracy:
+
+## Demonstrative pronouns: prodemons_010
+
+- Definition from Biber: 
+  "(a) that/this/these/those + V/AUX/CL-P/TS/WHP/W (where that is not a relative pronoun) 
+  (b) that's 
+  (c) T# + that 
+  (that in this last context was edited by hand to distinguish among demonstrative pronouns, relative pronouns, complementizers, etc.)" (1988: 226)
+- Example: "this is ridiculous" (Biber 1988: 226)
+- Our search strategy: We first distinguish between ["this", "these", "those"] and the word "that", since "that" has more potential functions in the sentence. We then check whether the following item (with a potential intervening adjective) is a noun to sort out demonstrative determiners (see feature demonstr_051). All remaining items are counted as demonstrative pronouns. *This is a slight deviation from Biber's approach which we consider necessary since ...* We included this code chunk within the function analyze_pronoun and within analyze_determiner to make sure we catch all cases, irrespective of the POS-tag that was assigned. 
+```{python}
+    if word_tuple[0] in ["this", "these", "those"]:
+        if tagged_sentence[index+1][1].startswith("NN"):
+            features_dict["demonstr_051"] += 1
+        elif tagged_sentence[index+1][1].startswith("JJ") and tagged_sentence[index+2][1].startswith("NN"):
+            features_dict["demonstr_051"] += 1
+        else:
+            features_dict["prodemons_010"] += 1
+
+    if word_tuple [0] == "that":
+        if tagged_sentence[index+1][1].startswith("NN"):
+            features_dict["demonstr_051"] += 1
+        elif tagged_sentence[index+1][1].startswith("JJ") and tagged_sentence[index+2][1].startswith("NN"):
+            features_dict["demonstr_051"] += 1
+        elif tagged_sentence[index+1][0] == "X":
+            features_dict["prodemons_010"] += 1
+        elif tagged_sentence[index+1][1].startswith("JJ"):
+            features_dict["prodemons_010"] += 0
+        else:
+            features_dict["prodemons_010"] += 1
+```
+
+- Accuracy:
+
+## Indefinitve pronouns: proindef_011
+
+- Definition from Biber: "anybody, anyone, anything, everybody, everyone, everything, nobody, none, nothing, nowhere, somebody, someone, something" (1988: 226)
+- Example: 
+- Our search strategy: We count everything that is in the list "indefpronounlist", which was defined above. The list contains the same items as given by Biber. We included this code within the analyze_noun function and the analyze_pronoun function, because the tagger seemed to be slightly inconsistent in its assignment.
+```{python}
+indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "everything", "nobody", "none", "nothing", "nowhere", "somebody", "someone", "something"]
+
+    if word_tuple[0] in indefpronounlist:
+        features_dict["proindef_011"] += 1
+```
+
+- Accuracy:
+
+## Pro-verb do: pverbdo_012
+
+- Definition from Biber: "DO when NOT in the following constructions: 
+  DO + (ADV) + V      (DO as auxiliary) 
+  ALL-P/TS/WHP + DO   (DO as question)" (1988: 226)
+- Example: 
+- Our search strategy: 
+```{python}
+
+```
+
+- Accuracy:
+
+## WH-questions: whquest_013
+
+- Definition from Biber: "CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)" (1988: 227)
+- Example: 
+- Our search strategy: 
+```{python}
+
+```
+
+- Accuracy:
+
+## Nominalisations: nominalis_014
+
+- Definition from Biber: "All words ending in -tion#, -ment#, -ness#, or -ity# (plus plural forms)" (1988: 227)
+- Example: 
+- Our search strategy: 
+```{python}
+
+```
+
+- Accuracy:
+
+## Gerunds: gerund_015
+
+- Definition from Biber: "All participle forms serving nominal functions - these are edited by hand." (1988: 227)
+- Example: 
+- Our search strategy: 
+```{python}
+
+```
+
+- Accuracy:
+
+## Nouns: nouns_016
+
+- Definition from Biber: "All nouns included in the dictionary, excluding those forms counted as nominalizations or gerunds." (1988: 228)
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## Agentless passives: passagentl_017
+
+- Definition from Biber: 
+  "(a) BE + (ADV) + (ADV) + VBN 
+  (b) BE + N/PRO + VBN  (question form)" (1988: 228)
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## By-passives: passby_018
+
+- Definition from Biber: 
+  "(a) BE + (ADV) + (ADV) + VBN + by 
+  (b) BE + N/PRO + VBN + by (question form)" (1988: 228)
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## Main verb use of be: mainvbe_019
+
+- Definition from Biber: "BE + DET/POSSPRO/TITLE/PREP/ADJ" (1988: 229)
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## Exitential 'there': exthere_020
+
+- Definition from Biber: 
+  "(a) there + (xxx) + BE 
+  (b) there's" (1988: 229)
+- Example: "there are several explanations" (Biber 1988: 229)
+- Our search strategy: 
+- Accuracy:
+
+## thatvcom_021
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## thatacom_022
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## WH-clauses: whclause_023"
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## Verbs in the infinitive: vinfinitive_024
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## Present participial clauses: vpresentpart_025
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## Past participial clauses: vpastpart_026
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## vpastwhiz_027
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## vpresentwhiz_028
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## thatresub_029
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## thatreobj_030
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## whresub_031
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## whreobj_032
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## whrepied_033
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## sentencere_034
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## advsubcause_035
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## advsubconc_036
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## advsubcond_037
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## Other adverbial subordinators: advsubother_038
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## Prepositions: prepositions_039
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## Attributive adjectives: adjattr_040
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search strategy: 
+- Accuracy:
+
+## Predicative adjectives: adjpred_041
+## Adverbs: adverbs_042
+## Word length: wordlength_044
+## Conjuncts: conjuncts_045
+## Downtoners: downtoners_046
+## Hedges: hedges_047
+## Amplifiers and emphatics: amplifiers_048
+## Discourse particles: discpart_050
+## Demonstratives: demonstr_051
+## Possibility modals: modalsposs_052
+## Necessity modals: modalsness_053
+## Predictive modals: modalspred_054
+## Public verbs: vpublic_055
+## Private verbs: vprivate_056
+## Suasive verbs: vsuasive_057
+## Seem and appear: vseemappear_058
+## Contractions: contractions_059
+## That-deletion: thatdel_060
+## Stranded prepositions: strandprep_061
+## Split infinitives: vsplitinf_062
+## Split auxiliaries: vsplitaux_063
+## Phrasal coordination: coordphras_064
+## Non-phrasal coordination: coordnonp_065
+## Synthetic negation: negsyn_066
+## Analytic negation: negana_067
+## Hashtags: hashtag_201
+## Reddit-external links: link_202
+## Reddit-internal links: interlink_203
+## Words in all caps: caps_204
+## Verbs in the imperative: vimperative_205
+## Strategic lengthening within words: lengthening_206
+## Emoticons: emoticons_207
+## Qeustion sentences: question_208
+## Exclamation sentences: exclamation_209
+## Sentence length in characters: lenchar_210
+## Sentence length in words: lenword_211
+## Synthetic comparatives: comparatives_syn_212
+## Synthetic superlatives: superlatives_syn_213
+## Analytic comparatives: comparatives_ana_214
+## Analytic superlatives: superlatives_ana_215
+## Community-specific abbreviations or words: reddit_vocab_216
+## verbs in the progressive aspect: vprogressive_217
+## Emojis: emojis_218
+
+- Definition from Biber: "" (1988: )
+- Example: 
+- Our search stragey: 
+- Accuracy:
+
+
+
+References:
+Biber, Douglas. 1988. Variation across speech and writing. Cambridge: Cambridge University Press.
+Clarke, Isobelle & Jack Grieve. 2017. Dimensions of Abusive Language on Twitter. In Proceedings of the First Workshop on Abusive Language Online, 1–10. Vancouver.
+
