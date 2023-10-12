@@ -17,7 +17,7 @@ Note that the Python code included here is not meant to be run on its own. It is
 ## Verbs in the past tense: vpast_001
 
 - Definition from Biber: "Any past tense form that occurs in the dictionary, or any word not otherwise identified that is longer than six letters and ends in ed%. Past tense forms have been edited by hand to distinguish between those forms with past participial functions and those with past tense functions." (1988: 223)
-- Example: 
+- Example from Reddit: San Francisco is in America in case you *forgot* LOL.
 - Our search stragey: everything that received the tag "VBD" (verb in the past tense) within the function analyze_verb.
 ```{python}
     word_tuple = tagged_sentence[index]
@@ -33,7 +33,7 @@ Note that the Python code included here is not meant to be run on its own. It is
   "(a) HAVE + (ADV) + (ADV) + VBN 
   (b) HAVE+ N/PRO + VBN (questions) 
   (includes contracted forms of HAVE)" (1988: 223)
-- Example: 
+- Example from Reddit: There is no evolution, just a list of animals Chuck Norris *has allowed* to live. 
 - Our search strategy: Biber's feature 2 "perfect aspect" does not distinguish between present perfect and past perfect. We therefore decided to split this up into two features (002a and 002b). For the present perfect we count combinations of ["have", "'ve", "has"] plus verbs with the tag "VBN" (past participle of verb) within the function analyze_verb. We are allowing for an unspecified number of intervening adverbs and nouns. 
 ```{python}
     elif word_tuple[0] in ["have", "'ve", "has"]: 
@@ -64,7 +64,7 @@ Note that the Python code included here is not meant to be run on its own. It is
   "(a) HAVE + (ADV) + (ADV) + VBN 
   (b) HAVE+ N/PRO +VBN (questions) 
   (includes contracted forms of HAVE)" (1988: 223)
-- Example: 
+- Example from Reddit: I *had* always *thought* they were great idea, [...] 
 - Our search strategy: Biber's feature 2 "perfect aspect" does not distinguish between present perfect and past perfect. We therefore decided to split this up into two features (002a and 002b). For the past perfect we count combinations of ["had", "'d"] plus verbs with the tag "VBN" (past participle of verb) within the function analyze_verb. We are allowing for an unspecified number of intervening adverbs and nouns. 
 ```{python}
     if word_tuple[0] in ["had", "'d"]: 
@@ -91,7 +91,7 @@ Note that the Python code included here is not meant to be run on its own. It is
 ## Verbs in the present tense: vpresent_003
 
 - Definition from Biber: "All VB (base form) or VBZ (third person singular present) verb forms in the dictionary, excluding infinitives." (1988: 224)
-- Example: 
+- Example from Reddit: Dont even *care* about this game anymore. 
 - Our search stragey: Within the function analyze_verb we are counting everything with the tag "VBP" (Verb, non-3rd person singular present ) or "VBZ" (Verb, 3rd person singular present ).
 ```{python}
     elif word_tuple[1] in ["VBP","VBZ"]:
@@ -103,19 +103,21 @@ Note that the Python code included here is not meant to be run on its own. It is
 ## Place adverbials: advplace_004
 
 - Definition from Biber: aboard, above, abroad, across, ahead, alongside, around, ashore, astern, away, behind, below, beneath, beside, downhill, downstairs, downstream, east, far, hereabouts, indoors, inland, inshore, inside, locally, near, nearby, north, nowhere, outdoors, outside, overboard, overland, overseas, south, underfoot, underground, underneath, uphill, upstairs, upstream, west (1988: 224)
-- Example: 
+- Example from Reddit: *Below* it on the same side is what TCL/BlackBerry are calling a [...]
 - Our search stragey: Within the function analyze_adverb we are counting everything that is in our list of place adverbials, "placelist". This list is defined beforehand and contains all the items listed by Biber (no further additions).
 ```{python}
+placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "anywhere", "ashore", "astern", "away", "behind", "below", "beneath", "between", "beyond", "beside", "down", "downhill", "downstairs", "downstream", "downwind", "east", "eastward", "eastwards", "elsewhere", "everywhere", "far", "here", "hereabouts", "indoors", "inland", "inshore", "inside", "locally", "near", "nearby", "north", "northward", "northwards", "nowhere", "offshore", "opposite", "outdoors", "outside", "overboard", "overhead", "overland", "overseas", "somewhere", "south", "southward", "southwards", "there", "thereabouts", "through", "throughout", "under", "underfoot", "underground", "underneath", "uphill", "upstairs", "upstream", "west", "westward", "westwards", "within"] 
+
     elif word_tuple[0] in placelist:
         features_dict["advplace_004"] += 1
 ```
 
 - Accuracy: 
 
-## time adverbials on location in time: advtime_position_005a
+## Time adverbials on location in time: advtime_position_005a
 
 - Definition from Biber: "afterwards, again, earlier, early, eventually, formerly, immediately, initially, instantly, late, lately, later, momentarily, now, nowadays, once, originally, presently, previously, recently, shortly, simultaneously, soon, subsequently, today, tomorrow, tonight, yesterday" (1988: 224)
-- Example: 
+- Example from Reddit: *Now* if we're talking about lavo, ovo or lavo-ovo vegetarians, yes, [...]
 - Our search strategy: Biber's feature 5, "time adverbials" does not distinguish between adverbials relating to a specific point in time (e.g. "yesterday") and adverbials relating to the frequency of occurrence or duration of an event (e.g. "daily"). We therefore decided to split this feature into two, 005a and 005b. For advtime_position_005a we are looking for items that are in the list "timepoints" within the function analyze_adverb. This list was defined beforehand. 
 ```{python}
 timepoints = ["afterwards", "again", "already", "anymore", "before", "currently", "earlier", "early", "eventually", "formerly", "finally", "immediately", "initially", "instantly", "late", "lately", "later", "momentarily", "now", "nowadays",  "originally", "presently", "previously", "promptly", "recently", "shortly", "simultaneously", "soon", "subsequently", "today", "tomorrow", "tonight", "yesterday"]
@@ -126,10 +128,10 @@ timepoints = ["afterwards", "again", "already", "anymore", "before", "currently"
 
 - Accuracy: 
 
-## time adverbials on frequency: advtime_durfreq_005b
+## Time adverbials on frequency: advtime_durfreq_005b
 
 - Definition from Biber: "afterwards, again, earlier, early, eventually, formerly, immediately, initially, instantly, late, lately, later, momentarily, now, nowadays, once, originally, presently, previously, recently, shortly, simultaneously, soon, subsequently, today, tomorrow, tonight, yesterday" (1988: 224)
-- Example: 
+- Example from Reddit: I think the boxes *usually* ask for oil but you can use the exact same amount in butter.
 - Our search strategy: Biber's feature 5, "time adverbials" does not distinguish between adverbials relating to a specific point in time (e.g. "yesterday") and adverbials relating to the frequency of occurrence or duration of an event (e.g. "daily"). We therefore decided to split this feature into two, 005a and 005b. For advtime_durfreq_005b we are looking for items that are in the list "timedurfreq" within the function analyze_adverb. This list was defined beforehand. 
 ```{python}
 timedurfreq = ["always", "annually", "ceaselessly", "commonly", "constantly", "continually", "continuously", "customarily", "daily", "eternally", "evermore", "endlessly", "forever", "fortnightly", "frequently", "habitually", "hourly", "infrequently", "intermittently", "irregularly", "invariably", "monthly", "never", "occasionally", "often", "oftentimes", "once", "periodically", "perpetually", "persistently", "rarely", "repeatedly", "routinely", "seldom", "sometimes", "twice", "unceasingly", "usually","weekly", "yearly"]
@@ -143,7 +145,7 @@ timedurfreq = ["always", "annually", "ceaselessly", "commonly", "constantly", "c
 ## First-person pronouns: profirpers_006
 
 - Definition from Biber: "I, me, we, us, my, our, myself, ourselves (plus contracted forms)" (1988: 225)
-- Example: 
+- Example from Reddit: Cool, just let *me* know if you change your mind
 - Our search strategy: Within the function analyze_pronoun we are looking for everything that is part of the list "firstpersonlist". This list was defined beforehand, it contains the same items as listed in Biber.
 ```{python}
 firstpersonlist = ["i", "me", "we", "us", "my", "our", "myself", "ourselves"]
@@ -157,7 +159,7 @@ firstpersonlist = ["i", "me", "we", "us", "my", "our", "myself", "ourselves"]
 ## Second-person pronouns: prosecpers_007
 
 - Definition from Biber: "you, your, yourself, yourselves (plus contracted forms)" (1988: 225)
-- Example: 
+- Example from Reddit: *You* sound like a smug asshole that likes the smell of his own farts. 
 - Our search strategy: Within the function analyze_pronoun we are counting everything that is part of the lsit "secondpersonlist". This list was defined beforehand and contains the same items as mentioned in Biber.
 ```{python}
 secondpersonlist = ["you", "yourself", "your", "yourselves"]
@@ -171,7 +173,7 @@ secondpersonlist = ["you", "yourself", "your", "yourselves"]
 ## Third-person pronouns: prothirper_008
 
 - Definition from Biber: "she, he, they, her, him, them, his, their, himself, herself, themselves (plus contracted forms)" (1988: 225)
-- Example: 
+- Example from Reddit: People who want a cap in *their* ass that's who.
 - Our search strategy: Within the function analyze_pronoun we are counting everything that is in the list "thirdpersonlist". This list was defined beforehand and contains the same items as listed in Biber.
 ```{python}
 thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "himself","herself", "themselves"]
@@ -184,8 +186,8 @@ thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "h
 
 ## Pronoun 'it': proit_009
 
-- Definition from Biber: none given, presumably surface form "it" (1988: 225-226)
-- Example: 
+- Definition from Biber: not stated, presumably surface form "it" (1988: 225-226)
+- Example from Reddit: Not much of a comment, I know, but *it*'s hard to comment on a story that I don't find interesting. 
 - Our search strategy: Within the function analyze_pronoun we are counting everything with the surface form "it".
 ```{python}
     if word_tuple[0] == "it":
@@ -201,8 +203,8 @@ thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "h
   (b) that's 
   (c) T# + that 
   (that in this last context was edited by hand to distinguish among demonstrative pronouns, relative pronouns, complementizers, etc.)" (1988: 226)
-- Example: "this is ridiculous" (Biber 1988: 226)
-- Our search strategy: We first distinguish between ["this", "these", "those"] and the word "that", since "that" has more potential functions in the sentence. We then check whether the following item (with a potential intervening adjective) is a noun to sort out demonstrative determiners (see feature demonstr_051). All remaining items are counted as demonstrative pronouns. *This is a slight deviation from Biber's approach which we consider necessary since ...* We included this code chunk within the function analyze_pronoun and within analyze_determiner to make sure we catch all cases, irrespective of the POS-tag that was assigned. 
+- Example from Reddit: *That*'s not Samuel l Jackson? 
+- Our search strategy: We first distinguish between ["this", "these", "those"] and the word "that", since "that" has more potential functions in the sentence. We then check whether the following item (with a potential intervening adjective) is a noun to sort out demonstrative determiners (see feature demonstr_051). All remaining items are counted as demonstrative pronouns. **This is a slight deviation from Biber's approach which we consider necessary since ...** We included this code chunk within the function analyze_pronoun and within analyze_determiner to make sure we catch all cases, irrespective of the POS-tag that was assigned. 
 ```{python}
     if word_tuple[0] in ["this", "these", "those"]:
         if tagged_sentence[index+1][1].startswith("NN"):
@@ -230,7 +232,7 @@ thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "h
 ## Indefinitve pronouns: proindef_011
 
 - Definition from Biber: "anybody, anyone, anything, everybody, everyone, everything, nobody, none, nothing, nowhere, somebody, someone, something" (1988: 226)
-- Example: 
+- Example from Reddit: I agree, why would *anyone* outside a marketing department create a giant poster with such a bad pun. 
 - Our search strategy: We count everything that is in the list "indefpronounlist", which was defined above. The list contains the same items as given by Biber. We included this code within the analyze_noun function and the analyze_pronoun function, because the tagger seemed to be slightly inconsistent in its assignment.
 ```{python}
 indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "everything", "nobody", "none", "nothing", "nowhere", "somebody", "someone", "something"]
@@ -246,10 +248,19 @@ indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "e
 - Definition from Biber: "DO when NOT in the following constructions: 
   DO + (ADV) + V      (DO as auxiliary) 
   ALL-P/TS/WHP + DO   (DO as question)" (1988: 226)
-- Example: 
-- Our search strategy: 
+- Example from Reddit: But when you *do*, he will definitely score for you. 
+- Our search strategy: Within the function analyze_verb we are first checking for forms of 'do'. Then we are only counting instances that are in sentence-final position, or that are followed by ["too", "this", "that", "it", "so"] in sentence-final position. **We therefore deviate from Biber's strategy because ...**
 ```{python}
+dolist = ["do", "does", "doing", "did", "done"]
 
+    if word_tuple[0] in dolist:
+        if tagged_sentence[index+1][1] == "X" or tagged_sentence[index+1][0] in ALLP:
+            features_dict["pverbdo_012"] += 1
+        elif tagged_sentence[index+1][0] in ["too", "this", "that", "it", "so"]:
+            if tagged_sentence[index+2][1] == "X" or tagged_sentence[index+2][0] in ALLP:
+                features_dict["pverbdo_012"] += 1
+            else:
+                pass
 ```
 
 - Accuracy:
@@ -257,10 +268,27 @@ indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "e
 ## WH-questions: whquest_013
 
 - Definition from Biber: "CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)" (1988: 227)
-- Example: 
-- Our search strategy: 
+- Example from Reddit: *WHAT* THE FUCK BARRY 
+- Our search strategy: *Within the function analyze_wh_word we are ... We decided to ...*
 ```{python}
-
+        if word_tuple[1] == "WRB":
+            #AB: we initially checked for surface membership in WHO, following Biber (line below). I explain why that's problematic
+            #AB: 13. direct WH-questions CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)
+            #AB: The comment above is Biber's definition. It leaves a couple of issues, mainly that "who" as interrogative particle is excluded.
+            #AB: We can instead use the tag "WRB" which consistently identifies interrogative particles, including "who" if and only if it is an interrogative particle.
+            #AB: We also want to look not only for sentence-initial uses, but for anything following clause-level punctuation. The "SYM" tag should be appropriate.
+            if tagged_sentence[index-1][1] in ["X", "SYM"]:  
+                if tagged_sentence[index+1][1] == "MD":
+                    features_dict["whquest_013"] += 1
+            elif tagged_sentence[index+1][1].startswith("V"):
+                if tagged_sentence[index+1][0] in belist or tagged_sentence[index+1][0] in havelist or tagged_sentence[index+1][0] in dolist:
+                    features_dict["whquest_013"] += 1
+                elif word_tuple[0] == "who":
+                    features_dict["whquest_013"] += 1
+                elif tagged_sentence[index+1] == "the" and tagged_sentence[index+2] in ["hell", "fuck"]:
+                    features_dict["whquest_013"] += 1
+                elif word_tuple[0] == "what" and tagged_sentence[index+1][0] == "about":
+                    features_dict["whquest_013"] += 1
 ```
 
 - Accuracy:
@@ -268,10 +296,11 @@ indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "e
 ## Nominalisations: nominalis_014
 
 - Definition from Biber: "All words ending in -tion#, -ment#, -ness#, or -ity# (plus plural forms)" (1988: 227)
-- Example: 
-- Our search strategy: 
+- Example from Reddit: Denial that racism exists and how most people discuss it on a public forum could also be considered a mental *illness*.
+- Our search strategy: Within the function analyze_noun we are checking for items that end in certain suffixes (same list as given in Biber).
 ```{python}
-
+    elif word_tuple[0].endswith("tions") or word_tuple[0].endswith("tion") or word_tuple[0].endswith("ments") or word_tuple[0].endswith("ment") or word_tuple[0].endswith("ness") or word_tuple[0].endswith("ity") or word_tuple[0].endswith("nesses") or word_tuple[0].endswith("ities"):
+        features_dict["nominalis_014"] += 1
 ```
 
 - Accuracy:
@@ -279,10 +308,14 @@ indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "e
 ## Gerunds: gerund_015
 
 - Definition from Biber: "All participle forms serving nominal functions - these are edited by hand." (1988: 227)
-- Example: 
-- Our search strategy: 
+- Example from Reddit: Does anyone seriously believe that *closing* the source of the OS will reduce piracy? 
+- Our search strategy: Within the function analyze_noun we are looking for items ending in <-ing>. These items are then checked against a list of words that we know not to be gerunds. We are therefore deviating from Biber's procedure since a manual analysis was not feasible.
 ```{python}
+notgerundlist = ["nothing", "everything", "something", "anything", "thing", "things", "ring", "sting", "ting", "viking", "wing", "zing"]
 
+    if word_tuple[0].endswith("ing"):
+        if word_tuple[0] not in notgerundlist:
+            features_dict["gerund_015"] += 1
 ```
 
 - Accuracy:
@@ -290,8 +323,20 @@ indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "e
 ## Nouns: nouns_016
 
 - Definition from Biber: "All nouns included in the dictionary, excluding those forms counted as nominalizations or gerunds." (1988: 228)
-- Example: 
-- Our search strategy: 
+- Example from Reddit: Good *lesson*.
+- Our search strategy: Within the function analyze_nouns we are counting all items that were not previously identified as gerunds or nominalisations or indefinite pronouns. These are the same criteria as in Biber, except for the indefinite pronouns (which he does not mention).
+```{python}
+    if word_tuple[0] in indefpronounlist:
+        features_dict["proindef_011"] += 1
+    if word_tuple[0].endswith("ing"): # or word_tuple[0].endswith("ings"): # removing plural form since gerund nouns only accept sing
+        if word_tuple[0] not in notgerundlist:
+            features_dict["gerund_015"] += 1
+    elif word_tuple[0].endswith("tions") or word_tuple[0].endswith("tion") or word_tuple[0].endswith("ments") or word_tuple[0].endswith("ment") or word_tuple[0].endswith("ness") or word_tuple[0].endswith("ity") or word_tuple[0].endswith("nesses") or word_tuple[0].endswith("ities"):
+        features_dict["nominalis_014"] += 1
+    else: 
+        features_dict["nouns_016"] += 1
+```
+
 - Accuracy:
 
 ## Agentless passives: passagentl_017
@@ -299,8 +344,68 @@ indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "e
 - Definition from Biber: 
   "(a) BE + (ADV) + (ADV) + VBN 
   (b) BE + N/PRO + VBN  (question form)" (1988: 228)
-- Example: 
-- Our search strategy: 
+- Example from Reddit: Your submission *has been* automatically *removed* because you haven't registered with our steam bot to receive flair.
+- Our search strategy: Our search strategy here might look rather complex. We are within the function analyze_verb. We first ...
+```{python}
+    elif word_tuple[0] in belist and (index == 3 or (index == 4 and tagged_sentence[index-1][1] == "WRB")): # Questions with BE; the index positions take the three ("x", "x") tuples at the beginning of a sentence into account
+         add_index = 0
+         while add_index < 5 and (index + add_index) < (len(tagged_sentence)-1):
+             add_index+=1
+             if tagged_sentence[index+add_index][1] == "VBN":
+                 if tagged_sentence[index+add_index+1][0] == "by":
+                     features_dict["passby_018"] += 1
+                 else:
+                     features_dict["passagentl_017"] += 1    
+                     
+    elif word_tuple[0] in belist:
+        if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
+            features_dict["mainvbe_019"] += 1
+        ## allow for one intervening adverb for mainvbe_019
+        elif tagged_sentence[index+1][1] == "RB" and tagged_sentence[index+2][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
+            features_dict["mainvbe_019"] += 1
+            
+        else:
+            move_on = True
+            insert_adv = False
+            x = index
+            while move_on == True:
+                x += 1
+                if tagged_sentence[x][1] == "VBN":
+                    move_on = False
+                    if tagged_sentence[x+1][0] == "by":
+                        features_dict["passby_018"] += 1
+                        if insert_adv:
+                            features_dict["vsplitaux_063"] += 1
+                    elif tagged_sentence[x+1][1] == "IN": # Here, provision is made for by-passive with intervening PPs: "was shot in the head by an unidentified suspect"
+                        x += 1
+                        move_on2 = True
+                        while move_on2:
+                            x += 1
+                            if tagged_sentence[x+1][1].startswith("N") or tagged_sentence[x+1][1].startswith("DT"): # One might include adjectives here as well, but prob at the cost of precision.
+                                pass
+                            elif tagged_sentence[x+1][0] == "by":
+                                features_dict["passby_018"] += 1
+                                if insert_adv:
+                                    features_dict["vsplitaux_063"] += 1
+                                move_on2 = False
+                            else:
+                                features_dict["passagentl_017"] += 1
+                                if insert_adv:
+                                    features_dict["vsplitaux_063"] += 1
+                                move_on2 = False
+                    else:
+                        features_dict["passagentl_017"] += 1
+                        if insert_adv:
+                            features_dict["vsplitaux_063"] += 1  
+                elif tagged_sentence[x][1].startswith("RB"):
+                    if tagged_sentence[x][0] not in ["n't", "not"]:
+                        insert_adv = True
+                    else:
+                        pass
+                else:
+                    move_on = False
+```
+
 - Accuracy:
 
 ## By-passives: passby_018
@@ -308,15 +413,92 @@ indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "e
 - Definition from Biber: 
   "(a) BE + (ADV) + (ADV) + VBN + by 
   (b) BE + N/PRO + VBN + by (question form)" (1988: 228)
-- Example: 
+- Example from Reddit: [...] the joke that the latest Bin Laden "message" *has been manufactured* by Mediaset in Milan [...] 
 - Our search strategy: 
+```{python}
+    elif word_tuple[0] in belist and (index == 3 or (index == 4 and tagged_sentence[index-1][1] == "WRB")): # Questions with BE; the index positions take the three ("x", "x") tuples at the beginning of a sentence into account
+         add_index = 0
+         while add_index < 5 and (index + add_index) < (len(tagged_sentence)-1):
+             add_index+=1
+             if tagged_sentence[index+add_index][1] == "VBN":
+                 if tagged_sentence[index+add_index+1][0] == "by":
+                     features_dict["passby_018"] += 1
+                 else:
+                     features_dict["passagentl_017"] += 1    
+    elif word_tuple[0] in belist:
+        if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
+            features_dict["mainvbe_019"] += 1
+        ## allow for one intervening adverb for mainvbe_019
+        elif tagged_sentence[index+1][1] == "RB" and tagged_sentence[index+2][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
+            features_dict["mainvbe_019"] += 1
+            
+        else:
+            move_on = True
+            insert_adv = False
+            x = index
+            while move_on == True:
+                x += 1
+                if tagged_sentence[x][1] == "VBN":
+                    move_on = False
+                    if tagged_sentence[x+1][0] == "by":
+                        features_dict["passby_018"] += 1
+                        if insert_adv:
+                            features_dict["vsplitaux_063"] += 1
+                    elif tagged_sentence[x+1][1] == "IN": # Here, provision is made for by-passive with intervening PPs: "was shot in the head by an unidentified suspect"
+                        x += 1
+                        move_on2 = True
+                        while move_on2:
+                            x += 1
+                            if tagged_sentence[x+1][1].startswith("N") or tagged_sentence[x+1][1].startswith("DT"): # One might include adjectives here as well, but prob at the cost of precision.
+                                pass
+                            elif tagged_sentence[x+1][0] == "by":
+                                features_dict["passby_018"] += 1
+                                if insert_adv:
+                                    features_dict["vsplitaux_063"] += 1
+                                move_on2 = False
+                            else:
+                                features_dict["passagentl_017"] += 1
+                                if insert_adv:
+                                    features_dict["vsplitaux_063"] += 1
+                                move_on2 = False
+                    else:
+                        features_dict["passagentl_017"] += 1
+                        if insert_adv:
+                            features_dict["vsplitaux_063"] += 1  
+                elif tagged_sentence[x][1].startswith("RB"):
+                    if tagged_sentence[x][0] not in ["n't", "not"]:
+                        insert_adv = True
+                    else:
+                        pass
+                else:
+                    move_on = False
+```
+
 - Accuracy:
 
 ## Main verb use of be: mainvbe_019
 
 - Definition from Biber: "BE + DET/POSSPRO/TITLE/PREP/ADJ" (1988: 229)
-- Example: 
+- Example from Reddit: Also, they*'re* fake. 
 - Our search strategy: 
+```{python}
+    elif word_tuple[0] in belist:
+        if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
+            features_dict["mainvbe_019"] += 1
+        ## allow for one intervening adverb for mainvbe_019
+        elif tagged_sentence[index+1][1] == "RB" and tagged_sentence[index+2][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
+            features_dict["mainvbe_019"] += 1
+
+    ## added this condition for mainvbe_019: in the structures represented below "'s" cannot be used as "has" and is almost certainly a shortening of "is"
+    ## 's is currently not included in the [belist] because of belonging to both HAVE and BE. 
+    if word_tuple[0] == "'s" or word_tuple[0] == "s":
+        if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
+            features_dict["mainvbe_019"] += 1
+        ## allow for one intervening adverb for mainvbe_019
+        elif tagged_sentence[index+1][1] == "RB" and tagged_sentence[index+2][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
+            features_dict["mainvbe_019"] += 1
+```
+
 - Accuracy:
 
 ## Exitential 'there': exthere_020
@@ -324,202 +506,843 @@ indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "e
 - Definition from Biber: 
   "(a) there + (xxx) + BE 
   (b) there's" (1988: 229)
-- Example: "there are several explanations" (Biber 1988: 229)
+- Example from Reddit: I just wished *there* was other UHQ pics from that photoshoot.. Closeups would be nice too! 
 - Our search strategy: 
+```{python}
+
+```
+
 - Accuracy:
 
 ## thatvcom_021
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: Movies and TV shows have shown *that* weapon movement is independent from head movement. 
+- Our search strategy: Within the function analyze_preposition...
+```{python}
+    #21 that verb complements (e.g., / said that he went)  
+    if tagged_sentence[index][0] == "that":
+    # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions)
+        if tagged_sentence[index-1][0] in ALLP or tagged_sentence[index-1][0] in ["and", "nor", "but", "or", "who"]:
+            if tagged_sentence[index+1][1] in ["DT", "PRP", "NNS", "NNP"] or tagged_sentence[index+1][0] in titlelist or tagged_sentence[index+1][0] == "there":
+                features_dict["thatvcom_021"] += 1
+    # (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/and)
+        elif (tagged_sentence[index-1][0] in suasivelist) or (tagged_sentence[index-1][0] in privatelist) or (tagged_sentence[index-1][0] in publiclist):
+            if not tagged_sentence[index+1][1].startswith("V"):
+                if tagged_sentence[index+1][0] not in [ALLP, "and"]:
+                    features_dict["thatvcom_021"] += 1
+        elif (tagged_sentence[index-1][0].startswith("seem")) or (tagged_sentence[index-1][0].startswith("appear")):
+            if not tagged_sentence[index+1][1].startswith("V"):
+                if tagged_sentence[index+1][0] not in [ALLP, "and"]:
+                    features_dict["thatvcom_021"] += 1            
+
+```
+
 - Accuracy:
 
 ## thatacom_022
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: I live in the country of reddit and I feel absolutely lucky *that* I see these exotic views everymorning.
+- Our search strategy: Within the function analyze_preposition ...
+```{python}
+    if tagged_sentence[index][0] == "that":
+    # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions)
+        if tagged_sentence[index-1][0] in ALLP or tagged_sentence[index-1][0] in ["and", "nor", "but", "or", "who"]:
+            if tagged_sentence[index+1][1] in ["DT", "PRP", "NNS", "NNP"] or tagged_sentence[index+1][0] in titlelist or tagged_sentence[index+1][0] == "there":
+                features_dict["thatvcom_021"] += 1
+    # (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/and)
+        elif (tagged_sentence[index-1][0] in suasivelist) or (tagged_sentence[index-1][0] in privatelist) or (tagged_sentence[index-1][0] in publiclist):
+            if not tagged_sentence[index+1][1].startswith("V"):
+                if tagged_sentence[index+1][0] not in [ALLP, "and"]:
+                    features_dict["thatvcom_021"] += 1
+        elif (tagged_sentence[index-1][0].startswith("seem")) or (tagged_sentence[index-1][0].startswith("appear")):
+            if not tagged_sentence[index+1][1].startswith("V"):
+                if tagged_sentence[index+1][0] not in [ALLP, "and"]:
+                    features_dict["thatvcom_021"] += 1            
+    # (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)
+    #     (This algorithm allows an intervening prepositional phrase between a verb and its complement.)  
+    ### HM: this is not implemented at the moment, since it seems very complicated and rather marginal. My guess is that we need to trash this whole feature anyway...              
+        if tagged_sentence[index-1][1].startswith("J"):
+            features_dict["thatacom_022"] += 1 
+```
+
 - Accuracy:
 
-## WH-clauses: whclause_023"
+## WH-clauses: whclause_023
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: *Mistake in the manual coding file?* 
+- Our search strategy: Within the function analyze_verb ... This procedure is repeated for private verbs and suasive verbs.
+```{python}
+    if word_tuple[0] in publiclist:
+        features_dict["vpublic_055"] += 1
+        if tagged_sentence[index + 1][0] in ["this", "these", "those", "I", "we", "he", "she", "they"]:
+            features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"):
+            if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
+                features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]:
+            if tagged_sentence[index + 2][1].startswith("NN"):
+                if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
+                    features_dict["thatdel_060"] += 1
+        if tagged_sentence[index + 1][0] in WHP or tagged_sentence[index + 1][0] in WHO:
+            if tagged_sentence[index + 2][1] != "MD":
+                features_dict["whclause_023"] += 1
+            else:
+                pass
+              
+    if word_tuple[0] in privatelist:
+        features_dict["vprivate_056"] += 1
+        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]: ## 60-1 pub/priv/sua + demonstrative pronoun/subjpro (I we he she they)
+            features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"): ## 60-2 pub/priv/sua + PRO/N + AUX/V
+            if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
+                features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]: ## 60-3 pub/priv/sua + adj/adv/det/posspro + (Adj) + N + AUX/V
+            if tagged_sentence[index + 2][1].startswith("NN"):
+                if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
+                    features_dict["thatdel_060"] += 1
+        if tagged_sentence[index + 1][0] in WHP or tagged_sentence[index + 1][0] in WHO:
+            if tagged_sentence[index + 2][1] != "MD":
+                features_dict["whclause_023"] += 1
+            else:
+                pass
+
+    if word_tuple[0] in suasivelist:
+        features_dict["vsuasive_057"] += 1
+        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]: ## 60-1 pub/priv/sua + demonstrative pronoun/subjpro (I we he she they)
+            features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"): ## 60-2 pub/priv/sua + PRO/N + AUX/V
+            if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
+                features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]: ## 60-3 pub/priv/sua + adj/adv/det/posspro + (Adj) + N + AUX/V
+            if tagged_sentence[index + 2][1].startswith("NN"):
+                if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
+                    features_dict["thatdel_060"] += 1
+        if tagged_sentence[index + 1][0] in WHP or tagged_sentence[index + 1][0] in WHO:
+            if tagged_sentence[index + 2][1] != "MD":
+                features_dict["whclause_023"] += 1
+            else:
+                pass
+            
+```
+
 - Accuracy:
 
 ## Verbs in the infinitive: vinfinitive_024
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: 
+- Our search strategy: Within the function analyze_verb
+```{python}
+    word_tuple = tagged_sentence[index]
+    if word_tuple[1] == "VBD":
+        features_dict["vpast_001"] += 1
+    elif word_tuple[1] == "VB":
+        if tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] == ",": 
+            features_dict["vimperative_205"] += 1
+        else: 
+            features_dict["vinfinitive_024"] += 1
+            if tagged_sentence[index-2][0] == "to":
+                if tagged_sentence[index-1][1] == "RB" and not tagged_sentence[index-1][0] in ["n't", "not"]:
+                    features_dict["vsplitinf_062"] += 1
+                else:
+                    pass
+```
+
 - Accuracy:
 
 ## Present participial clauses: vpresentpart_025
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: With new worlds icons and skins *coming* out this is a great way to get them for free.
+- Our search strategy: Within the function analyze_verb we are first checking for items with the tag "VBG" (standing for "Verb, gerund or present participle"). If this item occurs in sentence-initial position and is followed by a word tagged as ["IN", "DT", "RB", "WP","PRP", "WRB"] then it is counted towards this feature. Also if there is ["while", "without", "when", "although","with"] at the start of the sentence followed by the verb itself. *Comparison to Biber*
+```{python}
+    elif word_tuple[1] == "VBG":
+        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
+            if tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]:
+                features_dict["vpresentpart_025"] += 1
+        if (tagged_sentence[index-2][1] == "X" or tagged_sentence[index-2][0] in ALLP):
+            if tagged_sentence[index-1][0] in ["while", "without", "when", "although","with"]:
+                features_dict["vpresentpart_025"] += 1
+```
+
 - Accuracy:
 
 ## Past participial clauses: vpastpart_026
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: *none in our sample data*
+- Our search strategy: Within the function analyze_verb we are first looking for items with the tag "VBN" (Verb, past participle). The word is counted towards this feature if it is sentence-initial position and the following item is tagged as ["IN", "RB", "TO"]. *Compared to Biber ...*
+```{python}
+    elif word_tuple[1] == "VBN":
+        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
+            if tagged_sentence[index+1][1] in ["IN", "RB", "TO"]: # Biber (1988:233) notes for both that "these forms were edited by hand."
+                features_dict["vpastpart_026"] += 1 ## this one seems accurate enough to me (HM)
+        elif tagged_sentence[index-1][1].startswith("NN") or tagged_sentence[index-1][0] in QUANPRO:
+            if tagged_sentence[index+1][1] in ["IN", "RBR", "RB", "RBS"] or tagged_sentence[index+1][0] in belist:
+                features_dict["vpastwhiz_027"] += 1 
+```
+
 - Accuracy:
 
 ## vpastwhiz_027
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: Herbal Phentermine is an exclusive formulation of research-supported botanical ingredients, *designed* to support a healthy diet.
+- Our search strategy: Within the function analyze_verb we are first looking for items tagged as "VBN" (Verb, past participle). After sorting out instances beloning the feature vpastpart_026 we check for the following criteria: Is the preceding item tagged as a nouns (all nominal tags start with "NN") or is it within the list QUANPRO? If yes: is the following item tagged as ["IN", "RBR", "RB", "RBS"] or a form of 'be'? *Compared to Biber ...*
+```{python}
+    elif word_tuple[1] == "VBN":
+        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
+            if tagged_sentence[index+1][1] in ["IN", "RB", "TO"]: # Biber (1988:233) notes for both that "these forms were edited by hand."
+                features_dict["vpastpart_026"] += 1 ## this one seems accurate enough to me (HM)
+        elif tagged_sentence[index-1][1].startswith("NN") or tagged_sentence[index-1][0] in QUANPRO:
+            if tagged_sentence[index+1][1] in ["IN", "RBR", "RB", "RBS"] or tagged_sentence[index+1][0] in belist:
+                features_dict["vpastwhiz_027"] += 1 
+```
+
 - Accuracy:
 
 ## vpresentwhiz_028
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: I don't know... as a mom -- it just looks like a mess *waiting* to happen!!
+- Our search strategy: Within the function analyze_verb we are looking for items tagged as "VBG" (Verb, gerund or present participle). We are sorting out structures belonging to vpresentpart_025. If the preceding item is tagged as "NN" (Noun, singular or mass) or "NNS" (Noun, plural) then we are counting the hit towards the feature. *Compared to Biber we are ...*
+```{python}
+    elif word_tuple[1] == "VBG":
+        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
+            if tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]:
+                features_dict["vpresentpart_025"] += 1
+        if (tagged_sentence[index-2][1] == "X" or tagged_sentence[index-2][0] in ALLP):
+            if tagged_sentence[index-1][0] in ["while", "without", "when", "although","with"]:
+                features_dict["vpresentpart_025"] += 1
+        elif tagged_sentence[index-1][1] == "NN" or tagged_sentence[index-1][1] == "NNS": 
+            features_dict["vpresentwhiz_028"] += 1 
+        elif tagged_sentence[index-1][0] in belist:
+            features_dict["vprogressive_217"] += 1
+        elif (tagged_sentence[index-2][0] in belist) and (tagged_sentence[index-1][1] == "RB"):
+            features_dict["vprogressive_217"] += 1  
+            features_dict["vsplitaux_063"] += 1
+```
+
 - Accuracy:
 
 ## thatresub_029
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: I’m sure you could work a persona *that* didn’t have a pretty scowl… &gt;:-D
+- Our search strategy: Within the function analyze_wh_word we first check whether the preceding item has a nominal tag (all nominal tags start with "NN"). If yes we check whether the next item is a full verb or a modal verb. If these conditions are fulfilled the structure is counted towards the feature. We are also allowing for one intervening adverb (RB). *Biber, in contrast, ...*
+```{python}
+    #29. that relative clauses on subject position (e.g., the dog that bit me) N -p (T#) + that + (ADV) + AUX/V {that relatives across intonation boundaries are identified by hand.)
+    #30. that relative clauses on object position (e.g., the dog that I saw) N + (T#) + that + DET / SUBJPRO / POSSPRO / it / ADJ / plural noun/ proper noun / possessive noun / TITLE
+    if tagged_sentence[index-1][1].startswith("NN"):
+        if tagged_sentence[index+1][1].startswith("RB"):
+            if (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
+                features_dict["thatresub_029"] += 1 
+        elif tagged_sentence[index+1][1].startswith("VB") or tagged_sentence[index+1][1].startswith("MD"):
+            features_dict["thatresub_029"] += 1
+```
+
 - Accuracy:
 
 ## thatreobj_030
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: Can someone remind me what happened to the whole dad quest *that* Oliver was supposed to be on?
+- Our search strategy:
+```{python}
+
+```
+
 - Accuracy:
 
 ## whresub_031
 
 - Definition from Biber: "" (1988: )
-- Example: 
+- Example from Reddit: You really want help go to an al-anon meeting, support for codependent fools *who* put up with our shit.
 - Our search strategy: 
+```{python}
+
+```
+
 - Accuracy:
 
 ## whreobj_032
 
 - Definition from Biber: "" (1988: )
-- Example: 
+- Example from Reddit: You didn't give any evidence and then proceeded to change your argument to something *which* I actually agree with.
 - Our search strategy: 
+```{python}
+
+```
+
 - Accuracy:
 
 ## whrepied_033
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: *none in our sample*
+- Our search strategy:
+```{python}
+
+```
+
 - Accuracy:
 
 ## sentencere_034
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: *Which* is why we will be sending our military forces their way.
+- Our search strategy:
+```{python}
+
+```
+
 - Accuracy:
 
 ## advsubcause_035
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: *Because* the Canucks gave the Flames the best offer.
+- Our search strategy:
+```{python}
+
+```
+
 - Accuracy:
 
 ## advsubconc_036
 
 - Definition from Biber: "" (1988: )
-- Example: 
+- Example from Reddit: The parka copes fine with the rain, *although* I haven't been caught in any thunderstorms yet!
 - Our search strategy: 
+```{python}
+
+```
+
 - Accuracy:
 
 ## advsubcond_037
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: *If* Redskins get Williams...where is he playing?
+- Our search strategy:
+```{python}
+
+```
+
 - Accuracy:
 
 ## Other adverbial subordinators: advsubother_038
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: Just as long as you have a good time and enjoy your week here, you can't let anyone down!
+- Our search strategy:
+```{python}
+
+```
+
 - Accuracy:
 
 ## Prepositions: prepositions_039
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: Next thing you know, Google's going to solve slavery in the South.
+- Our search strategy:
+```{python}
+
+```
+
 - Accuracy:
 
 ## Attributive adjectives: adjattr_040
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search strategy: 
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
 - Accuracy:
 
 ## Predicative adjectives: adjpred_041
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Adverbs: adverbs_042
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Word length: wordlength_044
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Conjuncts: conjuncts_045
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Downtoners: downtoners_046
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Hedges: hedges_047
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Amplifiers and emphatics: amplifiers_048
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Discourse particles: discpart_050
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Demonstratives: demonstr_051
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Possibility modals: modalsposs_052
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Necessity modals: modalsness_053
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Predictive modals: modalspred_054
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Public verbs: vpublic_055
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Private verbs: vprivate_056
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Suasive verbs: vsuasive_057
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Seem and appear: vseemappear_058
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Contractions: contractions_059
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## That-deletion: thatdel_060
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Stranded prepositions: strandprep_061
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Split infinitives: vsplitinf_062
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Split auxiliaries: vsplitaux_063
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Phrasal coordination: coordphras_064
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Non-phrasal coordination: coordnonp_065
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Synthetic negation: negsyn_066
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Analytic negation: negana_067
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Hashtags: hashtag_201
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Reddit-external links: link_202
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Reddit-internal links: interlink_203
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Words in all caps: caps_204
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Verbs in the imperative: vimperative_205
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Strategic lengthening within words: lengthening_206
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Emoticons: emoticons_207
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Qeustion sentences: question_208
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Exclamation sentences: exclamation_209
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Sentence length in characters: lenchar_210
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Sentence length in words: lenword_211
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Synthetic comparatives: comparatives_syn_212
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Synthetic superlatives: superlatives_syn_213
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Analytic comparatives: comparatives_ana_214
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Analytic superlatives: superlatives_ana_215
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Community-specific abbreviations or words: reddit_vocab_216
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## verbs in the progressive aspect: vprogressive_217
+
+- Definition from Biber: "" (1988: )
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
 ## Emojis: emojis_218
 
 - Definition from Biber: "" (1988: )
-- Example: 
-- Our search stragey: 
+- Example from Reddit: 
+- Our search strategy:
+```{python}
+
+```
+
 - Accuracy:
 
 
 
-References:
+# References:
 Biber, Douglas. 1988. Variation across speech and writing. Cambridge: Cambridge University Press.
 Clarke, Isobelle & Jack Grieve. 2017. Dimensions of Abusive Language on Twitter. In Proceedings of the First Workshop on Abusive Language Online, 1–10. Vancouver.
 
