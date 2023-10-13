@@ -516,7 +516,11 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## thatvcom_021
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: 
+  "(a) and/nor/but/or/also/ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are that-clauses in clause-initial positions) 
+  (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/T#/and) (that-clauses as complements to verbs which are not included in the above verb classes are not counted - see Quirk et al. 1985:1179ff.) 
+  (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N) (This algorithm allows an intervening prepositional phrase between a verb and its complement.) 
+  (d) T# + that (This algorithm applies only to spoken texts. Forms in this context are checked by hand, to distinguish among that complements, relatives, demonstrative pronouns and subordinators.)" (1988: 230)
 - Example from Reddit: Movies and TV shows have shown *that* weapon movement is independent from head movement. 
 - Our search strategy: Within the function analyze_preposition...
 ```{python}
@@ -542,7 +546,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## thatacom_022
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: "ADJ + (T#) + that (complements across intonation boundaries were edited by hand)" (1988: 231)
 - Example from Reddit: I live in the country of reddit and I feel absolutely lucky *that* I see these exotic views everymorning.
 - Our search strategy: Within the function analyze_preposition ...
 ```{python}
@@ -571,7 +575,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## WH-clauses: whclause_023
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: "PUB/PRV/SUA + WHP/WHO + xxx (where xxx is NOT = AUX - this excludes WH questions)" (1988: 231)
 - Example from Reddit: *Mistake in the manual coding file?* 
 - Our search strategy: Within the function analyze_verb ... This procedure is repeated for private verbs and suasive verbs.
 ```{python}
@@ -632,7 +636,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Verbs in the infinitive: vinfinitive_024
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: "to + (ADV) + VB" (1988: 232)
 - Example from Reddit: 
 - Our search strategy: Within the function analyze_verb
 ```{python}
@@ -655,7 +659,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Present participial clauses: vpresentpart_025
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: "T#/ALL-P + VBG + PREP/DET/WHP/WHO/PRO/ADV (these forms were edited by hand)" (1988: 233)
 - Example from Reddit: With new worlds icons and skins *coming* out this is a great way to get them for free.
 - Our search strategy: Within the function analyze_verb we are first checking for items with the tag "VBG" (standing for "Verb, gerund or present participle"). If this item occurs in sentence-initial position and is followed by a word tagged as ["IN", "DT", "RB", "WP","PRP", "WRB"] then it is counted towards this feature. Also if there is ["while", "without", "when", "although","with"] at the start of the sentence followed by the verb itself. *Comparison to Biber*
 ```{python}
@@ -672,7 +676,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Past participial clauses: vpastpart_026
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: "T#/ALL-P + VBN + PREP/ADV (these forms were edited by hand)" (1988: 233)
 - Example from Reddit: *none in our sample data*
 - Our search strategy: Within the function analyze_verb we are first looking for items with the tag "VBN" (Verb, past participle). The word is counted towards this feature if it is sentence-initial position and the following item is tagged as ["IN", "RB", "TO"]. *Compared to Biber ...*
 ```{python}
@@ -689,7 +693,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## vpastwhiz_027
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: "N/QUANPRO + VBN + PREP/BE/ADV (these forms were edited by hand)" (1988: 233)
 - Example from Reddit: Herbal Phentermine is an exclusive formulation of research-supported botanical ingredients, *designed* to support a healthy diet.
 - Our search strategy: Within the function analyze_verb we are first looking for items tagged as "VBN" (Verb, past participle). After sorting out instances beloning the feature vpastpart_026 we check for the following criteria: Is the preceding item tagged as a nouns (all nominal tags start with "NN") or is it within the list QUANPRO? If yes: is the following item tagged as ["IN", "RBR", "RB", "RBS"] or a form of 'be'? *Compared to Biber ...*
 ```{python}
@@ -706,7 +710,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## vpresentwhiz_028
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: "N + VBG (these forms were edited by hand)" (1988: 233)
 - Example from Reddit: I don't know... as a mom -- it just looks like a mess *waiting* to happen!!
 - Our search strategy: Within the function analyze_verb we are looking for items tagged as "VBG" (Verb, gerund or present participle). We are sorting out structures belonging to vpresentpart_025. If the preceding item is tagged as "NN" (Noun, singular or mass) or "NNS" (Noun, plural) then we are counting the hit towards the feature. *Compared to Biber we are ...*
 ```{python}
@@ -730,7 +734,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## thatresub_029
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: "N + (T#) + that + (ADV) + AUX/V (that relatives across intonation boundaries are identified by hand.)" (1988: 234)
 - Example from Reddit: I’m sure you could work a persona *that* didn’t have a pretty scowl… &gt;:-D
 - Our search strategy: Within the function analyze_wh_word we first check whether the preceding item has a nominal tag (all nominal tags start with "NN"). If yes we check whether the next item is a full verb or a modal verb. If these conditions are fulfilled the structure is counted towards the feature. We are also allowing for one intervening adverb (RB). *Biber, in contrast, ...*
 ```{python}
@@ -748,7 +752,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## thatreobj_030
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: "N + (T#) + that + DET/SUBJPRO/POSSPRO/it/ADJ/plural noun/proper noun/possessive noun/TITLE (This algorithm does not distinguish between that complements to nouns and true relative clauses.)" (1988: 234)
 - Example from Reddit: Can someone remind me what happened to the whole dad quest *that* Oliver was supposed to be on?
 - Our search strategy:
 ```{python}
@@ -759,7 +763,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## whresub_031
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: "xxx + yyy + N + WHP + (ADV) + AUX/V (where xxx is NOT any form of the verbs ASK or TELL; to exclude indirect WH questions like Tom asked the man who went to the store)" (1988: 235)
 - Example from Reddit: You really want help go to an al-anon meeting, support for codependent fools *who* put up with our shit.
 - Our search strategy: 
 ```{python}
@@ -770,7 +774,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## whreobj_032
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: "xxx + yyy + N + WHP + zzz (where xxx is NOT any form of the verbs ASK or TELL, to exclude indirect WH questions, and zzz is not ADV, AUX or V, to exclude relativization on subject position)" (1988: 235)
 - Example from Reddit: You didn't give any evidence and then proceeded to change your argument to something *which* I actually agree with.
 - Our search strategy: 
 ```{python}
@@ -779,10 +783,10 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Accuracy:
 
-## whrepied_033
+## Pied-piping relative clauses: whrepied_033
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: *none in our sample*
+- Definition from Biber: "PREP + WHP" (1988: 235)
+- Example from Reddit: Example from Biber: "the manner *in which* he was told" (Biber 1988: 235)
 - Our search strategy:
 ```{python}
 
@@ -792,7 +796,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## sentencere_034
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: "T#/, + which (These forms are edited by hand to exclude non-restrictive relative clauses.)" (1988: 235)
 - Example from Reddit: *Which* is why we will be sending our military forces their way.
 - Our search strategy:
 ```{python}
@@ -803,7 +807,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## advsubcause_035
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: not stated, presumably surface form "because" (1988: 236)
 - Example from Reddit: *Because* the Canucks gave the Flames the best offer.
 - Our search strategy:
 ```{python}
@@ -814,7 +818,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## advsubconc_036
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: not stated, presumably surface forms "although" or "though" (1988: 236)
 - Example from Reddit: The parka copes fine with the rain, *although* I haven't been caught in any thunderstorms yet!
 - Our search strategy: 
 ```{python}
@@ -825,7 +829,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## advsubcond_037
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: not stated, presumably surface forms "if" or "unless" (1988: 236)
 - Example from Reddit: *If* Redskins get Williams...where is he playing?
 - Our search strategy:
 ```{python}
@@ -836,8 +840,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Other adverbial subordinators: advsubother_038
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: Just as long as you have a good time and enjoy your week here, you can't let anyone down!
+- Definition from Biber: "since, while, whilst, whereupon, whereas, whereby, such that, so that xxx, such that xxx, inasmuch as, forasmuch as, insofar as, insomuch as, as long as, as soon as (where xxx is NOT: N/ADJ)" (1988: 236)
+- Example from Reddit: Just *as long as* you have a good time and enjoy your week here, you can't let anyone down!
 - Our search strategy:
 ```{python}
 
@@ -847,8 +851,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Prepositions: prepositions_039
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: Next thing you know, Google's going to solve slavery in the South.
+- Definition from Biber: "against, amid, amidst, among, amongst, at, besides, between, by, despite, during, except, for, from, in, into, minus, notwithstanding, of, off, on, onto, opposite, out, per, plus, pro, re, than, through, throughout, thru, to, toward, towards, upon, versus, via, with, within, without" (1988: 236-237)
+- Example from Reddit: 
 - Our search strategy:
 ```{python}
 
@@ -858,7 +862,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Attributive adjectives: adjattr_040
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: "ADJ + ADJ/N (+ any ADJ not identified as predicative - no. 41)" (1988: 238)
 - Example from Reddit: 
 - Our search strategy:
 ```{python}
@@ -869,7 +873,9 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Predicative adjectives: adjpred_041
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: 
+  "(a) BE + ADJ + xxx (where xxx is NOT ADJ, ADV, or N) 
+  (b) BE + ADJ + ADV + xxx (where xxx is NOT ADJ or N)" (1988: 238)
 - Example from Reddit: 
 - Our search strategy:
 ```{python}
@@ -880,8 +886,18 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Adverbs: adverbs_042
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: "Any adverb form occurring in the dictionary, or any form that is longer than five letters and ends in -ly. The count for total adverbs excludes those adverbs counted as instances of hedges, amplifiers, downtoners, amplifiers, place adverbials, and time adverbials." (1988: 238)
+- Example from Reddit: Let it *never* be said that I am an impatient man.
+- Our search strategy:
+```{python}
+
+```
+
+- Accuracy:
+
+## Type-token ratio: ttratio_043
+
+- Definition from Biber: "This feature is computed by counting the number of different lexical items that occur in the first 400 words of each text, and then dividing by four; texts shorter than 400 words are not included in the present analysis." (1988: 238-239)
 - Our search strategy:
 ```{python}
 
@@ -891,8 +907,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Word length: wordlength_044
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: "mean length of the words in a text, in orthographic letters" (1988: 239)
 - Our search strategy:
 ```{python}
 
@@ -902,8 +917,16 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Conjuncts: conjuncts_045
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: 
+  "alternatively, altogether, consequently, conversely, eg, e.g., else, further- more, hence, however, i.e., instead, likewise, moreover, namely, neverthe- less, nonetheless, notwithstanding, otherwise, rather, similarly, therefore, thus, viz. 
+  in + comparison/contrast /particular /addition /conclusion /consequence /sum /summary/ any event/ any case/ other words 
+  for + example /instance 
+  by + contrast / comparison 
+  as a + result/consequence 
+  on the + contrary/other hand 
+  ALL-P/T# + that is/else / altogether+ T#, 
+  ALL-P/T# + rather + T#/,/xxx (where xxx is NOT: ADJ/ADV)" (1988: 239)
+- Example from Reddit: *However*, I would be happy if the race for President was between those two.
 - Our search strategy:
 ```{python}
 
@@ -913,8 +936,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Downtoners: downtoners_046
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: "almost, barely, hardly, merely, mildly, nearly, only, partially, partly, practically, scarcely, slightly, somewhat" (1988: 240)
+- Example from Reddit: Cheap individual health insurance fills that need nicely; it's *hardly* worthless.
 - Our search strategy:
 ```{python}
 
@@ -924,8 +947,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Hedges: hedges_047
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: "at about /something like/more or less /almost/ maybe/xxx sort of/xxx kind of (where xxx is NOT: DET/ADJ/POSSPRO/WHO - excludes sort and kind as true nouns)" (1988: 240)
+- Example from Reddit: *Maybe* they're the "one in a million"?
 - Our search strategy:
 ```{python}
 
@@ -935,8 +958,9 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Amplifiers and emphatics: amplifiers_048
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber for amplifiers: "absolutely, altogether, completely, enormously, entirely, extremely, fully, greatly, highly, intensely, perfectly, strongly, thoroughly, totally, utterly, very" (1988: 240)
+- Definition from Biber for emphatics: "for sure/a lot/such a/real + ADJ /so + ADJ /DO + V / just/really /most /more" (1988: 241)
+- Example from Reddit: *Extremely* so.
 - Our search strategy:
 ```{python}
 
@@ -946,8 +970,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Discourse particles: discpart_050
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: "CL-P/T# + well/now/anyway/anyhow/anyways" (1988: 241)
+- Example from Reddit: *Well*, not everyone is insecure about it.
 - Our search strategy:
 ```{python}
 
@@ -957,8 +981,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Demonstratives: demonstr_051
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: "that/this/these/those (This count excludes demonstrative pronouns (no. 10) and that as relative, complementizer, or subordinator.)" (1988: 241)
+- Example from Reddit: *This* article is being considered for deletion ...
 - Our search strategy:
 ```{python}
 
@@ -968,8 +992,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Possibility modals: modalsposs_052
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: "can/may/might/could (+ contractions)" (1988: 241)
+- Example from Reddit: You *can* change these things for the Internet Explorer COM component too.
 - Our search strategy:
 ```{python}
 
@@ -979,8 +1003,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Necessity modals: modalsness_053
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: "ought/should/must (+ contractions)" (1988: 242)
+- Example from Reddit: They *should* be shot dead with cheap bullets.
 - Our search strategy:
 ```{python}
 
@@ -990,8 +1014,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Predictive modals: modalspred_054
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: "will/would/shall ( + contractions)" (1988: 242)
+- Example from Reddit: He's also literally Space Jesus so I *would*n't worry about it.
 - Our search strategy:
 ```{python}
 
@@ -1001,8 +1025,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Public verbs: vpublic_055
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: "(e.g., acknowledge, admit, agree, assert, claim, complain, declare, deny, explain, hint, insist, mention, proclaim, promise, protest, remark, reply, report, say, suggest, swear, write)" (1988: 242)
+- Example from Reddit: It's worth pointing out that in America you can no longer *say* that everyone has a right to a fair trial.
 - Our search strategy:
 ```{python}
 
@@ -1012,8 +1036,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Private verbs: vprivate_056
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: "(e.g., anticipate, assume, believe, conclude, decide, demonstrate, determine, discover, doubt, estimate, fear, feel, find, forget, guess, hear, hope, imagine, imply, indicate, infer, know, learn, mean, notice, prove, realize, recognize, remember, reveal, see, show, suppose, think, understand)" (1988: 242)
+- Example from Reddit: Yeah, I do *remember* reading about it.
 - Our search strategy:
 ```{python}
 
@@ -1023,8 +1047,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Suasive verbs: vsuasive_057
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: "(e.g., agree, arrange, ask, beg, command, decide, demand, grant, insist, instruct, ordain, pledge, pronounce, propose, recommend, request, stipulate, suggest, urge)" (1988: 242)
+- Example from Reddit: His forehead makes me want to *ask* him if he needs help with a quest.
 - Our search strategy:
 ```{python}
 
@@ -1034,8 +1058,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Seem and appear: vseemappear_058
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: not stated, presumable surface forms "seem" and "appear" (1988: 242)
+- Example from Reddit: That *seems* like a weird place to draw the line, of course logic has no place in religion.
 - Our search strategy:
 ```{python}
 
@@ -1045,8 +1069,12 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Contractions: contractions_059
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: 
+  "(1) all contractions on pronouns
+  (2) all contractions on auxiliary forms (negation) 
+  (3) 's suffixed on nouns is analyzed separately (to exclude possessive forms):
+  N's + V/AUX/ADV+V/ADV+AUX/DET/POSSPRO/PREP/ADJ+CL-P/ADJ+T#" (1988: 243)
+- Example from Reddit: If the building were about to collapse, they would*n't* have a conference about it, they would leave the building.
 - Our search strategy:
 ```{python}
 
@@ -1054,10 +1082,13 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Accuracy:
 
-## That-deletion: thatdel_060
+## Subordinator-that deletion: thatdel_060
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: 
+  "(1) PUB/PRV/SUA + (T#) + demonstrative pro/SUBJPRO 
+  (2) PUB/PRV/SUA + PRO/N + AUX/V
+  (3) PUB/PRV/SUA + ADJ/ADV/DET/POSSPRO + (ADJ) + N + AUX/V" (1988: 244)
+- Example from Reddit: It seems quite freindly though I can *imagine it* would scare some younger kids.
 - Our search strategy:
 ```{python}
 
@@ -1067,8 +1098,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Stranded prepositions: strandprep_061
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: "PREP + ALL-P/T#" (1988: 244)
+- Example from Reddit: Gleeson, Issac, Serkis, and the old crew are the actors I have the most faith *in*.
 - Our search strategy:
 ```{python}
 
@@ -1078,8 +1109,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Split infinitives: vsplitinf_062
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: "to + ADV + (ADV) + VB" (1988: 244)
+- Example from Reddit: That's true, but it's much harder *to automatically detect*.
 - Our search strategy:
 ```{python}
 
@@ -1089,8 +1120,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Split auxiliaries: vsplitaux_063
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: "AUX + ADV + (ADV) + VB" (1988: 244)
+- Example from Reddit: A horse would notice stepping on someone and it *would probably move*.
 - Our search strategy:
 ```{python}
 
@@ -1100,7 +1131,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Phrasal coordination: coordphras_064
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: "xxxx1 + and + xxxx2 (where xxxl and xxx2 are both: ADV/ADJ/V/N)" (1988: 245)
 - Example from Reddit: 
 - Our search strategy:
 ```{python}
@@ -1111,7 +1142,10 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Non-phrasal coordination: coordnonp_065
 
-- Definition from Biber: "" (1988: )
+- Definition from Biber: 
+    "(a) T#/, + and + it/so/then/you/there+BE/demonstrative pronoun /SUBJPRO
+    (b) CL-P + and
+    (c) and + WHP/WHO/adverbial subordinator (nos. 35-8)/discourse particle (no. 50)/conjunct (no. 45)" (1988: 245)
 - Example from Reddit: 
 - Our search strategy:
 ```{python}
@@ -1122,8 +1156,10 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Synthetic negation: negsyn_066
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: 
+    "(a) no + QUANT/ADJ/N 
+    (b) neither, nor (excludes no as a response)" (1988: 245)
+- Example from Reddit: More accurate would be "Where there is *no* freedom, poverty persists".
 - Our search strategy:
 ```{python}
 
@@ -1133,8 +1169,8 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Analytic negation: negana_067
 
-- Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Definition from Biber: "not (also contracted forms)" (1988: 245)
+- Example from Reddit: I tried to spam Q every time it's up on him and ca*n't* even get oom'd.
 - Our search strategy:
 ```{python}
 
