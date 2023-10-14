@@ -637,7 +637,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Verbs in the infinitive: vinfinitive_024
 
 - Definition from Biber: "to + (ADV) + VB" (1988: 232)
-- Example from Reddit: 
+- Example from Reddit: oh crap, that's right, need *to update* my links.
 - Our search strategy: Within the function analyze_verb
 ```{python}
     word_tuple = tagged_sentence[index]
@@ -852,7 +852,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Prepositions: prepositions_039
 
 - Definition from Biber: "against, amid, amidst, among, amongst, at, besides, between, by, despite, during, except, for, from, in, into, minus, notwithstanding, of, off, on, onto, opposite, out, per, plus, pro, re, than, through, throughout, thru, to, toward, towards, upon, versus, via, with, within, without" (1988: 236-237)
-- Example from Reddit: 
+- Example from Reddit: I clap *during* the Friends theme song.
 - Our search strategy:
 ```{python}
 
@@ -863,7 +863,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Attributive adjectives: adjattr_040
 
 - Definition from Biber: "ADJ + ADJ/N (+ any ADJ not identified as predicative - no. 41)" (1988: 238)
-- Example from Reddit: 
+- Example from Reddit: All the documentaries I've seen, like FRONTLINE, paint Trump in a very *different* light.
 - Our search strategy:
 ```{python}
 
@@ -876,7 +876,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 - Definition from Biber: 
   "(a) BE + ADJ + xxx (where xxx is NOT ADJ, ADV, or N) 
   (b) BE + ADJ + ADV + xxx (where xxx is NOT ADJ or N)" (1988: 238)
-- Example from Reddit: 
+- Example from Reddit: Updating the getmonero.org site would be *awesome*!
 - Our search strategy:
 ```{python}
 
@@ -1133,6 +1133,9 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "xxxx1 + and + xxxx2 (where xxxl and xxx2 are both: ADV/ADJ/V/N)" (1988: 245)
 - Example from Reddit: 
+    If the people have something, they can use these tactics *and* others to wage a campaign.
+    It might be dropping, *but* it wont drop to what Striker orange fsl's are.
+    Now if we're talking about lavo, ovo *or* lavo-ovo vegetarians, yes, there are such diets, [...]
 - Our search strategy:
 ```{python}
 
@@ -1181,7 +1184,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Hashtags: hashtag_201
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Example from Reddit: *#BEST* FUCKING POST EVER
 - Our search strategy:
 ```{python}
 
@@ -1192,7 +1195,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Reddit-external links: link_202
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Example from Reddit: *[What's Up](https://youtu.be/6NXnxTNIWkc)* by 4 Non Blondes
 - Our search strategy:
 ```{python}
 
@@ -1203,7 +1206,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Reddit-internal links: interlink_203
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Example from Reddit: *[Among other things](http://www.reddit.com/r/starcraft/comments/d792k/psy_gets_map_hacked/c0y3hdf)*
 - Our search strategy:
 ```{python}
 
@@ -1214,7 +1217,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Words in all caps: caps_204
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Example from Reddit: no, *YOU* make it, thats the point
 - Our search strategy:
 ```{python}
 
@@ -1225,7 +1228,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Verbs in the imperative: vimperative_205
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Example from Reddit: *Save* the cross!
 - Our search strategy:
 ```{python}
 
@@ -1236,7 +1239,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Strategic lengthening within words: lengthening_206
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Example from Reddit: "I've come here to chew some bubble gum and kick some ass......*aaand* I'm all out of bubble gum" 
 - Our search strategy:
 ```{python}
 
@@ -1247,7 +1250,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Emoticons: emoticons_207
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Example from Reddit: Call that a typo... *:P*
 - Our search strategy:
 ```{python}
 
@@ -1258,7 +1261,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Qeustion sentences: question_208
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Example from Reddit: What about people with very common names (could happen a lot with Chinese people)*?*
 - Our search strategy:
 ```{python}
 
@@ -1269,7 +1272,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Exclamation sentences: exclamation_209
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Example from Reddit: crazy*!*
 - Our search strategy:
 ```{python}
 
@@ -1280,7 +1283,6 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Sentence length in characters: lenchar_210
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
 - Our search strategy:
 ```{python}
 
@@ -1291,7 +1293,6 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Sentence length in words: lenword_211
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
 - Our search strategy:
 ```{python}
 
@@ -1302,7 +1303,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Synthetic comparatives: comparatives_syn_212
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Example from Reddit: raiders of the lost arc was much, much *worse*
 - Our search strategy:
 ```{python}
 
@@ -1313,7 +1314,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Synthetic superlatives: superlatives_syn_213
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Example from Reddit: Because the Canucks gave the Flames the *best* offer.
 - Our search strategy:
 ```{python}
 
@@ -1324,7 +1325,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Analytic comparatives: comparatives_ana_214
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Example from Reddit: *More accurate* would be "Where there is no freedom, poverty persists".
 - Our search strategy:
 ```{python}
 
@@ -1335,7 +1336,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Analytic superlatives: superlatives_ana_215
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Example from Reddit: *Most pathetic* quote of all time:
 - Our search strategy:
 ```{python}
 
@@ -1346,7 +1347,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Community-specific abbreviations or words: reddit_vocab_216
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Example from Reddit: Congrats Raj, you got me to upvote a pic post.
 - Our search strategy:
 ```{python}
 
@@ -1357,7 +1358,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## verbs in the progressive aspect: vprogressive_217
 
 - Definition from Biber: "" (1988: )
-- Example from Reddit: 
+- Example from Reddit: If Redskins get Williams...where is he *playing*?
 - Our search strategy:
 ```{python}
 
@@ -1374,11 +1375,13 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ```
 
-- Accuracy:
+- Accuracy: not coded manually
 
 
 
 # References:
 Biber, Douglas. 1988. Variation across speech and writing. Cambridge: Cambridge University Press.
 Clarke, Isobelle & Jack Grieve. 2017. Dimensions of Abusive Language on Twitter. In Proceedings of the First Workshop on Abusive Language Online, 1–10. Vancouver.
+
+
 
