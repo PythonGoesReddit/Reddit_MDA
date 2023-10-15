@@ -507,9 +507,10 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
   "(a) there + (xxx) + BE 
   (b) there's" (1988: 229)
 - Example from Reddit: I just wished *there* was other UHQ pics from that photoshoot.. Closeups would be nice too! 
-- Our search strategy: 
+- Our search strategy: Within the function analyze_there we count everything with the tag "EX" (tag for existential there). We are therefore not implementing Biber's conditions, since the tag set contains a special tag for existential there.
 ```{python}
-
+    if tagged_sentence[index][1] == "EX":
+        features_dict["exthere_020"] += 1 
 ```
 
 - Accuracy:
@@ -638,21 +639,13 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "to + (ADV) + VB" (1988: 232)
 - Example from Reddit: oh crap, that's right, need *to update* my links.
-- Our search strategy: Within the function analyze_verb
+- Our search strategy: Within the function analyze_verb we first check for items tagges as VB (Verb, base form). We exclude all items in sentence-initial position or items following a comma. All remaining items are counted. We deviate from Biber in that we are not checking for the particle "to" to occur one or two to the left, since we rely on the tagger to correctly identify infinitives. 
 ```{python}
-    word_tuple = tagged_sentence[index]
-    if word_tuple[1] == "VBD":
-        features_dict["vpast_001"] += 1
     elif word_tuple[1] == "VB":
         if tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] == ",": 
             features_dict["vimperative_205"] += 1
         else: 
             features_dict["vinfinitive_024"] += 1
-            if tagged_sentence[index-2][0] == "to":
-                if tagged_sentence[index-1][1] == "RB" and not tagged_sentence[index-1][0] in ["n't", "not"]:
-                    features_dict["vsplitinf_062"] += 1
-                else:
-                    pass
 ```
 
 - Accuracy:
@@ -691,7 +684,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Accuracy:
 
-## vpastwhiz_027
+## Past participial WHIZ deletion relatives: vpastwhiz_027
 
 - Definition from Biber: "N/QUANPRO + VBN + PREP/BE/ADV (these forms were edited by hand)" (1988: 233)
 - Example from Reddit: Herbal Phentermine is an exclusive formulation of research-supported botanical ingredients, *designed* to support a healthy diet.
@@ -708,7 +701,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Accuracy:
 
-## vpresentwhiz_028
+## Present participial WHIZ deletion relatives: vpresentwhiz_028
 
 - Definition from Biber: "N + VBG (these forms were edited by hand)" (1988: 233)
 - Example from Reddit: I don't know... as a mom -- it just looks like a mess *waiting* to happen!!
@@ -732,7 +725,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Accuracy:
 
-## thatresub_029
+## that-relative clauses on subject position: thatresub_029
 
 - Definition from Biber: "N + (T#) + that + (ADV) + AUX/V (that relatives across intonation boundaries are identified by hand.)" (1988: 234)
 - Example from Reddit: I’m sure you could work a persona *that* didn’t have a pretty scowl… &gt;:-D
@@ -750,29 +743,44 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Accuracy:
 
-## thatreobj_030
+## that-relative clauses on object position: thatreobj_030
 
 - Definition from Biber: "N + (T#) + that + DET/SUBJPRO/POSSPRO/it/ADJ/plural noun/proper noun/possessive noun/TITLE (This algorithm does not distinguish between that complements to nouns and true relative clauses.)" (1988: 234)
 - Example from Reddit: Can someone remind me what happened to the whole dad quest *that* Oliver was supposed to be on?
-- Our search strategy:
+- Our search strategy: Within the function analyze_wh_word we are first exclusing structures with subject position. In all remaining structure we check whether ...
 ```{python}
-
+    if tagged_sentence[index-1][1].startswith("NN"):
+        if tagged_sentence[index+1][1].startswith("RB"):
+            if (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
+                features_dict["thatresub_029"] += 1 
+        elif tagged_sentence[index+1][1].startswith("VB") or tagged_sentence[index+1][1].startswith("MD"):
+            features_dict["thatresub_029"] += 1
+        elif tagged_sentence[index+1][1].startswith("DT") or tagged_sentence[index+1][1].startswith("JJ") or tagged_sentence[index+1][1] == "NNS" or tagged_sentence[index+1][1].startswith("NNP"):
+            features_dict["thatreobj_030"] += 1
+        elif tagged_sentence[index+1][0] == "it" or tagged_sentence[index+1][0] in subjpro or tagged_sentence[index+1][0] in posspro:
+            features_dict["thatreobj_030"] += 1   
 ```
 
 - Accuracy:
 
-## whresub_031
+## WH-relative clauses on subject position: whresub_031
 
 - Definition from Biber: "xxx + yyy + N + WHP + (ADV) + AUX/V (where xxx is NOT any form of the verbs ASK or TELL; to exclude indirect WH questions like Tom asked the man who went to the store)" (1988: 235)
 - Example from Reddit: You really want help go to an al-anon meeting, support for codependent fools *who* put up with our shit.
-- Our search strategy: 
+- Our search strategy: Within the function analyze_wh_word we ...
 ```{python}
+            if tagged_sentence[index-1][1].startswith("N") and tagged_sentence[index-2][0] not in ["tell", "tells", "told", "telling", "ask", "asks", "asked", "asking"]:
+                if tagged_sentence[index+1][1].startswith("R"):
+                    if (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
+                        features_dict["whresub_031"] += 1
 
+                elif(tagged_sentence[index+1][1].startswith("V") or tagged_sentence[index+1][1].startswith("MD")):
+                    features_dict["whresub_031"] += 1
 ```
 
 - Accuracy:
 
-## whreobj_032
+## WH-relative clauses on object position: whreobj_032
 
 - Definition from Biber: "xxx + yyy + N + WHP + zzz (where xxx is NOT any form of the verbs ASK or TELL, to exclude indirect WH questions, and zzz is not ADV, AUX or V, to exclude relativization on subject position)" (1988: 235)
 - Example from Reddit: You didn't give any evidence and then proceeded to change your argument to something *which* I actually agree with.
@@ -787,53 +795,78 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "PREP + WHP" (1988: 235)
 - Example from Reddit: Example from Biber: "the manner *in which* he was told" (Biber 1988: 235)
-- Our search strategy:
+- Our search strategy: Within the function analyze_wh_word we first exclude all structures that follow a noun. In the remaining structures we check whether the item is part of ["who", "whom", "whose", "which"], and whether the preceding item is tagged as "IN" (Preposition or subordinating conjunction). If yes then the structure is counted as pied-piping. We therefore don't deviate from Biber's strategy. 
 ```{python}
-
+    if tagged_sentence[index-1][1].startswith("NN"):
+                
+    else:
+        if word_tuple[0] in WHP:
+            if tagged_sentence[index-1][1] == "IN":
+                features_dict["whrepied_033"] += 1 
 ```
 
 - Accuracy:
 
-## sentencere_034
+## Sentence relatives: sentencere_034
 
 - Definition from Biber: "T#/, + which (These forms are edited by hand to exclude non-restrictive relative clauses.)" (1988: 235)
 - Example from Reddit: *Which* is why we will be sending our military forces their way.
-- Our search strategy:
+- Our search strategy: Within the function analyze_wh_word we first exclude all structures that follow a noun. We then check whether the item is part of ["who", "whom", "whose", "which"]. Next we exlude all structures that follow a preposition (which are pied-piping). We then narrow it down further to only items which are "which". These are counted either if they follow a comma or if they are in sentence-initial position and the next items is a verb (except be). We are therefore adding more conditions than Biber since we cannot afford manual analysis.
 ```{python}
+    if tagged_sentence[index-1][1].startswith("NN"):
+          
+    else:
+        if word_tuple[0] in WHP:
+            if tagged_sentence[index-1][1] == "IN":
+                features_dict["whrepied_033"] += 1
 
+            if word_tuple[0] == "which":
+                if tagged_sentence[index-1][0] == ",":
+                    features_dict["sentencere_034"] += 1
+                elif index == 3 and tagged_sentence[4][1].startswith("V"):
+                    if not tagged_sentence[4][0] in belist:
+                        features_dict["sentencere_034"] += 1
 ```
 
 - Accuracy:
 
-## advsubcause_035
+## Causative adverbial subordinators: advsubcause_035
 
 - Definition from Biber: not stated, presumably surface form "because" (1988: 236)
 - Example from Reddit: *Because* the Canucks gave the Flames the best offer.
-- Our search strategy:
+- Our search strategy: Within the function analyze_preposition we check whether the item is "because" (or one of its spelling variants). We count all hits except the ones that are followed by "of". 
 ```{python}
-
+    if word_tuple[0] in ["because", "becuase", "beacuse", "cause", "'cause", "cos", "'cos", "coz", "'coz", "caus", "'caus", "cuz", "'cuz", "bcoz", "bcuz", "bcos", "bcause", "bcaus"] and tagged_sentence[index+1][0] != "of":
+        features_dict["advsubcause_035"] += 1 
+        # AB: I decided against a separate feature for "because of" since it goes into "prepositions_039".
+        # HM: I don't understand what this means. Biber (1988: 236-237) does not list "because of" as a preposition (even though it is an obvious contender),
+        #     and it is purposefully excluded in the list above for "prepositions_039". Right now we are not counting "because of" at all, are we?
 ```
 
 - Accuracy:
 
-## advsubconc_036
+## Concessive adverbial subordinators: advsubconc_036
 
 - Definition from Biber: not stated, presumably surface forms "although" or "though" (1988: 236)
 - Example from Reddit: The parka copes fine with the rain, *although* I haven't been caught in any thunderstorms yet!
-- Our search strategy: 
+- Our search strategy: Within the function analyze_preposition we count all items with the surface form "although", "though" and "tho". We therefore deviate from Biber in including 'tho' and in checking for the word class preposition first.
 ```{python}
-
+    elif word_tuple[0] == "although" or word_tuple[0] == "though" or word_tuple[0] == "tho":
+        features_dict["advsubconc_036"] += 1 
 ```
 
 - Accuracy:
 
-## advsubcond_037
+## Conditional adverbial subordinators: advsubcond_037
 
 - Definition from Biber: not stated, presumably surface forms "if" or "unless" (1988: 236)
 - Example from Reddit: *If* Redskins get Williams...where is he playing?
-- Our search strategy:
+- Our search strategy: Within the function analyze_sentence we are checking for "if" and "unless" either in sentence-medial or sentence-initial position.
 ```{python}
-
+    for advsubcond in [" if ", " unless ", " if, ", " unless, "]:
+        features_dict["advsubcond_037"] += sentence.count(advsubcond)
+    if sentence.startswith("if ") or sentence.startswith("if, ") or sentence.startswith("unless ") or sentence.startswith("unless, "):
+        features_dict["advsubcond_037"] += 1
 ```
 
 - Accuracy:
@@ -844,7 +877,20 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 - Example from Reddit: Just *as long as* you have a good time and enjoy your week here, you can't let anyone down!
 - Our search strategy:
 ```{python}
+## within the function analyze_preposition
 
+    elif word_tuple[0] == "that" and tagged_sentence[index-1][0] in ["such", "so"]:
+        features_dict["advsubother_038"] += 1 
+
+    if word_tuple[0] in otheradvsublist:
+        features_dict["advsubother_038"] += 1 
+
+## within the function analyze_sentence
+
+    for advsub in ["inasmuch as", "forasmuch as", "insofar as", "insomuch as", " as long as ", " as soon as "]:
+        features_dict["advsubother_038"] += sentence.count(advsub)
+    if sentence.startswith("as long as ") or sentence.startswith("as soon as "):
+        features_dict["advsubother_038"] += 1
 ```
 
 - Accuracy:
@@ -853,9 +899,10 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "against, amid, amidst, among, amongst, at, besides, between, by, despite, during, except, for, from, in, into, minus, notwithstanding, of, off, on, onto, opposite, out, per, plus, pro, re, than, through, throughout, thru, to, toward, towards, upon, versus, via, with, within, without" (1988: 236-237)
 - Example from Reddit: I clap *during* the Friends theme song.
-- Our search strategy:
+- Our search strategy: Within the function analyze_preposition we are counting all items that are not one of ["because", "unless", "whilst", "while", "though", "tho", "although", "that", "since", "whereupon", "whereas", "whereby"], *because we consider these...* We therefore deviate significantly from Biber's procedure, as he looks for a finite list of items that he considers to be preposition. Again we rely more on our parts-of-speech tagger.
 ```{python}
-
+    if not word_tuple[0] in ["because", "unless", "whilst", "while", "though", "tho", "although", "that", "since", "whereupon", "whereas", "whereby"] + timepoints + timedurfreq + placelist: 
+        features_dict["prepositions_039"] += 1 
 ```
 
 - Accuracy:
@@ -888,9 +935,9 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "Any adverb form occurring in the dictionary, or any form that is longer than five letters and ends in -ly. The count for total adverbs excludes those adverbs counted as instances of hedges, amplifiers, downtoners, amplifiers, place adverbials, and time adverbials." (1988: 238)
 - Example from Reddit: Let it *never* be said that I am an impatient man.
-- Our search strategy:
+- Our search strategy: Within the function analyze_adverb we count all items that are caught by this function, so all items that receive the tag "RB" (advber), "RBR" (adverb, comparative), or "RBS" (adverb, superlative). This is a deviation from Biber, since we are not excluding the words covered by other features, and we are not checking for items in a dictionary (+ items longer than five letters ending in -ly), because we trust the accuracy of our parts-of-speech tagger.
 ```{python}
-
+    features_dict["adverbs_042"] += 1
 ```
 
 - Accuracy:
@@ -899,6 +946,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "This feature is computed by counting the number of different lexical items that occur in the first 400 words of each text, and then dividing by four; texts shorter than 400 words are not included in the present analysis." (1988: 238-239)
 - Our search strategy:
+  *apparently not in our script?*
 ```{python}
 
 ```
@@ -908,9 +956,14 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Word length: wordlength_044
 
 - Definition from Biber: "mean length of the words in a text, in orthographic letters" (1988: 239)
-- Our search strategy:
+- Our search strategy: Within the function analyze_sentence we count the length of all words in characters and divide it by the number of words in the sentence. *We deviate from Biber in that we replace ... with ... beforehand.*
 ```{python}
-
+    sum_wordlen = 0
+    for word in words:
+        word = re.sub(r'[^\w\s]','', word)
+        wordlen = len(word)
+        sum_wordlen = sum_wordlen + wordlen
+    features_dict["wordlength_044"] = (sum_wordlen/len(words)) 
 ```
 
 - Accuracy:
@@ -938,9 +991,12 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "almost, barely, hardly, merely, mildly, nearly, only, partially, partly, practically, scarcely, slightly, somewhat" (1988: 240)
 - Example from Reddit: Cheap individual health insurance fills that need nicely; it's *hardly* worthless.
-- Our search strategy:
+- Our search strategy: Within the function analyze_adverb we are counting all items that are part of the list "downtonerlist". This list was defined beforehand and contains all the items mentioned by Biber.
 ```{python}
+downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "only", "partially", "partly", "practically", "scarcely", "slightly", "somewhat"]
 
+    elif word_tuple[0] in downtonerlist:
+        features_dict["downtoners_046"] += 1
 ```
 
 - Accuracy:
@@ -949,9 +1005,21 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "at about /something like/more or less /almost/ maybe/xxx sort of/xxx kind of (where xxx is NOT: DET/ADJ/POSSPRO/WHO - excludes sort and kind as true nouns)" (1988: 240)
 - Example from Reddit: *Maybe* they're the "one in a million"?
-- Our search strategy:
+- Our search strategy: The structures within this feature are quite different in their composition, so we look for them in two different functions. 
+  - Within the function analyze_prepositions we first check whether the surface form is "of" and the preceding item is either "kind" or sort" and the item before that is tagged as one of ["JJ", "JJR", "JJS", "DT", "PRP$"]. If this is the case we exclude all structures in which the word two to the left is ["what", "whatever", "whichever"] and count all remaining hits.
+  - Within the function analyze_sentence (which has the untagged version of the entire sentence as input) we count the following strings of characters: [" at about ", " something like ", " more or less", " kinda ", " sorta ", " almost ", " maybe "]
+  We are therefore deviating from Biber in also including the more colloquial forms "kinda" and "sorta". *For "kind of" and "sort of" we also ...*
 ```{python}
+## within analyze_preposition
 
+    elif word_tuple[0] == "of" and tagged_sentence[index-1][0] in ["kind", "sort"] and not tagged_sentence[index-2][1] in ["JJ", "JJR", "JJS", "DT", "PRP$"]:
+        if not tagged_sentence[index-2][0] in ["what", "whatever", "whichever"]:
+            features_dict["hedges_047"] += 1
+            
+## within analyze_sentence
+
+    for hedge in [" at about ", " something like ", " more or less", " kinda ", " sorta ", " almost ", " maybe "]:
+        features_dict["hedges_047"] += sentence.count(hedge)
 ```
 
 - Accuracy:
@@ -972,9 +1040,20 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "CL-P/T# + well/now/anyway/anyhow/anyways" (1988: 241)
 - Example from Reddit: *Well*, not everyone is insecure about it.
-- Our search strategy:
+- Our search strategy: Within the function analyze_particle we are counting all items that are part of the list "discpart", which is defined beforehand, and that are in sentence-initial position. The list "discpart" contains all items from Biber plus "though". We do the same in the analyze_adverb function just in case one of the discourse particles is tagged as an adverb.
 ```{python}
+discpart = ["well", "now", "anyway", "anyhow", "anyways", "though"]
 
+## within the function analyze_particle
+    word_tuple = tagged_sentence[index]
+    if index == 3 and word_tuple[0] in discpart: # index == 3 is the first actual element in the sentence, after the three ("x", "x") tuples
+        features_dict["discpart_050"] += 1
+    else:
+        pass
+      
+## within the function analyze_adverb
+    if index == 3 and word_tuple[0] in discpart: # index == 3 is the first actual element in the sentence, after the three ("x", "x") tuples
+        features_dict["discpart_050"] += 1
 ```
 
 - Accuracy:
@@ -994,9 +1073,11 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "can/may/might/could (+ contractions)" (1988: 241)
 - Example from Reddit: You *can* change these things for the Internet Explorer COM component too.
-- Our search strategy:
+- Our search strategy: Within the function analyze_modal we are counting all items with the surface forms ["can","may","might","could"]. We are not considering any contractions.
 ```{python}
-
+    word_tuple = tagged_sentence[index]
+    if word_tuple[0] in ["can","may","might","could"]:
+        features_dict["modalsposs_052"] += 1
 ```
 
 - Accuracy:
@@ -1005,9 +1086,10 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "ought/should/must (+ contractions)" (1988: 242)
 - Example from Reddit: They *should* be shot dead with cheap bullets.
-- Our search strategy:
+- Our search strategy: Within the function analyze_modal we count everything with the surface form ["ought","should","must"]. We are not considering any contractions.
 ```{python}
-
+    elif word_tuple[0] in ["ought","should","must"]:
+        features_dict["modalsness_053"] += 1
 ```
 
 - Accuracy:
@@ -1016,9 +1098,10 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "will/would/shall ( + contractions)" (1988: 242)
 - Example from Reddit: He's also literally Space Jesus so I *would*n't worry about it.
-- Our search strategy:
+- Our search strategy: Within the function analyze_model we are couting everything with the surface form ["will","would","shall","'ll","'d"]. 
 ```{python}
-
+    elif word_tuple[0] in ["will","would","shall","'ll","'d"]: 
+        features_dict["modalspred_054"] += 1
 ```
 
 - Accuracy:
@@ -1027,9 +1110,20 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "(e.g., acknowledge, admit, agree, assert, claim, complain, declare, deny, explain, hint, insist, mention, proclaim, promise, protest, remark, reply, report, say, suggest, swear, write)" (1988: 242)
 - Example from Reddit: It's worth pointing out that in America you can no longer *say* that everyone has a right to a fair trial.
-- Our search strategy:
+- Our search strategy: Within the function analyze_verb we count everything that is part of the list "publiclist". This list was defined beforehand and contains all the lemmata mentioned by Biber as well as their inflected forms (since we are checking for surface forms).
 ```{python}
+publiclist = ["acknowledege", "acknowledges", "acknowledged", "acknowledging", "admit", "admits", "admitted", "admitting",
+              "agree", "agrees", "agreed", "agreeing", "assert", "asserts", "asserted", "asserting", "claim", "claimed", 
+              "claims", "claiming", "complain", "complains", "complained", "complaining", "declare", "declared", "declares",
+              "declaring", "deny", "denies", "denied", "denying", "explain", "explains", "explained", "explaining", "hint",
+              "hints", "hinted", "hinting", "insist", "insisted", "insists", "insisting", "mention", "mentions", "mentioned",
+              "mentioning", "proclaim", "proclaims", "proclaimed", "proclaiming", "promise", "promises", "promised", "promising",
+              "protest", "protests","protested", "protesting", "remark", "remarks", "remarking", "remarked", "reply", 
+              "replied", "replies", "replying", "report", "reports", "reported", "reporting", "say", "says", "said", "saying",
+              "suggest", "suggests", "suggested", "suggesting", "swear", "swears", "swore", "swearing", "write", "wrote", "writing", "writes"]
 
+    if word_tuple[0] in publiclist:
+        features_dict["vpublic_055"] += 1
 ```
 
 - Accuracy:
@@ -1038,9 +1132,27 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "(e.g., anticipate, assume, believe, conclude, decide, demonstrate, determine, discover, doubt, estimate, fear, feel, find, forget, guess, hear, hope, imagine, imply, indicate, infer, know, learn, mean, notice, prove, realize, recognize, remember, reveal, see, show, suppose, think, understand)" (1988: 242)
 - Example from Reddit: Yeah, I do *remember* reading about it.
-- Our search strategy:
+- Our search strategy: Within the function analyze_verb we count everything that is part of the list "privatelist". This list was defined beforehand and contains all the lemmata mentioned by Biber as well as their inflected forms (since we are checking for surface forms).
 ```{python}
+privatelist = ["anticipate", "anticipates", "anticipated", "anticipating", "assume", "assumes", "assumed", "assuming",
+               "believe", "believes", "believed", "believing", "conclude", "concludes", "concluded", "concluding", "decide",
+               "decides", "decided", "deciding", "demonstrate", "demostrates", "demonstrated","demonstrating", "determine",
+               "determines", "determined", "determining", "discover", "discovers", "discovered", "discovering", "doubt",
+               "doubts", "doubted", "doubting", "estimate", "estimated", "estimates", "estimating", "fear", "fears", "feared",
+               "fearing", "feel", "feels", "feeled", "feeling", "find", "finds", "found", "finding", "forget", "forgets", 
+               "forgot", "forgetting", "guess", "guesses", "guessed", "guessing", "hear", "hears", "heard", "hearing", "hope",
+               "hopes", "hoped", "hoping", "imagine", "imagines", "imagined", "imagining", "imply", "implies", "implied", 
+               "implying", "indicate", "indicates", "indicating", "indicated", "infer", "infers", "infered", "inferring", "inferred",
+               "know", "knows", "knew", "knowing", "learn", "learns", "learnt", "learned", "learning", "mean", "means", "meant",
+               "meaning", "notice", "notices", "noticed", "noticing", "prove", "proves", "proved", "proving", "realise", "realize",
+               "realised", "realized", "realises","realizes", "realising", "realizing", "recognise", "recognize", "recognises",
+               "recognizes", "recognised", "recognized", "recognising", "recognizing", "remember", "remembers", "remembered",
+               "remembering", "reveal", "reveals", "revealing", "revealed", "see", "sees", "saw", "seen", "seeing", "show", "shows",
+               "showed", "showing", "suppose", "supposed", "supposes", "supposing", "think", "thinks", "thought", "thinking",
+               "understand", "understands", "understood", "understanding"]
 
+    if word_tuple[0] in privatelist:
+        features_dict["vprivate_056"] += 1
 ```
 
 - Accuracy:
@@ -1049,9 +1161,19 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "(e.g., agree, arrange, ask, beg, command, decide, demand, grant, insist, instruct, ordain, pledge, pronounce, propose, recommend, request, stipulate, suggest, urge)" (1988: 242)
 - Example from Reddit: His forehead makes me want to *ask* him if he needs help with a quest.
-- Our search strategy:
+- Our search strategy: Within the function analyze_verb we count everything that is part of the list "suasivelist". This list was defined beforehand and contains all the lemmata mentioned by Biber as well as their inflected forms (since we are checking for surface forms).
 ```{python}
+suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "arranged", "arranging", "ask", "asks", "asked",
+               "asking", "beg", "begs", "begged", "begging", "command", "commands", "commanded", "commanding", "decide", "decides",
+               "decided", "deciding", "demand", "demands", "demanding", "demanded", "grant", "grants", "granted", "granting",
+               "insist", "insists", "insisted", "insisting", "instruct", "instructs", "instructed", "instructing", "ordain", 
+               "ordains", "ordained", "ordaining", "pledge", "pledges", "pledging", "pledged", "pronounce", "pronounces", 
+               "pronounced", "pronouncing", "propose", "proposes", "proposed", "proposing", "recommend", "recommends", "recommended",
+               "recommending", "request", "requests", "requested", "requesting", "stipulate", "stipulates", "stipulated", "stipulating",
+               "suggest", "suggests", "suggested", "suggesting", "urge", "urged", "urges", "urging"]
 
+    if word_tuple[0] in suasivelist:
+        features_dict["vsuasive_057"] += 1
 ```
 
 - Accuracy:
@@ -1060,9 +1182,10 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: not stated, presumable surface forms "seem" and "appear" (1988: 242)
 - Example from Reddit: That *seems* like a weird place to draw the line, of course logic has no place in religion.
-- Our search strategy:
+- Our search strategy: Within the function analyze_verb we are counting all items that start with "seem" or "appear".
 ```{python}
-
+    if word_tuple[0].startswith("seem") or word_tuple[0].startswith("appear"):
+        features_dict["vseemappear_058"] += 1
 ```
 
 - Accuracy:
@@ -1072,11 +1195,25 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 - Definition from Biber: 
   "(1) all contractions on pronouns
   (2) all contractions on auxiliary forms (negation) 
-  (3) 's suffixed on nouns is analyzed separately (to exclude possessive forms):
-  N's + V/AUX/ADV+V/ADV+AUX/DET/POSSPRO/PREP/ADJ+CL-P/ADJ+T#" (1988: 243)
+  (3) 's suffixed on nouns is analyzed separately (to exclude possessive forms): N's + V/AUX/ADV+V/ADV+AUX/DET/POSSPRO/PREP/ADJ+CL-P/ADJ+T#" (1988: 243)
 - Example from Reddit: If the building were about to collapse, they would*n't* have a conference about it, they would leave the building.
-- Our search strategy:
+- Our search strategy: Within the function analyze_verb we count all items that start with an apostrophe. Within the function analyze_modal we also count all items that start with an apostrophe. Within the function analyze_adverb we cound all items with the surface form "n't". This is a deviation from Biber in that we don't identify contractions based on the word class of the host, but we search for the clitics themselves.
 ```{python}
+## within the function analyze_verb
+
+    if word_tuple[0].startswith("'"):
+        features_dict["contractions_059"] += 1
+        
+## within the function analyze_modal
+
+    if word_tuple[0].startswith("'"):
+        features_dict["contractions_059"] += 1
+        
+## within the function analyze_adverb
+
+    if word_tuple[0] == "n't":
+        features_dict["negana_067"] += 1
+        features_dict["contractions_059"] += 1
 
 ```
 
@@ -1089,9 +1226,45 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
   (2) PUB/PRV/SUA + PRO/N + AUX/V
   (3) PUB/PRV/SUA + ADJ/ADV/DET/POSSPRO + (ADJ) + N + AUX/V" (1988: 244)
 - Example from Reddit: It seems quite freindly though I can *imagine it* would scare some younger kids.
-- Our search strategy:
+- Our search strategy: Within the function analyze_verb we are first checking whether the verb is part of "publiclist". This list contains surface forms of public verbs as given by Biber. 
+  - We count the structure as that-delation if the following item is one of ["this", "these", "those", "I", "we", "he", "she", "they"] (Biber's demonstrative pronouns and subject pronouns). 
+  - We also count the structure as that-deletion if the next word is tagged as a noun or pronoun and the word after that is a verb or modal. 
+  - We also count the structure as that-deletion if the following item is tagged as one of ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"] (Biber's adj/adv/det/posspro), the next item is a noun, and the item afterwards is a verb or modal. 
+  We are then repeating this procedure for private verbs and suasive verbs (with the same lemmata as given by Biber). 
+  The only deviation from Biber is that we are not looking for "that" in the first condition (because of its multifunctionality) and that we are not allowing for an additional interverning adjective in the third condition.
 ```{python}
+    if word_tuple[0] in publiclist:
+        if tagged_sentence[index + 1][0] in ["this", "these", "those", "I", "we", "he", "she", "they"]:
+            features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"):
+            if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
+                features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]:
+            if tagged_sentence[index + 2][1].startswith("NN"):
+                if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
+                    features_dict["thatdel_060"] += 1
 
+    if word_tuple[0] in privatelist:
+        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]:
+            features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"):
+            if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
+                features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]:
+            if tagged_sentence[index + 2][1].startswith("NN"):
+                if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
+                    features_dict["thatdel_060"] += 1
+
+    if word_tuple[0] in suasivelist:
+        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]:
+            features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"):
+            if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
+                features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]:
+            if tagged_sentence[index + 2][1].startswith("NN"):
+                if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
+                    features_dict["thatdel_060"] += 1
 ```
 
 - Accuracy:
@@ -1100,9 +1273,11 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "PREP + ALL-P/T#" (1988: 244)
 - Example from Reddit: Gleeson, Issac, Serkis, and the old crew are the actors I have the most faith *in*.
-- Our search strategy:
+- Our search strategy: Within the function analyze_preposition we first check whether this is the sentence-final item. If yes, we exclude everything that is "that" or "like" and count all remaining items towards the function. This is a slight deviation from Biber, he only checks for sentence-final position. *We decided to exclude 'that' and 'like' because...*
 ```{python}
-
+    if tagged_sentence[index+1][0] in ALLP or tagged_sentence[index+1][1] == "X":
+        if tagged_sentence[index+1][1] not in ["that", "like"]: 
+            features_dict["strandprep_061"] += 1
 ```
 
 - Accuracy:
@@ -1111,9 +1286,24 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "to + ADV + (ADV) + VB" (1988: 244)
 - Example from Reddit: That's true, but it's much harder *to automatically detect*.
-- Our search strategy:
+- Our search strategy: Within the function analyze_verb we are first checking for the tag "VB" (Verb, base form) and eliminating any instances that are sentence-initial or after a comma. We are counting the structure as a split infinitive if the item two slots before is "to", the previous item is tagged as RB (adverb), and the previous item is not "not" or "n't". We are also allowing for one additional intervening adverb between "to" and the verb itself, just like Biber does.
 ```{python}
-
+    elif word_tuple[1] == "VB":
+        if tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] == ",": 
+            features_dict["vimperative_205"] += 1
+        else: 
+            features_dict["vinfinitive_024"] += 1
+            if tagged_sentence[index-2][0] == "to":
+                if tagged_sentence[index-1][1] == "RB" and not tagged_sentence[index-1][0] in ["n't", "not"]:
+                    features_dict["vsplitinf_062"] += 1
+                else:
+                    pass
+            elif tagged_sentence[index-3][0] == "to":
+                if tagged_sentence[index-2][1] == "RB" and not tagged_sentence[index-2][0] in ["n't", "not"]:
+                    if tagged_sentence[index-1][1] == "RB" and not tagged_sentence[index-1][0] in ["n't", "not"]:
+                        features_dict["vsplitinf_062"] += 1
+                else:
+                    pass
 ```
 
 - Accuracy:
@@ -1122,9 +1312,153 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "AUX + ADV + (ADV) + VB" (1988: 244)
 - Example from Reddit: A horse would notice stepping on someone and it *would probably move*.
-- Our search strategy:
+- Our search strategy: Within the function analyze_verb 
 ```{python}
+## within the function analyze_verb
 
+    elif word_tuple[1] == "VBG":
+        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
+            if tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]:
+                features_dict["vpresentpart_025"] += 1
+        if (tagged_sentence[index-2][1] == "X" or tagged_sentence[index-2][0] in ALLP):
+            if tagged_sentence[index-1][0] in ["while", "without", "when", "although","with"]:
+                features_dict["vpresentpart_025"] += 1
+        elif tagged_sentence[index-1][1] == "NN" or tagged_sentence[index-1][1] == "NNS": 
+            features_dict["vpresentwhiz_028"] += 1 
+        elif tagged_sentence[index-1][0] in belist:
+            features_dict["vprogressive_217"] += 1
+        elif (tagged_sentence[index-2][0] in belist) and (tagged_sentence[index-1][1] == "RB"):
+            features_dict["vprogressive_217"] += 1  
+            features_dict["vsplitaux_063"] += 1
+
+    if word_tuple[0] in ["had", "'d"]: 
+        move_on = True
+        insert_adv = False
+        x = index
+        while move_on:
+            x += 1
+            if tagged_sentence[x][1] == "VBN":
+                move_on = False
+                features_dict["vpastperfect_002b"] += 1
+                if insert_adv:
+                    features_dict["vsplitaux_063"] += 1
+            elif tagged_sentence[x][1].startswith("R") and tagged_sentence[x][0] not in ["n't", "not"]:
+                insert_adv = True
+            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"):
+                move_on = True 
+                # HM: as intended by Biber (p. 223) we here also count questions with the word order HAD + NOUN/PRONOUN + VBN
+                # HM: this does, however, not catch all questions using the past perfect (e.g. does not count "had many people been to the store?" due to inserted adjective)
+            else: 
+                move_on =  False 
+
+    elif word_tuple[0] in ["have", "'ve", "has"]: 
+        move_on = True
+        insert_adv = False
+        x = index
+        while move_on: 
+            # These while-statements are an attempt to get around the question of how much intervening material to allow by instead setting 
+            # conditions for when to stop looking on (either because an instance of the feature has been found or an impermissible context has been encountered) (AB)
+            x += 1
+            if tagged_sentence[x][1] == "VBN":
+                move_on = False
+                features_dict["vpresperfect_002a"] += 1
+                if insert_adv:
+                    features_dict["vsplitaux_063"] += 1
+            elif tagged_sentence[x][1].startswith("R") and tagged_sentence[x][0] not in ["n't", "not"]:
+                insert_adv = True
+            elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"): 
+                # HM: as intended by Biber (p. 223) we here also count questions with the word order HAVE + NOUN/PRONOUN + VBN
+                # HM: this does, however, not catch all questions using the present perfect (e.g. does not count "have many people been to the store?" due to inserted adjective)
+                move_on = True
+            else: 
+                move_on = False
+
+    elif word_tuple[0] in belist:
+        if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
+            features_dict["mainvbe_019"] += 1
+        ## allow for one intervening adverb for mainvbe_019
+        elif tagged_sentence[index+1][1] == "RB" and tagged_sentence[index+2][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
+            features_dict["mainvbe_019"] += 1
+            
+        else:
+            move_on = True
+            insert_adv = False
+            x = index
+            while move_on == True:
+                x += 1
+                if tagged_sentence[x][1] == "VBN":
+                    move_on = False
+                    if tagged_sentence[x+1][0] == "by":
+                        features_dict["passby_018"] += 1
+                        if insert_adv:
+                            features_dict["vsplitaux_063"] += 1
+                    elif tagged_sentence[x+1][1] == "IN": # Here, provision is made for by-passive with intervening PPs: "was shot in the head by an unidentified suspect"
+                        x += 1
+                        move_on2 = True
+                        while move_on2:
+                            x += 1
+                            if tagged_sentence[x+1][1].startswith("N") or tagged_sentence[x+1][1].startswith("DT"): # One might include adjectives here as well, but prob at the cost of precision.
+                                pass
+                            elif tagged_sentence[x+1][0] == "by":
+                                features_dict["passby_018"] += 1
+                                if insert_adv:
+                                    features_dict["vsplitaux_063"] += 1
+                                move_on2 = False
+                            else:
+                                features_dict["passagentl_017"] += 1
+                                if insert_adv:
+                                    features_dict["vsplitaux_063"] += 1
+                                move_on2 = False
+                    else:
+                        features_dict["passagentl_017"] += 1
+                        if insert_adv:
+                            features_dict["vsplitaux_063"] += 1  
+                elif tagged_sentence[x][1].startswith("RB"):
+                    if tagged_sentence[x][0] not in ["n't", "not"]:
+                        insert_adv = True
+                    else:
+                        pass
+                else:
+                    move_on = False
+
+    elif word_tuple[0] in dolist:
+        move_on = True
+        negator = False
+        insert_adv = False
+        x = index
+        while move_on:
+            x += 1
+            if tagged_sentence[x][1].startswith("V"):
+                move_on = False
+                if negator == False:
+                    features_dict["amplifiers_048"] += 1
+                if insert_adv:
+                    features_dict["vsplitaux_063"] += 1
+            elif tagged_sentence[x][0] in ["not", "n't"]:
+                negator = True
+            elif tagged_sentence[x][1].startswith("R"):
+                insert_adv = True
+            else:
+                move_on = False
+
+
+## within the function analyze_modal
+
+    move_on = True
+    insert_adv = False
+    x = index
+    while move_on:
+        x += 1
+        if tagged_sentence[x][1].startswith("V"):
+            move_on = False
+            if insert_adv:
+                features_dict["vsplitaux_063"] += 1
+        elif tagged_sentence[x][0] in ["not", "n't"]:
+            pass
+        elif tagged_sentence[x][1].startswith("R"):
+            insert_adv = True
+        else:
+            move_on = False
 ```
 
 - Accuracy:
@@ -1163,9 +1497,17 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
     "(a) no + QUANT/ADJ/N 
     (b) neither, nor (excludes no as a response)" (1988: 245)
 - Example from Reddit: More accurate would be "Where there is *no* freedom, poverty persists".
-- Our search strategy:
+- Our search strategy: Within the function analyze_determiner we first count everything that has the surface form "neither" or "nor". We then check for the surface form "no" and only count these structures of they are followed by a noun (tag starting with "NN"), by an adjective (tag starting with "JJ") or by an item in the list QUAN. The list QUAN is the same as in Biber, we therefore don't deviate from his search strategy.
 ```{python}
+QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
 
+    if word_tuple[0] == "neither" or word_tuple[0] == "nor":
+        features_dict["negsyn_066"] += 1
+    elif word_tuple[0] == "no":
+        if tagged_sentence[index+1][1].startswith("NN") or tagged_sentence[index+1][1].startswith("JJ"):
+            features_dict["negsyn_066"] += 1
+        elif tagged_sentence[index+1][0] in QUAN:
+            features_dict["negsyn_066"] += 1
 ```
 
 - Accuracy:
@@ -1174,16 +1516,21 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "not (also contracted forms)" (1988: 245)
 - Example from Reddit: I tried to spam Q every time it's up on him and ca*n't* even get oom'd.
-- Our search strategy:
+- Our search strategy: Within the function analyze_adverb we count everything with the surface form "not" or "n't". The only deviation from Biber is therefore that we are restricting the search to items that are tagged as adverbs. 
 ```{python}
-
+    word_tuple = tagged_sentence[index]
+    if word_tuple[0] == "not":
+        features_dict["negana_067"] += 1
+    if word_tuple[0] == "n't":
+        features_dict["negana_067"] += 1
+        features_dict["contractions_059"] += 1
 ```
 
 - Accuracy:
 
 ## Hashtags: hashtag_201
 
-- Definition from Biber: "" (1988: )
+- Definition from Clark & Grieve (2017): none given.
 - Example from Reddit: *#BEST* FUCKING POST EVER
 - Our search strategy:
 ```{python}
@@ -1194,7 +1541,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Reddit-external links: link_202
 
-- Definition from Biber: "" (1988: )
+- Definition from Clark & Grieve (2017): none given.
 - Example from Reddit: *[What's Up](https://youtu.be/6NXnxTNIWkc)* by 4 Non Blondes
 - Our search strategy:
 ```{python}
@@ -1205,7 +1552,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Reddit-internal links: interlink_203
 
-- Definition from Biber: "" (1988: )
+- Definition: 
 - Example from Reddit: *[Among other things](http://www.reddit.com/r/starcraft/comments/d792k/psy_gets_map_hacked/c0y3hdf)*
 - Our search strategy:
 ```{python}
@@ -1216,7 +1563,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Words in all caps: caps_204
 
-- Definition from Biber: "" (1988: )
+- Definition from Clark & Grieve (2017): none given.
 - Example from Reddit: no, *YOU* make it, thats the point
 - Our search strategy:
 ```{python}
@@ -1227,7 +1574,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Verbs in the imperative: vimperative_205
 
-- Definition from Biber: "" (1988: )
+- Definition from Clark & Grieve (2017): none given.
 - Example from Reddit: *Save* the cross!
 - Our search strategy:
 ```{python}
@@ -1238,7 +1585,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Strategic lengthening within words: lengthening_206
 
-- Definition from Biber: "" (1988: )
+- Definition:
 - Example from Reddit: "I've come here to chew some bubble gum and kick some ass......*aaand* I'm all out of bubble gum" 
 - Our search strategy:
 ```{python}
@@ -1249,7 +1596,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Emoticons: emoticons_207
 
-- Definition from Biber: "" (1988: )
+- Definition:
 - Example from Reddit: Call that a typo... *:P*
 - Our search strategy:
 ```{python}
@@ -1260,7 +1607,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Qeustion sentences: question_208
 
-- Definition from Biber: "" (1988: )
+- Definition:
 - Example from Reddit: What about people with very common names (could happen a lot with Chinese people)*?*
 - Our search strategy:
 ```{python}
@@ -1271,7 +1618,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Exclamation sentences: exclamation_209
 
-- Definition from Biber: "" (1988: )
+- Definition:
 - Example from Reddit: crazy*!*
 - Our search strategy:
 ```{python}
@@ -1302,7 +1649,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Synthetic comparatives: comparatives_syn_212
 
-- Definition from Biber: "" (1988: )
+- Definition from Clark & Grieve (2017): none given.
 - Example from Reddit: raiders of the lost arc was much, much *worse*
 - Our search strategy:
 ```{python}
@@ -1313,7 +1660,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Synthetic superlatives: superlatives_syn_213
 
-- Definition from Biber: "" (1988: )
+- Definition from Clark & Grieve (2017): none given.
 - Example from Reddit: Because the Canucks gave the Flames the *best* offer.
 - Our search strategy:
 ```{python}
@@ -1324,7 +1671,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Analytic comparatives: comparatives_ana_214
 
-- Definition from Biber: "" (1988: )
+- Definition from Clark & Grieve (2017): none given.
 - Example from Reddit: *More accurate* would be "Where there is no freedom, poverty persists".
 - Our search strategy:
 ```{python}
@@ -1335,7 +1682,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Analytic superlatives: superlatives_ana_215
 
-- Definition from Biber: "" (1988: )
+- Definition from Clark & Grieve (2017): none given.
 - Example from Reddit: *Most pathetic* quote of all time:
 - Our search strategy:
 ```{python}
@@ -1346,7 +1693,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Community-specific abbreviations or words: reddit_vocab_216
 
-- Definition from Biber: "" (1988: )
+- Definition:
 - Example from Reddit: Congrats Raj, you got me to upvote a pic post.
 - Our search strategy:
 ```{python}
@@ -1357,7 +1704,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## verbs in the progressive aspect: vprogressive_217
 
-- Definition from Biber: "" (1988: )
+- Definition:
 - Example from Reddit: If Redskins get Williams...where is he *playing*?
 - Our search strategy:
 ```{python}
@@ -1368,7 +1715,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 ## Emojis: emojis_218
 
-- Definition from Biber: "" (1988: )
+- Definition:
 - Example from Reddit: 
 - Our search strategy:
 ```{python}
@@ -1376,6 +1723,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ```
 
 - Accuracy: not coded manually
+
 
 
 
