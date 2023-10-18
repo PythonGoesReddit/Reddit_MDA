@@ -36,6 +36,8 @@ feats = ["vpast_001", "vpresperfect_002a", "vpastperfect_002b", "vpresent_003", 
      "superlatives_syn_213", "comparatives_ana_214", "superlatives_ana_215", "reddit_vocab_216", "vprogressive_217",
      "emojis_218", "coordAnd_219", "coordBut_220", "coordOr_221"]
 
+# 043, 044, 210, 211 and 218 have placeholder manual coding files
+
 p = open("Feature_coding_discrepancies_flair2.tsv", "w")
 p.write("Feature\tsentence\tManualCount\tAutoCount\n")
 p2 = open("Feature_coding_accuracies_flair2.tsv", "w")
