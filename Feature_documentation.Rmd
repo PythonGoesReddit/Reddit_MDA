@@ -305,21 +305,6 @@ dolist = ["do", "does", "doing", "did", "done"]
 
 - Accuracy:
 
-## Gerunds: gerund_015
-
-- Definition from Biber: "All participle forms serving nominal functions - these are edited by hand." (1988: 227)
-- Example from Reddit: Does anyone seriously believe that *closing* the source of the OS will reduce piracy? 
-- Our search strategy: Within the function analyze_noun we are looking for items ending in <-ing>. These items are then checked against a list of words that we know not to be gerunds. We are therefore deviating from Biber's procedure since a manual analysis was not feasible.
-```{python}
-notgerundlist = ["nothing", "everything", "something", "anything", "thing", "things", "ring", "sting", "ting", "viking", "wing", "zing"]
-
-    if word_tuple[0].endswith("ing"):
-        if word_tuple[0] not in notgerundlist:
-            features_dict["gerund_015"] += 1
-```
-
-- Accuracy:
-
 ## Nouns: nouns_016
 
 - Definition from Biber: "All nouns included in the dictionary, excluding those forms counted as nominalizations or gerunds." (1988: 228)
@@ -650,77 +635,16 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Accuracy:
 
-## Present participial clauses: vpresentpart_025
-
-- Definition from Biber: "T#/ALL-P + VBG + PREP/DET/WHP/WHO/PRO/ADV (these forms were edited by hand)" (1988: 233)
-- Example from Reddit: With new worlds icons and skins *coming* out this is a great way to get them for free.
-- Our search strategy: Within the function analyze_verb we are first checking for items with the tag "VBG" (standing for "Verb, gerund or present participle"). If this item occurs in sentence-initial position and is followed by a word tagged as ["IN", "DT", "RB", "WP","PRP", "WRB"] then it is counted towards this feature. Also if there is ["while", "without", "when", "although","with"] at the start of the sentence followed by the verb itself. *Comparison to Biber*
-```{python}
-    elif word_tuple[1] == "VBG":
-        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
-            if tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]:
-                features_dict["vpresentpart_025"] += 1
-        if (tagged_sentence[index-2][1] == "X" or tagged_sentence[index-2][0] in ALLP):
-            if tagged_sentence[index-1][0] in ["while", "without", "when", "although","with"]:
-                features_dict["vpresentpart_025"] += 1
-```
-
-- Accuracy:
-
 ## Past participial clauses: vpastpart_026
 
 - Definition from Biber: "T#/ALL-P + VBN + PREP/ADV (these forms were edited by hand)" (1988: 233)
 - Example from Reddit: *none in our sample data*
-- Our search strategy: Within the function analyze_verb we are first looking for items with the tag "VBN" (Verb, past participle). The word is counted towards this feature if it is sentence-initial position and the following item is tagged as ["IN", "RB", "TO"]. *Compared to Biber ...*
+- Our search strategy: Within the function analyze_verb we are first looking for items with the tag "VBN" (Verb, past participle). The word is counted towards this feature if it is sentence-initial position and the following item is tagged as ["IN", "RB", "TO"]. We are therefore implementing the same strategy as Biber.
 ```{python}
     elif word_tuple[1] == "VBN":
         if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
-            if tagged_sentence[index+1][1] in ["IN", "RB", "TO"]: # Biber (1988:233) notes for both that "these forms were edited by hand."
-                features_dict["vpastpart_026"] += 1 ## this one seems accurate enough to me (HM)
-        elif tagged_sentence[index-1][1].startswith("NN") or tagged_sentence[index-1][0] in QUANPRO:
-            if tagged_sentence[index+1][1] in ["IN", "RBR", "RB", "RBS"] or tagged_sentence[index+1][0] in belist:
-                features_dict["vpastwhiz_027"] += 1 
-```
-
-- Accuracy:
-
-## Past participial WHIZ deletion relatives: vpastwhiz_027
-
-- Definition from Biber: "N/QUANPRO + VBN + PREP/BE/ADV (these forms were edited by hand)" (1988: 233)
-- Example from Reddit: Herbal Phentermine is an exclusive formulation of research-supported botanical ingredients, *designed* to support a healthy diet.
-- Our search strategy: Within the function analyze_verb we are first looking for items tagged as "VBN" (Verb, past participle). After sorting out instances beloning the feature vpastpart_026 we check for the following criteria: Is the preceding item tagged as a nouns (all nominal tags start with "NN") or is it within the list QUANPRO? If yes: is the following item tagged as ["IN", "RBR", "RB", "RBS"] or a form of 'be'? *Compared to Biber ...*
-```{python}
-    elif word_tuple[1] == "VBN":
-        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
-            if tagged_sentence[index+1][1] in ["IN", "RB", "TO"]: # Biber (1988:233) notes for both that "these forms were edited by hand."
-                features_dict["vpastpart_026"] += 1 ## this one seems accurate enough to me (HM)
-        elif tagged_sentence[index-1][1].startswith("NN") or tagged_sentence[index-1][0] in QUANPRO:
-            if tagged_sentence[index+1][1] in ["IN", "RBR", "RB", "RBS"] or tagged_sentence[index+1][0] in belist:
-                features_dict["vpastwhiz_027"] += 1 
-```
-
-- Accuracy:
-
-## Present participial WHIZ deletion relatives: vpresentwhiz_028
-
-- Definition from Biber: "N + VBG (these forms were edited by hand)" (1988: 233)
-- Example from Reddit: I don't know... as a mom -- it just looks like a mess *waiting* to happen!!
-- Our search strategy: Within the function analyze_verb we are looking for items tagged as "VBG" (Verb, gerund or present participle). We are sorting out structures belonging to vpresentpart_025. If the preceding item is tagged as "NN" (Noun, singular or mass) or "NNS" (Noun, plural) then we are counting the hit towards the feature. *Compared to Biber we are ...*
-```{python}
-    elif word_tuple[1] == "VBG":
-        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
-            if tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]:
-                features_dict["vpresentpart_025"] += 1
-        if (tagged_sentence[index-2][1] == "X" or tagged_sentence[index-2][0] in ALLP):
-            if tagged_sentence[index-1][0] in ["while", "without", "when", "although","with"]:
-                features_dict["vpresentpart_025"] += 1
-        elif tagged_sentence[index-1][1] == "NN" or tagged_sentence[index-1][1] == "NNS": 
-            features_dict["vpresentwhiz_028"] += 1 
-        elif tagged_sentence[index-1][0] in belist:
-            features_dict["vprogressive_217"] += 1
-        elif (tagged_sentence[index-2][0] in belist) and (tagged_sentence[index-1][1] == "RB"):
-            features_dict["vprogressive_217"] += 1  
-            features_dict["vsplitaux_063"] += 1
+            if tagged_sentence[index+1][1] in ["IN", "RB", "TO"]:
+                features_dict["vpastpart_026"] += 1
 ```
 
 - Accuracy:
@@ -731,34 +655,12 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 - Example from Reddit: I’m sure you could work a persona *that* didn’t have a pretty scowl… &gt;:-D
 - Our search strategy: Within the function analyze_wh_word we first check whether the preceding item has a nominal tag (all nominal tags start with "NN"). If yes we check whether the next item is a full verb or a modal verb. If these conditions are fulfilled the structure is counted towards the feature. We are also allowing for one intervening adverb (RB). *Biber, in contrast, ...*
 ```{python}
-    #29. that relative clauses on subject position (e.g., the dog that bit me) N -p (T#) + that + (ADV) + AUX/V {that relatives across intonation boundaries are identified by hand.)
-    #30. that relative clauses on object position (e.g., the dog that I saw) N + (T#) + that + DET / SUBJPRO / POSSPRO / it / ADJ / plural noun/ proper noun / possessive noun / TITLE
     if tagged_sentence[index-1][1].startswith("NN"):
         if tagged_sentence[index+1][1].startswith("RB"):
             if (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
                 features_dict["thatresub_029"] += 1 
         elif tagged_sentence[index+1][1].startswith("VB") or tagged_sentence[index+1][1].startswith("MD"):
             features_dict["thatresub_029"] += 1
-```
-
-- Accuracy:
-
-## that-relative clauses on object position: thatreobj_030
-
-- Definition from Biber: "N + (T#) + that + DET/SUBJPRO/POSSPRO/it/ADJ/plural noun/proper noun/possessive noun/TITLE (This algorithm does not distinguish between that complements to nouns and true relative clauses.)" (1988: 234)
-- Example from Reddit: Can someone remind me what happened to the whole dad quest *that* Oliver was supposed to be on?
-- Our search strategy: Within the function analyze_wh_word we are first exclusing structures with subject position. In all remaining structure we check whether ...
-```{python}
-    if tagged_sentence[index-1][1].startswith("NN"):
-        if tagged_sentence[index+1][1].startswith("RB"):
-            if (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
-                features_dict["thatresub_029"] += 1 
-        elif tagged_sentence[index+1][1].startswith("VB") or tagged_sentence[index+1][1].startswith("MD"):
-            features_dict["thatresub_029"] += 1
-        elif tagged_sentence[index+1][1].startswith("DT") or tagged_sentence[index+1][1].startswith("JJ") or tagged_sentence[index+1][1] == "NNS" or tagged_sentence[index+1][1].startswith("NNP"):
-            features_dict["thatreobj_030"] += 1
-        elif tagged_sentence[index+1][0] == "it" or tagged_sentence[index+1][0] in subjpro or tagged_sentence[index+1][0] in posspro:
-            features_dict["thatreobj_030"] += 1   
 ```
 
 - Accuracy:
@@ -971,7 +873,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ## Conjuncts: conjuncts_045
 
 - Definition from Biber: 
-  "alternatively, altogether, consequently, conversely, eg, e.g., else, further- more, hence, however, i.e., instead, likewise, moreover, namely, neverthe- less, nonetheless, notwithstanding, otherwise, rather, similarly, therefore, thus, viz. 
+  "alternatively, altogether, consequently, conversely, eg, e.g., else, furthermore, hence, however, i.e., instead, likewise, moreover, namely, nevertheless, nonetheless, notwithstanding, otherwise, rather, similarly, therefore, thus, viz. 
   in + comparison/contrast /particular /addition /conclusion /consequence /sum /summary/ any event/ any case/ other words 
   for + example /instance 
   by + contrast / comparison 
@@ -980,9 +882,25 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
   ALL-P/T# + that is/else / altogether+ T#, 
   ALL-P/T# + rather + T#/,/xxx (where xxx is NOT: ADJ/ADV)" (1988: 239)
 - Example from Reddit: *However*, I would be happy if the race for President was between those two.
-- Our search strategy:
+- Our search strategy: All of the one-word items listed by Biber that do not have punctuation attached to them are searched for within the analyze_adverb function. We count all items that have a surface form which is part of the list "conjunctslist", which we defined beforehand. The items in the list are the same as listed by Biber. The two-word items and the words with punctuation are searched for within the analyze_sentence function (so using the untagged string of characters forming the sentence).
 ```{python}
+conjunctslist = ["alternatively", "altogether", "consequently", "conversely", "eg", "e.g.", "else", "furthermore",
+                 "hence", "however", "ie", "i.e.", "instead", "likewise", "moreover", "namely", "nevertheless",
+                 "nonetheless", "notwithstanding", "otherwise", "rather", "similarly", "therefore", "thus", "viz"]
 
+## within the function analyze_adverb
+
+    elif word_tuple[0] in conjunctslist:
+        features_dict["conjuncts_045"] += 1
+
+## within the function analyze_sentence
+
+    for conjunct in ["on the contrary", "on the other hand", "for example", "for instance", "by contrast", "by comparison", "in comparison", "in contrast", "in particular", "in addition", "in conclusion", "in consequence", "in sum", "in summary", "in any event", "in any case", "in other words", "as a result", "as a consequence"]:
+        features_dict["conjuncts_045"] += sentence.count(conjunct)
+        
+    for conjunct in ["that is,", "else,", "altogether,", "rather,"]:
+        if sentence.startswith(conjunct):
+            features_dict["conjuncts_045"] += 1
 ```
 
 - Accuracy:
@@ -1029,9 +947,21 @@ downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "on
 - Definition from Biber for amplifiers: "absolutely, altogether, completely, enormously, entirely, extremely, fully, greatly, highly, intensely, perfectly, strongly, thoroughly, totally, utterly, very" (1988: 240)
 - Definition from Biber for emphatics: "for sure/a lot/such a/real + ADJ /so + ADJ /DO + V / just/really /most /more" (1988: 241)
 - Example from Reddit: *Extremely* so.
-- Our search strategy:
+- Our search strategy: We are combining two features from Biber here because the theoretical delimitation is not clear to us. Within the function analyze_adverb we are couting all items that have a surface form listed in the list "amplifierlist". The list "amplifierlist" is defined beforhand and contains all the words mentioned by Biber plus our addition 'definitely'. From the original feature "emphatics" we are only keeping "for sure" because the other items strike us as ambiguous and not always emphatic in nature. We look for 'for sure' with in the function analyze_sentence (where we are only checking the untagged string of characters).
 ```{python}
+amplifierlist = ["absolutely", "altogether", "completely", "definitely", "enormously", "entirely", "extremely", "fully", "greatly", "highly", "intensely", "perfectly", "strongly", "thoroughly", "totally", "utterly", "very"]
 
+## within the function analyze_adverb:
+
+    elif word_tuple[0] in amplifierlist:
+        features_dict["amplifiers_048"] += 1 
+
+## within the function analyze_sentence
+
+    for emphatic in [" for sure"]: 
+        features_dict["amplifiers_048"] += sentence.count(emphatic)
+    if sentence.startswith("for sure"): # AB: Catch cases of sentence-initial "for sure" that have been excluded through the insertion of spaces above
+        features_dict["amplifiers_048"] += 1
 ```
 
 - Accuracy:
@@ -1062,9 +992,29 @@ discpart = ["well", "now", "anyway", "anyhow", "anyways", "though"]
 
 - Definition from Biber: "that/this/these/those (This count excludes demonstrative pronouns (no. 10) and that as relative, complementizer, or subordinator.)" (1988: 241)
 - Example from Reddit: *This* article is being considered for deletion ...
-- Our search strategy:
+- Our search strategy: Within the function analyze_pronoun and within the function analyze_determiner we first check whether the surface form is 'that' or one of ["this", "these", "those"]. In the latter case we count the item as a demonstrative if it is followed by a noun or an adjective + noun. Other cases are considered demonstrative pronouns. If the item is 'that' we also count it if it is followed by a noun or an adjective + noun. We are implementing this procedure in both POS-functions because the POS-identification of the words in question is not always reliable.
 ```{python}
+## within the function analyze_pronoun and within the function analyze_determiner
 
+    if word_tuple[0] in ["this", "these", "those"]:
+        if tagged_sentence[index+1][1].startswith("NN"):
+            features_dict["demonstr_051"] += 1
+        elif tagged_sentence[index+1][1].startswith("JJ") and tagged_sentence[index+2][1].startswith("NN"):
+            features_dict["demonstr_051"] += 1
+        else:
+            features_dict["prodemons_010"] += 1
+            
+    if word_tuple [0] == "that":
+        if tagged_sentence[index+1][1].startswith("NN"):
+            features_dict["demonstr_051"] += 1
+        elif tagged_sentence[index+1][1].startswith("JJ") and tagged_sentence[index+2][1].startswith("NN"):
+            features_dict["demonstr_051"] += 1
+        elif tagged_sentence[index+1][0] == "X":
+            features_dict["prodemons_010"] += 1
+        elif tagged_sentence[index+1][1].startswith("JJ"):
+            features_dict["prodemons_010"] += 0
+        else:
+            features_dict["prodemons_010"] += 1
 ```
 
 - Accuracy:
@@ -1215,56 +1165,6 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
         features_dict["negana_067"] += 1
         features_dict["contractions_059"] += 1
 
-```
-
-- Accuracy:
-
-## Subordinator-that deletion: thatdel_060
-
-- Definition from Biber: 
-  "(1) PUB/PRV/SUA + (T#) + demonstrative pro/SUBJPRO 
-  (2) PUB/PRV/SUA + PRO/N + AUX/V
-  (3) PUB/PRV/SUA + ADJ/ADV/DET/POSSPRO + (ADJ) + N + AUX/V" (1988: 244)
-- Example from Reddit: It seems quite freindly though I can *imagine it* would scare some younger kids.
-- Our search strategy: Within the function analyze_verb we are first checking whether the verb is part of "publiclist". This list contains surface forms of public verbs as given by Biber. 
-  - We count the structure as that-delation if the following item is one of ["this", "these", "those", "I", "we", "he", "she", "they"] (Biber's demonstrative pronouns and subject pronouns). 
-  - We also count the structure as that-deletion if the next word is tagged as a noun or pronoun and the word after that is a verb or modal. 
-  - We also count the structure as that-deletion if the following item is tagged as one of ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"] (Biber's adj/adv/det/posspro), the next item is a noun, and the item afterwards is a verb or modal. 
-  We are then repeating this procedure for private verbs and suasive verbs (with the same lemmata as given by Biber). 
-  The only deviation from Biber is that we are not looking for "that" in the first condition (because of its multifunctionality) and that we are not allowing for an additional interverning adjective in the third condition.
-```{python}
-    if word_tuple[0] in publiclist:
-        if tagged_sentence[index + 1][0] in ["this", "these", "those", "I", "we", "he", "she", "they"]:
-            features_dict["thatdel_060"] += 1
-        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"):
-            if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
-                features_dict["thatdel_060"] += 1
-        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]:
-            if tagged_sentence[index + 2][1].startswith("NN"):
-                if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
-                    features_dict["thatdel_060"] += 1
-
-    if word_tuple[0] in privatelist:
-        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]:
-            features_dict["thatdel_060"] += 1
-        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"):
-            if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
-                features_dict["thatdel_060"] += 1
-        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]:
-            if tagged_sentence[index + 2][1].startswith("NN"):
-                if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
-                    features_dict["thatdel_060"] += 1
-
-    if word_tuple[0] in suasivelist:
-        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]:
-            features_dict["thatdel_060"] += 1
-        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"):
-            if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
-                features_dict["thatdel_060"] += 1
-        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]:
-            if tagged_sentence[index + 2][1].startswith("NN"):
-                if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
-                    features_dict["thatdel_060"] += 1
 ```
 
 - Accuracy:
@@ -1532,31 +1432,39 @@ QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
 
 - Definition from Clark & Grieve (2017): none given.
 - Example from Reddit: *#BEST* FUCKING POST EVER
-- Our search strategy:
+- Our search strategy: Within the function analyze_sentence (where we work with the untagged string of characters) we are counting all items that start with a # and that have alphanumerical characters following.
 ```{python}
-
+    features_dict["hashtag_201"] = len(re.findall(r"#\w+", sentence))
 ```
 
 - Accuracy:
 
-## Reddit-external links: link_202
+## Reddit-internal links: link_202
 
 - Definition from Clark & Grieve (2017): none given.
 - Example from Reddit: *[What's Up](https://youtu.be/6NXnxTNIWkc)* by 4 Non Blondes
-- Our search strategy:
+- Our search strategy: Within the function analyze_sentence (where we work with the untagged string of characters) we count all items that start with u/ (indicating a user name) or starting with r/ (indicating a subreddit).
 ```{python}
-
+        if words[i].lower().startswith("u/"):
+            features_dict["link_202"] += 1 
+            words[i] = "username"
+                
+        if words[i].lower().startswith("r/"):
+            features_dict["link_202"] += 1 
+            words[i] = "subredditname"
 ```
 
 - Accuracy:
 
-## Reddit-internal links: interlink_203
+## Reddit-external links: interlink_203
 
-- Definition: 
-- Example from Reddit: *[Among other things](http://www.reddit.com/r/starcraft/comments/d792k/psy_gets_map_hacked/c0y3hdf)*
-- Our search strategy:
+- Definition: Links to websites other than Reddit.
+- Example from Reddit: *[Asymmetric Warfare](https://en.wikipedia.org/wiki/Asymmetric_warfare)*
+- Our search strategy: Within the function analyze_sentence (where we work with the untagged string of characters) we count all items that start with "http" or with "www".
 ```{python}
-
+        if "http" in words[i].lower() or "www" in words[i].lower():
+            features_dict["interlink_203"] += 1 
+            words[i] = "url"
 ```
 
 - Accuracy:
@@ -1576,73 +1484,101 @@ QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
 
 - Definition from Clark & Grieve (2017): none given.
 - Example from Reddit: *Save* the cross!
-- Our search strategy:
+- Our search strategy: Within the function analyze_verb we count all items that received the tag "VB" (Verb, base form) and that are either at the beginning of a sentence or after a comma.
 ```{python}
-
+    word_tuple = tagged_sentence[index]
+    if word_tuple[1] == "VBD":
+        features_dict["vpast_001"] += 1
+    elif word_tuple[1] == "VB":
+        if tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] == ",": 
+            features_dict["vimperative_205"] += 1
 ```
 
 - Accuracy:
 
 ## Strategic lengthening within words: lengthening_206
 
-- Definition:
+- Definition: Words in which an individual letter is repeated (3 instanes or more) for emphasis.
 - Example from Reddit: "I've come here to chew some bubble gum and kick some ass......*aaand* I'm all out of bubble gum" 
-- Our search strategy:
+- Our search strategy: Within the function analyze_sentence (which takes the raw string of characters as input) we apply the function lengthening() to each item and count it if the function returns 'true'. The function returns true if there are 3 or more identical characters in direct sequence within the word (excluding www).
 ```{python}
+def lengthening(word):
+    '''Takes a word as an argument. Returns True if any sequence of 3+
+    identical characters is in the word, with the exception of multiple
+    "w"s (to avoid false positives with websites). Else returns False.'''
+    count = 1
+    character = ""
+    for c in word:
+        if c == character and c.isalpha() and not c == "w":
+            count += 1
+            if count == 3:
+                return(True)
+        else:
+            count = 1
+            character = c
+    return(False)
 
+## within the function analyze_sentence:
+
+    for i in range(len(words)):
+        if lengthening(words[i].lower()):
+            features_dict["lengthening_206"] += 1
 ```
 
 - Accuracy:
 
 ## Emoticons: emoticons_207
 
-- Definition:
+- Definition: Combinations of punctuation marks to imitate a facial expression.
 - Example from Reddit: Call that a typo... *:P*
-- Our search strategy:
+- Our search strategy: Within the function analyze_sentence we count all combinations of punctuation marks that are commonly used to form emoticons.
 ```{python}
-
+    for emoticon in [":-)", ":)", ";-)", ":-p", ";-p", ":-(", ";-(", ":-o", "^^", "-.-", ":-$", ":-\\", ":-/", ":-|", ";-/", ";-\\", ":-[", ":-]", ":-§", "owo", "*.*", ";)", ":p", ";p", ":(", ";(", ":o", ":|", ";/", ";\\", ":[", ":]", ":§", ":-d"]:
+        features_dict["emoticons_207"] += sentence.count(emoticon)
 ```
 
 - Accuracy:
 
 ## Qeustion sentences: question_208
 
-- Definition:
+- Definition: All sentences ending in a question mark.
 - Example from Reddit: What about people with very common names (could happen a lot with Chinese people)*?*
-- Our search strategy:
+- Our search strategy: Within the function analyze_sentence we count all sentences that end with the symbol ?
 ```{python}
-
+    if sentence.endswith("?"):
+        features_dict["question_208"] += 1
 ```
 
 - Accuracy:
 
 ## Exclamation sentences: exclamation_209
 
-- Definition:
+- Definition: All sentences ending in an exclamation mark.
 - Example from Reddit: crazy*!*
-- Our search strategy:
+- Our search strategy: Within the function analyze_sentence we count all sentences that end with the symbol !
 ```{python}
-
+    if sentence.endswith("!"):
+        features_dict["exclamation_209"] += 1
 ```
 
 - Accuracy:
 
 ## Sentence length in characters: lenchar_210
 
-- Definition from Biber: "" (1988: )
-- Our search strategy:
+- Definition: Length of the sentence in characters (that includes symbols, numberals, and punctuation marks).
+- Our search strategy: Within the function analyze_sentence we count the number of characters in the string.
 ```{python}
-
+    features_dict["lenchar_210"] = len(sentence) 
 ```
 
 - Accuracy:
 
 ## Sentence length in words: lenword_211
 
-- Definition from Biber: "" (1988: )
-- Our search strategy:
+- Definition: The number of orthographic units within a sentence.
+- Our search strategy: Within the function analyse_sentence we split the string of characters at every whitespace and count the number of remaining units.
 ```{python}
-
+    features_dict["lenword_211"] = len(sentence.split(" ")) 
 ```
 
 - Accuracy:
@@ -1651,9 +1587,10 @@ QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
 
 - Definition from Clark & Grieve (2017): none given.
 - Example from Reddit: raiders of the lost arc was much, much *worse*
-- Our search strategy:
+- Our search strategy: Within the function analyze_adjective we count all items that received the tag JJR (Adjective, comparative).
 ```{python}
-
+    if tagged_sentence[index][1] == "JJR":
+        features_dict["comparatives_syn_212"] += 1
 ```
 
 - Accuracy:
@@ -1662,9 +1599,10 @@ QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
 
 - Definition from Clark & Grieve (2017): none given.
 - Example from Reddit: Because the Canucks gave the Flames the *best* offer.
-- Our search strategy:
+- Our search strategy: Within the function analyze_adjective we count all items with the tag JJS (Adjective, superlative)
 ```{python}
-
+    elif tagged_sentence[index][1] == "JJS":
+        features_dict["superlatives_syn_213"] += 1
 ```
 
 - Accuracy:
@@ -1673,9 +1611,10 @@ QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
 
 - Definition from Clark & Grieve (2017): none given.
 - Example from Reddit: *More accurate* would be "Where there is no freedom, poverty persists".
-- Our search strategy:
+- Our search strategy: Within the function analyze_adjective we are counting all items that have the word "more" preceding them.
 ```{python}
-
+    if tagged_sentence[index-1][0] == "more":
+        features_dict["comparatives_ana_214"] += 1
 ```
 
 - Accuracy:
@@ -1684,31 +1623,49 @@ QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
 
 - Definition from Clark & Grieve (2017): none given.
 - Example from Reddit: *Most pathetic* quote of all time:
-- Our search strategy:
+- Our search strategy: Within the function analyze_adjective we are counting all items that have the word "most" preceding them.
 ```{python}
-
+    elif tagged_sentence[index-1][0] == "most":
+        features_dict["superlatives_ana_215"] += 1
 ```
 
 - Accuracy:
 
 ## Community-specific abbreviations or words: reddit_vocab_216
 
-- Definition:
-- Example from Reddit: Congrats Raj, you got me to upvote a pic post.
-- Our search strategy:
+- Definition: Presence of abbreviations or lexical items that are frequently used on or specific to Reddit.
+- Example from Reddit: Congrats Raj, you got me to *upvote* a pic *post*.
+- Our search strategy: Within the function analyze_sentence we check for various surface forms that we identified as Reddit-specific vocabulary. Usage of these lexical items or abbreviations marks the author as an experiences Reddit user.
 ```{python}
-
+    for i in range(len(words)):
+        if lengthening(words[i].lower()):
+            features_dict["lengthening_206"] += 1
+        if words[i].lower() in ["op", "subreddit", "sub", "subreddits", "upvoted", "posted", "repost", "thread", "upvotes", "upvote", "upvoting", "reddit", "redditor", "redditors", "post", "posts", "mod", "mods", "flair", "karma", "downmod", "downmodding", "downvote", "downvoting", "modding"]:
+            features_dict["reddit_vocab_216"] += 1 
 ```
 
 - Accuracy:
 
 ## verbs in the progressive aspect: vprogressive_217
 
-- Definition:
+- Definition: finite progressive verb phrases (ing-form and form of BE)
 - Example from Reddit: If Redskins get Williams...where is he *playing*?
-- Our search strategy:
+- Our search strategy: Within the function analyze_verb we first check whether the word received the tag VBG (Verb, gerund or present participle). If yes, we first sort out sentence-initial instances and cases preceded by markers of non-finite adverbial clauses. We then sort out instances following nouns. If the word is preceded by a form of BE (listed in "belist") we count it for this feature. Also, if the word two to the left is a form of BE and the word to the left is an adverb (tag RB) we count it towards this feature.
 ```{python}
-
+    elif word_tuple[1] == "VBG":
+        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
+            if tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]:
+                features_dict["vpresentpart_025"] += 1
+        if (tagged_sentence[index-2][1] == "X" or tagged_sentence[index-2][0] in ALLP):
+            if tagged_sentence[index-1][0] in ["while", "without", "when", "although","with"]:
+                features_dict["vpresentpart_025"] += 1
+        elif tagged_sentence[index-1][1] == "NN" or tagged_sentence[index-1][1] == "NNS": 
+            features_dict["vpresentwhiz_028"] += 1 
+        elif tagged_sentence[index-1][0] in belist:
+            features_dict["vprogressive_217"] += 1
+        elif (tagged_sentence[index-2][0] in belist) and (tagged_sentence[index-1][1] == "RB"):
+            features_dict["vprogressive_217"] += 1  
+            features_dict["vsplitaux_063"] += 1
 ```
 
 - Accuracy:
@@ -1716,14 +1673,166 @@ QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
 ## Emojis: emojis_218
 
 - Definition:
-- Example from Reddit: 
-- Our search strategy:
+- Our search strategy: Within the function analyze_sentence we ...
 ```{python}
-
+    features_dict["emojis_218"] = adv.extract_emoji(sentence)["overview"]["num_emoji"]
 ```
 
 - Accuracy: not coded manually
 
+
+# Features that were discarded
+
+The following features were initially coded but then removed from the script because we could not reach a satisfying level of accuracy.
+
+
+## that-relative clauses on object position: thatreobj_030
+
+- Definition from Biber: "N + (T#) + that + DET/SUBJPRO/POSSPRO/it/ADJ/plural noun/proper noun/possessive noun/TITLE (This algorithm does not distinguish between that complements to nouns and true relative clauses.)" (1988: 234)
+- Example from Reddit: Can someone remind me what happened to the whole dad quest *that* Oliver was supposed to be on?
+- Our search strategy: 
+```{python}
+    if tagged_sentence[index-1][1].startswith("NN"):
+        if tagged_sentence[index+1][1].startswith("RB"):
+            if (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
+                features_dict["thatresub_029"] += 1 
+        elif tagged_sentence[index+1][1].startswith("VB") or tagged_sentence[index+1][1].startswith("MD"):
+            features_dict["thatresub_029"] += 1
+        elif tagged_sentence[index+1][1].startswith("DT") or tagged_sentence[index+1][1].startswith("JJ") or tagged_sentence[index+1][1] == "NNS" or tagged_sentence[index+1][1].startswith("NNP"):
+            features_dict["thatreobj_030"] += 1
+        elif tagged_sentence[index+1][0] == "it" or tagged_sentence[index+1][0] in subjpro or tagged_sentence[index+1][0] in posspro:
+            features_dict["thatreobj_030"] += 1   
+```
+
+- Accuracy: F-score of 0.23
+
+## Gerunds: gerund_015
+
+- Definition from Biber: "All participle forms serving nominal functions - these are edited by hand." (1988: 227)
+- Example from Reddit: Does anyone seriously believe that *closing* the source of the OS will reduce piracy? 
+- Our search strategy: Within the function analyze_noun we are looking for items ending in <-ing>. These items are then checked against a list of words that we know not to be gerunds. We are therefore deviating from Biber's procedure since a manual analysis was not feasible.
+```{python}
+notgerundlist = ["nothing", "everything", "something", "anything", "thing", "things", "ring", "sting", "ting", "viking", "wing", "zing"]
+
+    if word_tuple[0].endswith("ing"):
+        if word_tuple[0] not in notgerundlist:
+            features_dict["gerund_015"] += 1
+```
+
+- Accuracy: F-score of 0.235
+
+
+
+## Present participial WHIZ deletion relatives: vpresentwhiz_028
+
+- Definition from Biber: "N + VBG (these forms were edited by hand)" (1988: 233)
+- Example from Reddit: I don't know... as a mom -- it just looks like a mess *waiting* to happen!!
+- Our search strategy: Within the function analyze_verb we are looking for items tagged as "VBG" (Verb, gerund or present participle). We are sorting out structures belonging to vpresentpart_025. If the preceding item is tagged as "NN" (Noun, singular or mass) or "NNS" (Noun, plural) then we are counting the hit towards the feature. *Compared to Biber we are ...*
+```{python}
+    elif word_tuple[1] == "VBG":
+        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
+            if tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]:
+                features_dict["vpresentpart_025"] += 1
+        if (tagged_sentence[index-2][1] == "X" or tagged_sentence[index-2][0] in ALLP):
+            if tagged_sentence[index-1][0] in ["while", "without", "when", "although","with"]:
+                features_dict["vpresentpart_025"] += 1
+        elif tagged_sentence[index-1][1] == "NN" or tagged_sentence[index-1][1] == "NNS": 
+            features_dict["vpresentwhiz_028"] += 1 
+        elif tagged_sentence[index-1][0] in belist:
+            features_dict["vprogressive_217"] += 1
+        elif (tagged_sentence[index-2][0] in belist) and (tagged_sentence[index-1][1] == "RB"):
+            features_dict["vprogressive_217"] += 1  
+            features_dict["vsplitaux_063"] += 1
+```
+
+- Accuracy: F-score of 0.352
+
+## Subordinator-that deletion: thatdel_060
+
+- Definition from Biber: 
+  "(1) PUB/PRV/SUA + (T#) + demonstrative pro/SUBJPRO 
+  (2) PUB/PRV/SUA + PRO/N + AUX/V
+  (3) PUB/PRV/SUA + ADJ/ADV/DET/POSSPRO + (ADJ) + N + AUX/V" (1988: 244)
+- Example from Reddit: It seems quite freindly though I can *imagine it* would scare some younger kids.
+- Our search strategy: Within the function analyze_verb we are first checking whether the verb is part of "publiclist". This list contains surface forms of public verbs as given by Biber. 
+  - We count the structure as that-delation if the following item is one of ["this", "these", "those", "I", "we", "he", "she", "they"] (Biber's demonstrative pronouns and subject pronouns). 
+  - We also count the structure as that-deletion if the next word is tagged as a noun or pronoun and the word after that is a verb or modal. 
+  - We also count the structure as that-deletion if the following item is tagged as one of ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"] (Biber's adj/adv/det/posspro), the next item is a noun, and the item afterwards is a verb or modal. 
+  We are then repeating this procedure for private verbs and suasive verbs (with the same lemmata as given by Biber). 
+  The only deviation from Biber is that we are not looking for "that" in the first condition (because of its multifunctionality) and that we are not allowing for an additional interverning adjective in the third condition.
+```{python}
+    if word_tuple[0] in publiclist:
+        if tagged_sentence[index + 1][0] in ["this", "these", "those", "I", "we", "he", "she", "they"]:
+            features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"):
+            if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
+                features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]:
+            if tagged_sentence[index + 2][1].startswith("NN"):
+                if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
+                    features_dict["thatdel_060"] += 1
+
+    if word_tuple[0] in privatelist:
+        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]:
+            features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"):
+            if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
+                features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]:
+            if tagged_sentence[index + 2][1].startswith("NN"):
+                if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
+                    features_dict["thatdel_060"] += 1
+
+    if word_tuple[0] in suasivelist:
+        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]:
+            features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"):
+            if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
+                features_dict["thatdel_060"] += 1
+        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]:
+            if tagged_sentence[index + 2][1].startswith("NN"):
+                if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
+                    features_dict["thatdel_060"] += 1
+```
+
+- Accuracy: F-score of 0.5
+
+
+
+## Present participial clauses: vpresentpart_025
+
+- Definition from Biber: "T#/ALL-P + VBG + PREP/DET/WHP/WHO/PRO/ADV (these forms were edited by hand)" (1988: 233)
+- Example from Reddit: With new worlds icons and skins *coming* out this is a great way to get them for free.
+- Our search strategy: Within the function analyze_verb we are first checking for items with the tag "VBG" (standing for "Verb, gerund or present participle"). If this item occurs in sentence-initial position and is followed by a word tagged as ["IN", "DT", "RB", "WP","PRP", "WRB"] then it is counted towards this feature. Also if there is ["while", "without", "when", "although","with"] at the start of the sentence followed by the verb itself. This is overall the same strategy as Biber, only that we are including sentences starting with ["while", "without", "when", "although","with"], since these can also be present participial adverbial clauses in sentence-initial position (with overt subject).
+```{python}
+    elif word_tuple[1] == "VBG":
+        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
+            if tagged_sentence[index+1][1] in ["IN", "DT", "RB", "WP","PRP", "WRB"]:
+                features_dict["vpresentpart_025"] += 1
+        if (tagged_sentence[index-2][1] == "X" or tagged_sentence[index-2][0] in ALLP):
+            if tagged_sentence[index-1][0] in ["while", "without", "when", "although","with"]:
+                features_dict["vpresentpart_025"] += 1
+```
+
+- Accuracy: F-score of 0.533
+
+
+## Past participial WHIZ deletion relatives: vpastwhiz_027
+
+- Definition from Biber: "N/QUANPRO + VBN + PREP/BE/ADV (these forms were edited by hand)" (1988: 233)
+- Example from Reddit: Herbal Phentermine is an exclusive formulation of research-supported botanical ingredients, *designed* to support a healthy diet.
+- Our search strategy: Within the function analyze_verb we are first looking for items tagged as "VBN" (Verb, past participle). After sorting out instances beloning the feature vpastpart_026 we check for the following criteria: Is the preceding item tagged as a nouns (all nominal tags start with "NN") or is it within the list QUANPRO? If yes: is the following item tagged as ["IN", "RBR", "RB", "RBS"] or a form of 'be'? *Compared to Biber ...*
+```{python}
+    elif word_tuple[1] == "VBN":
+        if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
+            if tagged_sentence[index+1][1] in ["IN", "RB", "TO"]:
+                features_dict["vpastpart_026"] += 1
+        elif tagged_sentence[index-1][1].startswith("NN") or tagged_sentence[index-1][0] in QUANPRO:
+            if tagged_sentence[index+1][1] in ["IN", "RBR", "RB", "RBS"] or tagged_sentence[index+1][0] in belist:
+                features_dict["vpastwhiz_027"] += 1 
+```
+
+- Accuracy: F-score of 0.555
 
 
 
