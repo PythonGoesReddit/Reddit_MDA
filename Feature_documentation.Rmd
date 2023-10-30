@@ -15,12 +15,19 @@ Features that were dropped from the analysis can be found at the end of the file
 Note that the Python code included here is not meant to be run on its own. It is copied out of our main script "Reddit_MDA" and serves illustration purposes only.
 
 *What still needs to be done:*
-- insert features coordAnd_219, coordBut_220, and coordOr_221, delete original coordination-features
 - add missing accuracy scores after next round of testing
+- we often have the condition "if tagged_sentence[index-1][0] in ALLP" to catch sentence-initial structures. Should this not be " elif tagged_sentence[index+1][0] == "X"" ?? (same for sentence-final positions) -> if we decide to change this: update accuracy scores afterwards!
+- add code for ttratio_043 to main script and in here.
 - decide what to do with the features that had 0 hits in our sample data - keep them in the code without reporting an accuracy score? Or remove?
 - decide what to do with whquest_013 and caps_204
-- add justifications for prodemons_010, pverbdo_012, whquest_013, passagentl_017, passby_018, mainvbe_019, thatvcom_021, thatacom_022, whclause_023, vpastwhiz_027, vpresentwhiz_028, thatresub_029, thatreobj_030, whresub_031, whreobj_032, advsubother_038, prepositions_039, adjattr_040, adjpred_041, wordlength_044, hedges_047, strandprep_061, vsplitaux_063, caps_204
-- add code for ttratio_043 to main script
+- add justifications for whquest_013, passagentl_017, passby_018, vsplitaux_063, caps_204
+  - thatresub_029: are we missing the condition item == "that" ?
+  - wordlength_044: what are we replacing here and why?
+  - whresub_031: do we have a hierarchy problem here? Condition that the noun needs to precede holds? Combine this and whreobj_032?
+    - I think this is why this feature does so badly in the accuracy test.
+  - whreobj_032: do we have a hierarchy problem here? Condition that the noun needs to precede holds?
+    - I think this is why this feature does so badly in the accuracy test.
+
 
 ## Verbs in the past tense: vpast_001
 
@@ -212,7 +219,7 @@ thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "h
   (c) T# + that 
   (that in this last context was edited by hand to distinguish among demonstrative pronouns, relative pronouns, complementizers, etc.)" (1988: 226)
 - Example from Reddit: *That*'s not Samuel l Jackson? 
-- Our search strategy: We first distinguish between ["this", "these", "those"] and the word "that", since "that" has more potential functions in the sentence. We then check whether the following item (with a potential intervening adjective) is a noun to sort out demonstrative determiners (see feature demonstr_051). All remaining items are counted as demonstrative pronouns. **This is a slight deviation from Biber's approach which we consider necessary since ...** We included this code chunk within the function analyze_pronoun and within analyze_determiner to make sure we catch all cases, irrespective of the POS-tag that was assigned. 
+- Our search strategy: We first distinguish between ["this", "these", "those"] and the word "that", since "that" has more potential functions in the sentence. We then check whether the following item (with a potential intervening adjective) is a noun to sort out demonstrative determiners (see feature demonstr_051). All remaining items are counted as demonstrative pronouns. This is a slight deviation from Biber's approach. We included this code chunk within the function analyze_pronoun and within analyze_determiner to make sure we catch all cases, irrespective of the POS-tag that was assigned. 
 ```{python}
     if word_tuple[0] in ["this", "these", "those"]:
         if tagged_sentence[index+1][1].startswith("NN"):
@@ -257,7 +264,7 @@ indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "e
   DO + (ADV) + V      (DO as auxiliary) 
   ALL-P/TS/WHP + DO   (DO as question)" (1988: 226)
 - Example from Reddit: But when you *do*, he will definitely score for you. 
-- Our search strategy: Within the function analyze_verb we are first checking for forms of 'do'. Then we are only counting instances that are in sentence-final position, or that are followed by ["too", "this", "that", "it", "so"] in sentence-final position. **We therefore deviate from Biber's strategy because ...**
+- Our search strategy: Within the function analyze_verb we are first checking for forms of 'do'. Then we are only counting instances that are in sentence-final position, or that are followed by ["too", "this", "that", "it", "so"] in sentence-final position. This is a slight deviation from Biber's strategy.
 ```{python}
 dolist = ["do", "does", "doing", "did", "done"]
 
@@ -353,7 +360,6 @@ dolist = ["do", "does", "doing", "did", "done"]
     elif word_tuple[0] in belist:
         if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
             features_dict["mainvbe_019"] += 1
-        ## allow for one intervening adverb for mainvbe_019
         elif tagged_sentence[index+1][1] == "RB" and tagged_sentence[index+2][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
             features_dict["mainvbe_019"] += 1
             
@@ -374,7 +380,7 @@ dolist = ["do", "does", "doing", "did", "done"]
                         move_on2 = True
                         while move_on2:
                             x += 1
-                            if tagged_sentence[x+1][1].startswith("N") or tagged_sentence[x+1][1].startswith("DT"): # One might include adjectives here as well, but prob at the cost of precision.
+                            if tagged_sentence[x+1][1].startswith("N") or tagged_sentence[x+1][1].startswith("DT"):
                                 pass
                             elif tagged_sentence[x+1][0] == "by":
                                 features_dict["passby_018"] += 1
@@ -473,21 +479,19 @@ dolist = ["do", "does", "doing", "did", "done"]
 
 - Definition from Biber: "BE + DET/POSSPRO/TITLE/PREP/ADJ" (1988: 229)
 - Example from Reddit: Also, they*'re* fake. 
-- Our search strategy: 
+- Our search strategy: Within the function analyze_verb we first check whether the item is part of "belist". The list is defined beforehand and contains full and contracted forms of 'be' (except for 's which can serve several functions). We count the structure towards mainvbe_019 if the following item is tagged as ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"] (with one potential intervening adverbial). We then repeat these steps for all items with the surface form 's (since we don't want this as part of our "belist", which is used in several other functions). We therefore deviate from Biber in allowing for intervening adverbials and by giving special attention to 's (which is not part of Biber's list for "BE"). 
 ```{python}
+belist = ["be", "am", "are", "is", "was", "were", "been", "being", "'m", "'re",]
+
     elif word_tuple[0] in belist:
         if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
             features_dict["mainvbe_019"] += 1
-        ## allow for one intervening adverb for mainvbe_019
         elif tagged_sentence[index+1][1] == "RB" and tagged_sentence[index+2][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
             features_dict["mainvbe_019"] += 1
 
-    ## added this condition for mainvbe_019: in the structures represented below "'s" cannot be used as "has" and is almost certainly a shortening of "is"
-    ## 's is currently not included in the [belist] because of belonging to both HAVE and BE. 
     if word_tuple[0] == "'s" or word_tuple[0] == "s":
         if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
             features_dict["mainvbe_019"] += 1
-        ## allow for one intervening adverb for mainvbe_019
         elif tagged_sentence[index+1][1] == "RB" and tagged_sentence[index+2][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
             features_dict["mainvbe_019"] += 1
 ```
@@ -508,7 +512,7 @@ dolist = ["do", "does", "doing", "did", "done"]
 
 - Accuracy: F-score of 0.95
 
-## thatvcom_021
+## 'that' verb complements thatvcom_021
 
 - Definition from Biber: 
   "(a) and/nor/but/or/also/ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are that-clauses in clause-initial positions) 
@@ -516,9 +520,9 @@ dolist = ["do", "does", "doing", "did", "done"]
   (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N) (This algorithm allows an intervening prepositional phrase between a verb and its complement.) 
   (d) T# + that (This algorithm applies only to spoken texts. Forms in this context are checked by hand, to distinguish among that complements, relatives, demonstrative pronouns and subordinators.)" (1988: 230)
 - Example from Reddit: Movies and TV shows have shown *that* weapon movement is independent from head movement. 
-- Our search strategy: Within the function analyze_preposition...
+- Our search strategy: Within the function analyze_preposition we first check whether the item is "that". If yes, we count the structure if it is in sentence-initial position or preceded by ["and", "nor", "but", "or", "who"], and it is followed by a noun phrase or title or the word "there". Alternatively, we count the structure if it is preceded by public, private, or suasive verb (or a form of 'seem' or 'appear'), and the item is not followed by "and", a verb or sentence-final punctuation.
+  We decided against implementing Biber's condition c) as it seems marginal to us and complicated to count correctly.
 ```{python}
-    #21 that verb complements (e.g., / said that he went)  
     if tagged_sentence[index][0] == "that":
     # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions)
         if tagged_sentence[index-1][0] in ALLP or tagged_sentence[index-1][0] in ["and", "nor", "but", "or", "who"]:
@@ -538,18 +542,16 @@ dolist = ["do", "does", "doing", "did", "done"]
 
 - Accuracy: F-score of 0.80
 
-## thatacom_022
+## 'that' adjective complements thatacom_022
 
 - Definition from Biber: "ADJ + (T#) + that (complements across intonation boundaries were edited by hand)" (1988: 231)
 - Example from Reddit: I live in the country of reddit and I feel absolutely lucky *that* I see these exotic views everymorning.
-- Our search strategy: Within the function analyze_preposition ...
+- Our search strategy: Within the function analyze_preposition we count all cases where the item has the surface form "that" and the preceding item is tagged as an adjective. We sort out cases of verbal complementation beforehand.
 ```{python}
     if tagged_sentence[index][0] == "that":
-    # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions)
         if tagged_sentence[index-1][0] in ALLP or tagged_sentence[index-1][0] in ["and", "nor", "but", "or", "who"]:
             if tagged_sentence[index+1][1] in ["DT", "PRP", "NNS", "NNP"] or tagged_sentence[index+1][0] in titlelist or tagged_sentence[index+1][0] == "there":
                 features_dict["thatvcom_021"] += 1
-    # (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/and)
         elif (tagged_sentence[index-1][0] in suasivelist) or (tagged_sentence[index-1][0] in privatelist) or (tagged_sentence[index-1][0] in publiclist):
             if not tagged_sentence[index+1][1].startswith("V"):
                 if tagged_sentence[index+1][0] not in [ALLP, "and"]:
@@ -558,9 +560,6 @@ dolist = ["do", "does", "doing", "did", "done"]
             if not tagged_sentence[index+1][1].startswith("V"):
                 if tagged_sentence[index+1][0] not in [ALLP, "and"]:
                     features_dict["thatvcom_021"] += 1            
-    # (c) PUB/PRV/SUA + PREP + xxx + N + that (where xxx is any number of words, but NOT = N)
-    #     (This algorithm allows an intervening prepositional phrase between a verb and its complement.)  
-    ### HM: this is not implemented at the moment, since it seems very complicated and rather marginal. My guess is that we need to trash this whole feature anyway...              
         if tagged_sentence[index-1][1].startswith("J"):
             features_dict["thatacom_022"] += 1 
 ```
@@ -570,9 +569,13 @@ dolist = ["do", "does", "doing", "did", "done"]
 ## WH-clauses: whclause_023
 
 - Definition from Biber: "PUB/PRV/SUA + WHP/WHO + xxx (where xxx is NOT = AUX - this excludes WH questions)" (1988: 231)
-- Example from Reddit: *Mistake in the manual coding file?* 
-- Our search strategy: Within the function analyze_verb ... This procedure is repeated for private verbs and suasive verbs.
+- Example from Reddit: When the time comes, you will remember *where* to go.
+- Our search strategy: Within the function analyze_verb we first select only cases in which the verb is a public verb (part of the list "publiclist" defined beforehand). If yes, we first exclude cases of that-deletion. If the following item is part of the list WHP or WHO (see definition below), and the item after that is not a modal verb we count it towards whclause_023. 
+  This procedure is repeated for private verbs and suasive verbs.
 ```{python}
+WHP = ["who", "whom", "whose", "which"]
+WHO = ["what", "where", "when", "how", "whether", "why", "whoever", "whomever", "whichever", "whenever", "whatever", "however"] 
+
     if word_tuple[0] in publiclist:
         features_dict["vpublic_055"] += 1
         if tagged_sentence[index + 1][0] in ["this", "these", "those", "I", "we", "he", "she", "they"]:
@@ -592,12 +595,12 @@ dolist = ["do", "does", "doing", "did", "done"]
               
     if word_tuple[0] in privatelist:
         features_dict["vprivate_056"] += 1
-        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]: ## 60-1 pub/priv/sua + demonstrative pronoun/subjpro (I we he she they)
+        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]:
             features_dict["thatdel_060"] += 1
-        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"): ## 60-2 pub/priv/sua + PRO/N + AUX/V
+        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"):
             if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
                 features_dict["thatdel_060"] += 1
-        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]: ## 60-3 pub/priv/sua + adj/adv/det/posspro + (Adj) + N + AUX/V
+        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]:
             if tagged_sentence[index + 2][1].startswith("NN"):
                 if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
                     features_dict["thatdel_060"] += 1
@@ -609,12 +612,12 @@ dolist = ["do", "does", "doing", "did", "done"]
 
     if word_tuple[0] in suasivelist:
         features_dict["vsuasive_057"] += 1
-        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]: ## 60-1 pub/priv/sua + demonstrative pronoun/subjpro (I we he she they)
+        if tagged_sentence[index + 1][0] in ["this", "these", "that", "those", "I", "we", "he", "she", "they"]:
             features_dict["thatdel_060"] += 1
-        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"): ## 60-2 pub/priv/sua + PRO/N + AUX/V
+        elif tagged_sentence[index + 1][1].startswith("NN") or tagged_sentence[index + 1][1].startswith("PR"):
             if tagged_sentence[index + 2][1].startswith("V") or tagged_sentence[index + 2][1] == "MD":
                 features_dict["thatdel_060"] += 1
-        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]: ## 60-3 pub/priv/sua + adj/adv/det/posspro + (Adj) + N + AUX/V
+        elif tagged_sentence[index + 1][1] in ["JJ", "JJR", "JJS", "RB", "RBR", "RBS", "PRP$", "DT"]:
             if tagged_sentence[index + 2][1].startswith("NN"):
                 if tagged_sentence[index + 3][1].startswith("V") or tagged_sentence[index + 3][1] == "MD":
                     features_dict["thatdel_060"] += 1
@@ -661,7 +664,7 @@ dolist = ["do", "does", "doing", "did", "done"]
 
 - Definition from Biber: "N + (T#) + that + (ADV) + AUX/V (that relatives across intonation boundaries are identified by hand.)" (1988: 234)
 - Example from Reddit: I’m sure you could work a persona *that* didn’t have a pretty scowl… &gt;:-D
-- Our search strategy: Within the function analyze_wh_word we first check whether the preceding item has a nominal tag (all nominal tags start with "NN"). If yes we check whether the next item is a full verb or a modal verb. If these conditions are fulfilled the structure is counted towards the feature. We are also allowing for one intervening adverb (RB). *Biber, in contrast, ...*
+- Our search strategy: Within the function analyze_wh_word we first check whether the preceding item has a nominal tag (all nominal tags start with "NN"). If yes we check whether the next item is a full verb or a modal verb. If these conditions are fulfilled the structure is counted towards the feature. We are also allowing for one intervening adverb (RB).
 ```{python}
     if tagged_sentence[index-1][1].startswith("NN"):
         if tagged_sentence[index+1][1].startswith("RB"):
@@ -677,8 +680,31 @@ dolist = ["do", "does", "doing", "did", "done"]
 
 - Definition from Biber: "xxx + yyy + N + WHP + (ADV) + AUX/V (where xxx is NOT any form of the verbs ASK or TELL; to exclude indirect WH questions like Tom asked the man who went to the store)" (1988: 235)
 - Example from Reddit: You really want help go to an al-anon meeting, support for codependent fools *who* put up with our shit.
-- Our search strategy: Within the function analyze_wh_word we ...
+- Our search strategy: *Within the function analyze_wh_word we ...* We then check whether our item is one of ["who", "whom", "whose", "which"]. If yes, we first exclude all instances of sentence relatives, pied piping, and relative clauses in subject position. For all remaining cases we exclude structures that have a form of 'ask' or 'tell' as main verb and that do not have a noun preceding. We then count all structures that are followed by a verb or modal (with one potential intervening adverb) towards whresub_031.
 ```{python}
+    if tagged_sentence[index-1][1].startswith("NN"):
+        if tagged_sentence[index+1][1].startswith("RB"):
+            if (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
+                features_dict["thatresub_029"] += 1 
+        elif tagged_sentence[index+1][1].startswith("VB") or tagged_sentence[index+1][1].startswith("MD"):
+            features_dict["thatresub_029"] += 1
+        elif tagged_sentence[index+1][1].startswith("DT") or tagged_sentence[index+1][1].startswith("JJ") or tagged_sentence[index+1][1] == "NNS" or tagged_sentence[index+1][1].startswith("NNP"):
+            features_dict["thatreobj_030"] += 1
+        elif tagged_sentence[index+1][0] == "it" or tagged_sentence[index+1][0] in subjpro or tagged_sentence[index+1][0] in posspro:
+            features_dict["thatreobj_030"] += 1    
+                
+    else:
+        if word_tuple[0] in WHP: # WHP = ["who", "whom", "whose", "which"]
+            if tagged_sentence[index-1][1] == "IN":
+                features_dict["whrepied_033"] += 1
+            if word_tuple[0] == "which":
+                if tagged_sentence[index-1][0] == ",": 
+                    features_dict["sentencere_034"] += 1
+                elif index == 3 and tagged_sentence[4][1].startswith("V"):
+                    if not tagged_sentence[4][0] in belist:
+                        features_dict["sentencere_034"] += 1
+
+            #31. WH relative clauses on subject position (e.g., the man who likes popcorn) xxx + yyy + N + WHP + (ADV) + AUX/V 
             if tagged_sentence[index-1][1].startswith("N") and tagged_sentence[index-2][0] not in ["tell", "tells", "told", "telling", "ask", "asks", "asked", "asking"]:
                 if tagged_sentence[index+1][1].startswith("R"):
                     if (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
@@ -686,6 +712,7 @@ dolist = ["do", "does", "doing", "did", "done"]
 
                 elif(tagged_sentence[index+1][1].startswith("V") or tagged_sentence[index+1][1].startswith("MD")):
                     features_dict["whresub_031"] += 1
+        
 ```
 
 - Accuracy:
@@ -694,9 +721,44 @@ dolist = ["do", "does", "doing", "did", "done"]
 
 - Definition from Biber: "xxx + yyy + N + WHP + zzz (where xxx is NOT any form of the verbs ASK or TELL, to exclude indirect WH questions, and zzz is not ADV, AUX or V, to exclude relativization on subject position)" (1988: 235)
 - Example from Reddit: You didn't give any evidence and then proceeded to change your argument to something *which* I actually agree with.
-- Our search strategy: 
+- Our search strategy: *Within the function analyze_wh_word we ...* We then check whether our item is one of ["who", "whom", "whose", "which"]. If yes, we first exclude all instances of sentence relatives, pied piping, and relative clauses in subject position. For all remaining cases we exclude structures that have a form of 'ask' or 'tell' as main verb. We also exclude cases that have an adverb, verb, or modal following. All remaining structures are counted towards whreobj_032. 
 ```{python}
+    if tagged_sentence[index-1][1].startswith("NN"):
+        if tagged_sentence[index+1][1].startswith("RB"):
+            if (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
+                features_dict["thatresub_029"] += 1 
+        elif tagged_sentence[index+1][1].startswith("VB") or tagged_sentence[index+1][1].startswith("MD"):
+            features_dict["thatresub_029"] += 1
+        elif tagged_sentence[index+1][1].startswith("DT") or tagged_sentence[index+1][1].startswith("JJ") or tagged_sentence[index+1][1] == "NNS" or tagged_sentence[index+1][1].startswith("NNP"):
+            features_dict["thatreobj_030"] += 1
+        elif tagged_sentence[index+1][0] == "it" or tagged_sentence[index+1][0] in subjpro or tagged_sentence[index+1][0] in posspro:
+            features_dict["thatreobj_030"] += 1    
+                
+    else:
+        if word_tuple[0] in WHP: # WHP = ["who", "whom", "whose", "which"]
+            if tagged_sentence[index-1][1] == "IN":
+                features_dict["whrepied_033"] += 1
+            if word_tuple[0] == "which":
+                if tagged_sentence[index-1][0] == ",": 
+                    features_dict["sentencere_034"] += 1
+                elif index == 3 and tagged_sentence[4][1].startswith("V"):
+                    if not tagged_sentence[4][0] in belist:
+                        features_dict["sentencere_034"] += 1
 
+            #31. WH relative clauses on subject position (e.g., the man who likes popcorn) xxx + yyy + N + WHP + (ADV) + AUX/V 
+            if tagged_sentence[index-1][1].startswith("N") and tagged_sentence[index-2][0] not in ["tell", "tells", "told", "telling", "ask", "asks", "asked", "asking"]:
+                if tagged_sentence[index+1][1].startswith("R"):
+                    if (tagged_sentence[index+2][1].startswith("V") or tagged_sentence[index+2][1].startswith("MD")):
+                        features_dict["whresub_031"] += 1
+
+                elif(tagged_sentence[index+1][1].startswith("V") or tagged_sentence[index+1][1].startswith("MD")):
+                    features_dict["whresub_031"] += 1
+        
+            #32. WH relative clauses on object positions
+            if not tagged_sentence[index-3][0].startswith("ask") and not tagged_sentence[index-3][0].startswith("tell") and not tagged_sentence[index-3][0] == "told": 
+                if not tagged_sentence[index+1][1].startswith("R") and not tagged_sentence[index+1][1].startswith("V") and not tagged_sentence[index+1][1].startswith("MD"):
+                    if tagged_sentence[index-1][1].startswith("N"):
+                        features_dict["whreobj_032"] += 1 
 ```
 
 - Accuracy: F-score of 
@@ -785,8 +847,10 @@ dolist = ["do", "does", "doing", "did", "done"]
 
 - Definition from Biber: "since, while, whilst, whereupon, whereas, whereby, such that, so that xxx, such that xxx, inasmuch as, forasmuch as, insofar as, insomuch as, as long as, as soon as (where xxx is NOT: N/ADJ)" (1988: 236)
 - Example from Reddit: Just *as long as* you have a good time and enjoy your week here, you can't let anyone down!
-- Our search strategy:
+- Our search strategy: Within the function analyze_preposition we check for all the single-word items that are part of Biber's list, they are included in the list "oteradvsublist". We also count all cases where the item itself is "that" and the preceding item is "such" or "so", to catch "such that" and "so that". All other items listed by Biber are searched via the analyze_sentence function (so using the untagged string of characters). Here we check for all surface forms. The only exceptions are "as long as" and "as soon as", which are counted only in sentence-initial position (to avoid uses in which the second item is a true adjective, e.g. "the key was as long as a pencil")
 ```{python}
+otheradvsublist = ["since", "while", "whilst", "whereupon", "whereas", "whereby"]
+
 ## within the function analyze_preposition
 
     elif word_tuple[0] == "that" and tagged_sentence[index-1][0] in ["such", "so"]:
@@ -803,13 +867,13 @@ dolist = ["do", "does", "doing", "did", "done"]
         features_dict["advsubother_038"] += 1
 ```
 
-- Accuracy: F-score of 0.67
+- Accuracy:
 
 ## Prepositions: prepositions_039
 
 - Definition from Biber: "against, amid, amidst, among, amongst, at, besides, between, by, despite, during, except, for, from, in, into, minus, notwithstanding, of, off, on, onto, opposite, out, per, plus, pro, re, than, through, throughout, thru, to, toward, towards, upon, versus, via, with, within, without" (1988: 236-237)
 - Example from Reddit: I clap *during* the Friends theme song.
-- Our search strategy: Within the function analyze_preposition we are counting all items that are not one of ["because", "unless", "whilst", "while", "though", "tho", "although", "that", "since", "whereupon", "whereas", "whereby"], *because we consider these...* We therefore deviate significantly from Biber's procedure, as he looks for a finite list of items that he considers to be preposition. Again we rely more on our parts-of-speech tagger.
+- Our search strategy: Within the function analyze_preposition we are counting all items that are not one of ["because", "unless", "whilst", "while", "though", "tho", "although", "that", "since", "whereupon", "whereas", "whereby"] (because these are often or always conjunctins) and that are not parts of our list of adverbs of time and place. We therefore deviate significantly from Biber's procedure, as he looks for a finite list of items that he considers to be preposition. Again we rely more on our parts-of-speech tagger.
 ```{python}
     if not word_tuple[0] in ["because", "unless", "whilst", "while", "though", "tho", "although", "that", "since", "whereupon", "whereas", "whereby"] + timepoints + timedurfreq + placelist: 
         features_dict["prepositions_039"] += 1 
@@ -821,12 +885,22 @@ dolist = ["do", "does", "doing", "did", "done"]
 
 - Definition from Biber: "ADJ + ADJ/N (+ any ADJ not identified as predicative - no. 41)" (1988: 238)
 - Example from Reddit: All the documentaries I've seen, like FRONTLINE, paint Trump in a very *different* light.
-- Our search strategy:
+- Our search strategy: Within the function analzye_adjective we set all adjectives to predicative as the default. We then look at the following items and only change the value to attributive if it is followed by a string of nouns or a string of adjectives + noun (which can also be separated by a come). We then count all structures that  have the value attributive
+  We also tried this the other way around (starting with attributive as the default), but the results were less accurate.
 ```{python}
-
+    adj_type = "pred"
+    forward = 1
+    while tagged_sentence[index+forward][1].startswith(("N","J")) or tagged_sentence[index+forward][0] == ",":
+        if tagged_sentence[index+forward][1].startswith("N"):
+            adj_type = "attr"
+        forward += 1
+    if adj_type == "attr":
+        features_dict["adjattr_040b"] += 1
+    elif adj_type == "pred":
+        features_dict["adjpred_041b"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.91
 
 ## Predicative adjectives: adjpred_041
 
@@ -834,12 +908,22 @@ dolist = ["do", "does", "doing", "did", "done"]
   "(a) BE + ADJ + xxx (where xxx is NOT ADJ, ADV, or N) 
   (b) BE + ADJ + ADV + xxx (where xxx is NOT ADJ or N)" (1988: 238)
 - Example from Reddit: Updating the getmonero.org site would be *awesome*!
-- Our search strategy:
+- Our search strategy: Within the function analzye_adjective we set all adjectives to predicative as the default. We then look at the following items and only change the value to attributive if it is followed by a string of nouns or a string of adjectives + noun (which can also be separated by a come). We then count all structures that still have the value predicative.
+  We also tried this the other way around (starting with attributive as the default), but the results were less accurate.
 ```{python}
-
+    adj_type = "pred"
+    forward = 1
+    while tagged_sentence[index+forward][1].startswith(("N","J")) or tagged_sentence[index+forward][0] == ",":
+        if tagged_sentence[index+forward][1].startswith("N"):
+            adj_type = "attr"
+        forward += 1
+    if adj_type == "attr":
+        features_dict["adjattr_040b"] += 1
+    elif adj_type == "pred":
+        features_dict["adjpred_041b"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.75
 
 ## Adverbs: adverbs_042
 
@@ -868,6 +952,8 @@ dolist = ["do", "does", "doing", "did", "done"]
 - Definition from Biber: "mean length of the words in a text, in orthographic letters" (1988: 239)
 - Our search strategy: Within the function analyze_sentence we count the length of all words in characters and divide it by the number of words in the sentence. *We deviate from Biber in that we replace ... with ... beforehand.*
 ```{python}
+    words = sent.split()
+
     sum_wordlen = 0
     for word in words:
         word = re.sub(r'[^\w\s]','', word)
@@ -934,7 +1020,7 @@ downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "on
 - Our search strategy: The structures within this feature are quite different in their composition, so we look for them in two different functions. 
   - Within the function analyze_prepositions we first check whether the surface form is "of" and the preceding item is either "kind" or sort" and the item before that is tagged as one of ["JJ", "JJR", "JJS", "DT", "PRP$"]. If this is the case we exclude all structures in which the word two to the left is ["what", "whatever", "whichever"] and count all remaining hits.
   - Within the function analyze_sentence (which has the untagged version of the entire sentence as input) we count the following strings of characters: [" at about ", " something like ", " more or less", " kinda ", " sorta ", " almost ", " maybe "]
-  We are therefore deviating from Biber in also including the more colloquial forms "kinda" and "sorta". *For "kind of" and "sort of" we also ...*
+  We are therefore deviating from Biber in also including the more colloquial forms "kinda" and "sorta". For "kind of" and "sort of" we also do not use the exact same conditions as Biber.
 ```{python}
 ## within analyze_preposition
 
@@ -1181,7 +1267,7 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
 
 - Definition from Biber: "PREP + ALL-P/T#" (1988: 244)
 - Example from Reddit: Gleeson, Issac, Serkis, and the old crew are the actors I have the most faith *in*.
-- Our search strategy: Within the function analyze_preposition we first check whether this is the sentence-final item. If yes, we exclude everything that is "that" or "like" and count all remaining items towards the function. This is a slight deviation from Biber, he only checks for sentence-final position. *We decided to exclude 'that' and 'like' because...*
+- Our search strategy: Within the function analyze_preposition we first check whether this is the sentence-final item. If yes, we exclude everything that is "that" or "like" and count all remaining items towards the function. This is a slight deviation from Biber, he only checks for sentence-final position. We decided to exclude 'that' and 'like' because of cases like "More like: ..." and because of the multifunctionality of 'that' in general.
 ```{python}
     if tagged_sentence[index+1][0] in ALLP or tagged_sentence[index+1][1] == "X":
         if tagged_sentence[index+1][1] not in ["that", "like"]: 
@@ -1264,8 +1350,6 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
         insert_adv = False
         x = index
         while move_on: 
-            # These while-statements are an attempt to get around the question of how much intervening material to allow by instead setting 
-            # conditions for when to stop looking on (either because an instance of the feature has been found or an impermissible context has been encountered) (AB)
             x += 1
             if tagged_sentence[x][1] == "VBN":
                 move_on = False
@@ -1284,7 +1368,6 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
     elif word_tuple[0] in belist:
         if tagged_sentence[index+1][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
             features_dict["mainvbe_019"] += 1
-        ## allow for one intervening adverb for mainvbe_019
         elif tagged_sentence[index+1][1] == "RB" and tagged_sentence[index+2][1] in ["DT", "PRP$", "JJ", "JJR", "JJS", "NN", "NNS", "NNP"]:
             features_dict["mainvbe_019"] += 1
             
@@ -1300,12 +1383,12 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
                         features_dict["passby_018"] += 1
                         if insert_adv:
                             features_dict["vsplitaux_063"] += 1
-                    elif tagged_sentence[x+1][1] == "IN": # Here, provision is made for by-passive with intervening PPs: "was shot in the head by an unidentified suspect"
+                    elif tagged_sentence[x+1][1] == "IN": 
                         x += 1
                         move_on2 = True
                         while move_on2:
                             x += 1
-                            if tagged_sentence[x+1][1].startswith("N") or tagged_sentence[x+1][1].startswith("DT"): # One might include adjectives here as well, but prob at the cost of precision.
+                            if tagged_sentence[x+1][1].startswith("N") or tagged_sentence[x+1][1].startswith("DT"):
                                 pass
                             elif tagged_sentence[x+1][0] == "by":
                                 features_dict["passby_018"] += 1
@@ -1370,34 +1453,6 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
 ```
 
 - Accuracy: F-score of 0.86
-
-## Phrasal coordination: coordphras_064
-
-- Definition from Biber: "xxxx1 + and + xxxx2 (where xxxl and xxx2 are both: ADV/ADJ/V/N)" (1988: 245)
-- Example from Reddit: 
-    If the people have something, they can use these tactics *and* others to wage a campaign.
-    It might be dropping, *but* it wont drop to what Striker orange fsl's are.
-    Now if we're talking about lavo, ovo *or* lavo-ovo vegetarians, yes, there are such diets, [...]
-- Our search strategy:
-```{python}
-
-```
-
-- Accuracy:
-
-## Non-phrasal coordination: coordnonp_065
-
-- Definition from Biber: 
-    "(a) T#/, + and + it/so/then/you/there+BE/demonstrative pronoun /SUBJPRO
-    (b) CL-P + and
-    (c) and + WHP/WHO/adverbial subordinator (nos. 35-8)/discourse particle (no. 50)/conjunct (no. 45)" (1988: 245)
-- Example from Reddit: 
-- Our search strategy:
-```{python}
-
-```
-
-- Accuracy:
 
 ## Synthetic negation: negsyn_066
 
@@ -1689,6 +1744,42 @@ def lengthening(word):
 - Accuracy: this was not coded manually and therefore also not checked for accuracy.
 
 
+## Coordination with 'and': coordAnd_219
+
+- This feature is not included in Biber (1988). We decided to add it because we found Biber's distinction of phrasal vs. non-phrasal coordination impossible to implement.
+- Example from Reddit: If the people have something, they can use these tactics *and* others to wage a campaign.
+- Our search strategy: Within the function "analyze_conjunction" we count all items with the surface form "and".
+```{python}
+    if word_tuple[0].lower() == "and": 
+        features_dict["coordAnd_219"] += 1
+```
+
+- Accuracy: F-score of 1.00
+
+## Coordination with 'but': coordBut_220
+
+- This feature is not included in Biber (1988). We decided to add it because we found Biber's distinction of phrasal vs. non-phrasal coordination impossible to implement.
+- Example from Reddit: It might be dropping, *but* it wont drop to what Striker orange fsl's are.
+- Our search strategy: Within the function "analyze_conjunction" we count all items with the surface form "but".
+```{python}
+    elif word_tuple[0].lower() == "but": 
+        features_dict["coordBut_220"] += 1
+```
+
+- Accuracy: F-score of 1.00
+
+## Coordination with 'or': coordOr_221
+
+- This feature is not included in Biber (1988). We decided to add it because we found Biber's distinction of phrasal vs. non-phrasal coordination impossible to implement.
+- Example from Reddit: Was hoping a looking for teams sub *or* thread existed but couldn't find one.
+- Our search strategy: Within the function "analyze_conjunction" we count all items with the surface form "ot".
+```{python}
+    elif word_tuple[0].lower() == "or": 
+        features_dict["coordOr_221"] += 1
+```
+
+- Accuracy: F-score of 1.00
+
 
 # Features that were discarded
 
@@ -1699,7 +1790,7 @@ The following features were initially coded but then removed from the script bec
 
 - Definition from Biber: "N + (T#) + that + DET/SUBJPRO/POSSPRO/it/ADJ/plural noun/proper noun/possessive noun/TITLE (This algorithm does not distinguish between that complements to nouns and true relative clauses.)" (1988: 234)
 - Example from Reddit: Can someone remind me what happened to the whole dad quest *that* Oliver was supposed to be on?
-- Our search strategy: 
+- Our search strategy: Within the function analyze_wh_word we first select only structures that have a noun preceding the wh-word. We then exclude structures that are followed by a verb or modal (with one potential intervening adverb). If the following item is a determiner or adjective or plural/mass noun we count it towards thatreobj_030. WE also count it if it is followed by the word 'it' or a subject pronoun or possessive pronoun.
 ```{python}
     if tagged_sentence[index-1][1].startswith("NN"):
         if tagged_sentence[index+1][1].startswith("RB"):
@@ -1736,7 +1827,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "N + VBG (these forms were edited by hand)" (1988: 233)
 - Example from Reddit: I don't know... as a mom -- it just looks like a mess *waiting* to happen!!
-- Our search strategy: Within the function analyze_verb we are looking for items tagged as "VBG" (Verb, gerund or present participle). We are sorting out structures belonging to vpresentpart_025. If the preceding item is tagged as "NN" (Noun, singular or mass) or "NNS" (Noun, plural) then we are counting the hit towards the feature. *Compared to Biber we are ...*
+- Our search strategy: Within the function analyze_verb we are looking for items tagged as "VBG" (Verb, gerund or present participle). We are sorting out structures belonging to vpresentpart_025. If the preceding item is tagged as "NN" (Noun, singular or mass) or "NNS" (Noun, plural) then we are counting the hit towards the feature.
 ```{python}
     elif word_tuple[1] == "VBG":
         if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
@@ -1830,7 +1921,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Definition from Biber: "N/QUANPRO + VBN + PREP/BE/ADV (these forms were edited by hand)" (1988: 233)
 - Example from Reddit: Herbal Phentermine is an exclusive formulation of research-supported botanical ingredients, *designed* to support a healthy diet.
-- Our search strategy: Within the function analyze_verb we are first looking for items tagged as "VBN" (Verb, past participle). After sorting out instances beloning the feature vpastpart_026 we check for the following criteria: Is the preceding item tagged as a nouns (all nominal tags start with "NN") or is it within the list QUANPRO? If yes: is the following item tagged as ["IN", "RBR", "RB", "RBS"] or a form of 'be'? *Compared to Biber ...*
+- Our search strategy: Within the function analyze_verb we are first looking for items tagged as "VBN" (Verb, past participle). After sorting out instances belonging the feature vpastpart_026 we check for the following criteria: Is the preceding item tagged as a nouns (all nominal tags start with "NN") or is it within the list QUANPRO? If yes: is the following item tagged as ["IN", "RBR", "RB", "RBS"] or a form of 'be'?
 ```{python}
     elif word_tuple[1] == "VBN":
         if (tagged_sentence[index-1][1] == "X" or tagged_sentence[index-1][0] in ALLP):
@@ -1843,6 +1934,23 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 
 - Accuracy: F-score of 0.555
 
+
+
+## Phrasal coordination: coordphras_064
+
+- Definition from Biber: "xxxx1 + and + xxxx2 (where xxxl and xxx2 are both: ADV/ADJ/V/N)" (1988: 245)
+- Example from Reddit: 
+    If the people have something, they can use these tactics *and* others to wage a campaign.
+- We were unable to come up with a code that can consistently distinguish between all cases of phrasal and non-phrasal coordination, which is why we decided to instead search for coordination with 'and', with 'or', and with 'but" (see above).
+
+## Non-phrasal coordination: coordnonp_065
+
+- Definition from Biber: 
+    "(a) T#/, + and + it/so/then/you/there+BE/demonstrative pronoun /SUBJPRO
+    (b) CL-P + and
+    (c) and + WHP/WHO/adverbial subordinator (nos. 35-8)/discourse particle (no. 50)/conjunct (no. 45)" (1988: 245)
+- Example from Reddit: I use it exclusively for porn, *and* it works surprisingly well
+- We were unable to come up with a code that can consistently distinguish between all cases of phrasal and non-phrasal coordination, which is why we decided to instead search for coordination with 'and', with 'or', and with 'but" (see above).
 
 
 

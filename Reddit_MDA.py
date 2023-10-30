@@ -250,7 +250,7 @@ s = {"vpast_001": 0, "vpresperfect_002a": 0, "vpastperfect_002b": 0, "vpresent_0
      "mainvbe_019": 0, "exthere_020": 0, "thatvcom_021": 0, "thatacom_022": 0, "whclause_023": 0, "vinfinitive_024": 0, 
      "vpresentpart_025": 0, "vpastpart_026": 0, "vpastwhiz_027": 0, "vpresentwhiz_028":0, "thatresub_029": 0, "thatreobj_030": 0, 
      "whresub_031": 0, "whreobj_032": 0, "whrepied_033": 0, "sentencere_034": 0, "advsubcause_035": 0, "advsubconc_036": 0, 
-     "advsubcond_037": 0, "advsubother_038": 0, "prepositions_039": 0, "adjattr_040a": 0, "adjpred_041a": 0, "adjattr_040b": 0, "adjpred_041b": 0,
+     "advsubcond_037": 0, "advsubother_038": 0, "prepositions_039": 0, "adjattr_040": 0, "adjpred_041": 0, "adjattr_040": 0, "adjpred_041": 0,
      "adverbs_042": 0, "ttratio_043": 0, "wordlength_044": 0, "conjuncts_045": 0, "downtoners_046": 0, "hedges_047": 0, "amplifiers_048": 0, 
      "discpart_050": 0, "demonstr_051": 0, "modalsposs_052": 0, "modalsness_053": 0, "modalspred_054": 0, 
      "vpublic_055": 0, "vprivate_056": 0, "vsuasive_057": 0, "vseemappear_058": 0, "contractions_059": 0, "thatdel_060": 0, 
@@ -309,7 +309,7 @@ amplifierlist = ["absolutely", "altogether", "completely", "definitely", "enormo
                  "intensely", "perfectly", "strongly", "thoroughly", "totally", "utterly", "very"]
 asktelllist = ["ask", "asked", "asking", "asks", "tell", "telling", "tells", "told"]
 titlelist = ["mr", "ms", "mrs", "prof", "professor", "dr", "sir"]
-otheradvsublist = ["since", "while", "whilst", "whereupon", "whereas", "whereby", "such that", "so that", "such that", "inasmuch as", "forasmuch as", "insofar as", "insomuch as", "as long as", "as soon as"]
+otheradvsublist = ["since", "while", "whilst", "whereupon", "whereas", "whereby"]
 notgerundlist = ["nothing", "everything", "something", "anything", "thing", "things", "ring", "sting", "ting", "viking", "wing", "zing"]
 publiclist = ["acknowledege", "acknowledges", "acknowledged", "acknowledging", "admit", "admits", "admitted", "admitting",
               "agree", "agrees", "agreed", "agreeing", "assert", "asserts", "asserted", "asserting", "claim", "claimed", 
@@ -668,20 +668,6 @@ def analyze_adjective(index, tagged_sentence, features_dict):
     elif tagged_sentence[index-1][0] == "most":
         features_dict["superlatives_ana_215"] += 1
         
-    adj_type = "attr"
-    x = index-1
-    while adj_type == "attr" and x > 0:
-        if tagged_sentence[x][1].startswith("R"):
-            x -= 1
-        elif tagged_sentence[x][0] in copulalist + ["'s", "'re", "'m"]:# Were the enclitic forms of BE purposely omitted from our copulalist?
-            adj_type = "pred"
-        else:
-            x = 0
-    if adj_type == "attr":
-        features_dict["adjattr_040a"] += 1
-    elif adj_type == "pred":
-        features_dict["adjpred_041a"] += 1
-    
     adj_type = "pred"
     forward = 1
     while tagged_sentence[index+forward][1].startswith(("N","J")) or tagged_sentence[index+forward][0] == ",":
@@ -689,9 +675,9 @@ def analyze_adjective(index, tagged_sentence, features_dict):
             adj_type = "attr"
         forward += 1
     if adj_type == "attr":
-        features_dict["adjattr_040b"] += 1
+        features_dict["adjattr_040"] += 1
     elif adj_type == "pred":
-        features_dict["adjpred_041b"] += 1
+        features_dict["adjpred_041"] += 1
       
 def analyze_preposition(index, tagged_sentence, features_dict):
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys: 
@@ -846,8 +832,6 @@ def analyze_determiner(index, tagged_sentence, features_dict):
             features_dict["negsyn_066"] += 1
 
 def analyze_wh_word(index, tagged_sentence, features_dict):
-    # Check: Ft 32 (Biber's way of finding this seems like it could be optimized)
-    # Check: Ft 22 (catches unintended phrases)
     '''Takes the index position of the current word, a tagged sentence, and dictionary of all possible tags and updates relevant keys:
     "whquest_013", "thatvcom_021", "thatacom_022", "whrepied_033", "sentencere_034", "thatresub_029", "thatreobj_030", 
     "whresub_031", "whreobj_032".'''
