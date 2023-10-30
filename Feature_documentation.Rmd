@@ -14,6 +14,14 @@ Features that were dropped from the analysis can be found at the end of the file
 
 Note that the Python code included here is not meant to be run on its own. It is copied out of our main script "Reddit_MDA" and serves illustration purposes only.
 
+*What still needs to be done:*
+- insert features coordAnd_219, coordBut_220, and coordOr_221, delete original coordination-features
+- add missing accuracy scores after next round of testing
+- decide what to do with the features that had 0 hits in our sample data - keep them in the code without reporting an accuracy score? Or remove?
+- decide what to do with whquest_013 and caps_204
+- add justifications for prodemons_010, pverbdo_012, whquest_013, passagentl_017, passby_018, mainvbe_019, thatvcom_021, thatacom_022, whclause_023, vpastwhiz_027, vpresentwhiz_028, thatresub_029, thatreobj_030, whresub_031, whreobj_032, advsubother_038, prepositions_039, adjattr_040, adjpred_041, wordlength_044, hedges_047, strandprep_061, vsplitaux_063, caps_204
+- add code for ttratio_043 to main script
+
 ## Verbs in the past tense: vpast_001
 
 - Definition from Biber: "Any past tense form that occurs in the dictionary, or any word not otherwise identified that is longer than six letters and ends in ed%. Past tense forms have been edited by hand to distinguish between those forms with past participial functions and those with past tense functions." (1988: 223)
@@ -25,7 +33,7 @@ Note that the Python code included here is not meant to be run on its own. It is
         features_dict["vpast_001"] += 1
 ```
 
-- Accuracy: 
+- Accuracy: F-score of 0.75
 
 ## Verbs in the present perfect: vpresperfect_002a
 
@@ -55,7 +63,7 @@ Note that the Python code included here is not meant to be run on its own. It is
                 move_on = False
 ```
 
-- Accuracy: 
+- Accuracy: F-score of 0.83
 
 
 ## Verbs in the past perfect: vpastperfect_002b
@@ -86,7 +94,7 @@ Note that the Python code included here is not meant to be run on its own. It is
                 move_on =  False 
 ```
 
-- Accuracy: 
+- Accuracy: F-score of 0.60
 
 ## Verbs in the present tense: vpresent_003
 
@@ -98,7 +106,7 @@ Note that the Python code included here is not meant to be run on its own. It is
         features_dict["vpresent_003"] += 1
 ```
 
-- Accuracy: 
+- Accuracy: F-score of 0.89
 
 ## Place adverbials: advplace_004
 
@@ -112,7 +120,7 @@ placelist = ["aboard", "above", "abroad", "across", "ahead", "alongside", "anywh
         features_dict["advplace_004"] += 1
 ```
 
-- Accuracy: 
+- Accuracy: F-score of 1.00
 
 ## Time adverbials on location in time: advtime_position_005a
 
@@ -126,7 +134,7 @@ timepoints = ["afterwards", "again", "already", "anymore", "before", "currently"
         features_dict["advtime_position_005a"] += 1
 ```
 
-- Accuracy: 
+- Accuracy: F-score of 0.90
 
 ## Time adverbials on frequency: advtime_durfreq_005b
 
@@ -140,7 +148,7 @@ timedurfreq = ["always", "annually", "ceaselessly", "commonly", "constantly", "c
         features_dict["advtime_durfreq_005b"] += 1
 ```
 
-- Accuracy: 
+- Accuracy: F-score of 0.80
 
 ## First-person pronouns: profirpers_006
 
@@ -154,7 +162,7 @@ firstpersonlist = ["i", "me", "we", "us", "my", "our", "myself", "ourselves"]
         features_dict["profirpers_006"] += 1
 ```
 
-- Accuracy: 
+- Accuracy: F-score of 0.96
 
 ## Second-person pronouns: prosecpers_007
 
@@ -168,7 +176,7 @@ secondpersonlist = ["you", "yourself", "your", "yourselves"]
         features_dict["prosecpers_007"] += 1
 ```
 
-- Accuracy: 
+- Accuracy: F-score of 1.00
 
 ## Third-person pronouns: prothirper_008
 
@@ -182,7 +190,7 @@ thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "h
         features_dict["prothirdper_008"] += 1
 ```
 
-- Accuracy: 
+- Accuracy: F-score of 1.00
 
 ## Pronoun 'it': proit_009
 
@@ -194,7 +202,7 @@ thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "h
         features_dict["proit_009"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.97
 
 ## Demonstrative pronouns: prodemons_010
 
@@ -227,7 +235,7 @@ thirdpersonlist = ["she", "he", "they", "her", "him", "them", "his", "their", "h
             features_dict["prodemons_010"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.78
 
 ## Indefinitve pronouns: proindef_011
 
@@ -241,7 +249,7 @@ indefpronounlist = ["anybody", "anyone", "anything", "everybody", "everyone", "e
         features_dict["proindef_011"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 1.00
 
 ## Pro-verb do: pverbdo_012
 
@@ -263,7 +271,7 @@ dolist = ["do", "does", "doing", "did", "done"]
                 pass
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.74
 
 ## WH-questions: whquest_013
 
@@ -291,7 +299,7 @@ dolist = ["do", "does", "doing", "did", "done"]
                     features_dict["whquest_013"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 
 
 ## Nominalisations: nominalis_014
 
@@ -303,7 +311,7 @@ dolist = ["do", "does", "doing", "did", "done"]
         features_dict["nominalis_014"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.71
 
 ## Nouns: nouns_016
 
@@ -322,7 +330,7 @@ dolist = ["do", "does", "doing", "did", "done"]
         features_dict["nouns_016"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 1.00
 
 ## Agentless passives: passagentl_017
 
@@ -391,7 +399,7 @@ dolist = ["do", "does", "doing", "did", "done"]
                     move_on = False
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.82
 
 ## By-passives: passby_018
 
@@ -459,7 +467,7 @@ dolist = ["do", "does", "doing", "did", "done"]
                     move_on = False
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.71
 
 ## Main verb use of be: mainvbe_019
 
@@ -484,7 +492,7 @@ dolist = ["do", "does", "doing", "did", "done"]
             features_dict["mainvbe_019"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.80
 
 ## Exitential 'there': exthere_020
 
@@ -498,7 +506,7 @@ dolist = ["do", "does", "doing", "did", "done"]
         features_dict["exthere_020"] += 1 
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.95
 
 ## thatvcom_021
 
@@ -528,7 +536,7 @@ dolist = ["do", "does", "doing", "did", "done"]
 
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.80
 
 ## thatacom_022
 
@@ -557,7 +565,7 @@ dolist = ["do", "does", "doing", "did", "done"]
             features_dict["thatacom_022"] += 1 
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.73
 
 ## WH-clauses: whclause_023
 
@@ -618,7 +626,7 @@ dolist = ["do", "does", "doing", "did", "done"]
             
 ```
 
-- Accuracy:
+- Accuracy: F-score of 
 
 ## Verbs in the infinitive: vinfinitive_024
 
@@ -633,7 +641,7 @@ dolist = ["do", "does", "doing", "did", "done"]
             features_dict["vinfinitive_024"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.67
 
 ## Past participial clauses: vpastpart_026
 
@@ -647,7 +655,7 @@ dolist = ["do", "does", "doing", "did", "done"]
                 features_dict["vpastpart_026"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 
 
 ## that-relative clauses on subject position: thatresub_029
 
@@ -663,7 +671,7 @@ dolist = ["do", "does", "doing", "did", "done"]
             features_dict["thatresub_029"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.71
 
 ## WH-relative clauses on subject position: whresub_031
 
@@ -691,7 +699,7 @@ dolist = ["do", "does", "doing", "did", "done"]
 
 ```
 
-- Accuracy:
+- Accuracy: F-score of 
 
 ## Pied-piping relative clauses: whrepied_033
 
@@ -707,7 +715,7 @@ dolist = ["do", "does", "doing", "did", "done"]
                 features_dict["whrepied_033"] += 1 
 ```
 
-- Accuracy:
+- Accuracy: F-score of 
 
 ## Sentence relatives: sentencere_034
 
@@ -730,7 +738,7 @@ dolist = ["do", "does", "doing", "did", "done"]
                         features_dict["sentencere_034"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.71
 
 ## Causative adverbial subordinators: advsubcause_035
 
@@ -745,7 +753,7 @@ dolist = ["do", "does", "doing", "did", "done"]
         #     and it is purposefully excluded in the list above for "prepositions_039". Right now we are not counting "because of" at all, are we?
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.89
 
 ## Concessive adverbial subordinators: advsubconc_036
 
@@ -757,7 +765,7 @@ dolist = ["do", "does", "doing", "did", "done"]
         features_dict["advsubconc_036"] += 1 
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.80
 
 ## Conditional adverbial subordinators: advsubcond_037
 
@@ -771,7 +779,7 @@ dolist = ["do", "does", "doing", "did", "done"]
         features_dict["advsubcond_037"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 1.00
 
 ## Other adverbial subordinators: advsubother_038
 
@@ -795,7 +803,7 @@ dolist = ["do", "does", "doing", "did", "done"]
         features_dict["advsubother_038"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.67
 
 ## Prepositions: prepositions_039
 
@@ -807,7 +815,7 @@ dolist = ["do", "does", "doing", "did", "done"]
         features_dict["prepositions_039"] += 1 
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.87
 
 ## Attributive adjectives: adjattr_040
 
@@ -853,7 +861,7 @@ dolist = ["do", "does", "doing", "did", "done"]
 
 ```
 
-- Accuracy:
+- Accuracy: this was not coded manually and therefore not checked for accuracy.
 
 ## Word length: wordlength_044
 
@@ -868,7 +876,7 @@ dolist = ["do", "does", "doing", "did", "done"]
     features_dict["wordlength_044"] = (sum_wordlen/len(words)) 
 ```
 
-- Accuracy:
+- Accuracy:  this was not coded manually and therefore not checked for accuracy.
 
 ## Conjuncts: conjuncts_045
 
@@ -903,7 +911,7 @@ conjunctslist = ["alternatively", "altogether", "consequently", "conversely", "e
             features_dict["conjuncts_045"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.82
 
 ## Downtoners: downtoners_046
 
@@ -917,7 +925,7 @@ downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "on
         features_dict["downtoners_046"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.82
 
 ## Hedges: hedges_047
 
@@ -940,7 +948,7 @@ downtonerlist = ["almost", "barely", "hardly", "merely", "mildly", "nearly", "on
         features_dict["hedges_047"] += sentence.count(hedge)
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.70
 
 ## Amplifiers and emphatics: amplifiers_048
 
@@ -964,7 +972,7 @@ amplifierlist = ["absolutely", "altogether", "completely", "definitely", "enormo
         features_dict["amplifiers_048"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.92
 
 ## Discourse particles: discpart_050
 
@@ -986,7 +994,7 @@ discpart = ["well", "now", "anyway", "anyhow", "anyways", "though"]
         features_dict["discpart_050"] += 1
 ```
 
-- Accuracy:
+- Accuracy:  F-score of 0.84
 
 ## Demonstratives: demonstr_051
 
@@ -1017,7 +1025,7 @@ discpart = ["well", "now", "anyway", "anyhow", "anyways", "though"]
             features_dict["prodemons_010"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.94
 
 ## Possibility modals: modalsposs_052
 
@@ -1030,7 +1038,7 @@ discpart = ["well", "now", "anyway", "anyhow", "anyways", "though"]
         features_dict["modalsposs_052"] += 1
 ```
 
-- Accuracy:
+- Accuracy:  F-score of 0.90
 
 ## Necessity modals: modalsness_053
 
@@ -1042,7 +1050,7 @@ discpart = ["well", "now", "anyway", "anyhow", "anyways", "though"]
         features_dict["modalsness_053"] += 1
 ```
 
-- Accuracy:
+- Accuracy:  F-score of 0.82
 
 ## Predictive modals: modalspred_054
 
@@ -1054,7 +1062,7 @@ discpart = ["well", "now", "anyway", "anyhow", "anyways", "though"]
         features_dict["modalspred_054"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.95
 
 ## Public verbs: vpublic_055
 
@@ -1076,7 +1084,7 @@ publiclist = ["acknowledege", "acknowledges", "acknowledged", "acknowledging", "
         features_dict["vpublic_055"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.95
 
 ## Private verbs: vprivate_056
 
@@ -1105,7 +1113,7 @@ privatelist = ["anticipate", "anticipates", "anticipated", "anticipating", "assu
         features_dict["vprivate_056"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.93
 
 ## Suasive verbs: vsuasive_057
 
@@ -1126,7 +1134,7 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
         features_dict["vsuasive_057"] += 1
 ```
 
-- Accuracy:
+- Accuracy:  F-score of 0.95
 
 ## Seem and appear: vseemappear_058
 
@@ -1138,7 +1146,7 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
         features_dict["vseemappear_058"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 1.00
 
 ## Contractions: contractions_059
 
@@ -1167,7 +1175,7 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
 
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.95
 
 ## Stranded prepositions: strandprep_061
 
@@ -1180,7 +1188,7 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
             features_dict["strandprep_061"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.69
 
 ## Split infinitives: vsplitinf_062
 
@@ -1206,7 +1214,7 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
                     pass
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.67
 
 ## Split auxiliaries: vsplitaux_063
 
@@ -1361,7 +1369,7 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
             move_on = False
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.86
 
 ## Phrasal coordination: coordphras_064
 
@@ -1410,7 +1418,7 @@ QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
             features_dict["negsyn_066"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.82
 
 ## Analytic negation: negana_067
 
@@ -1426,7 +1434,7 @@ QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
         features_dict["contractions_059"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.93
 
 ## Hashtags: hashtag_201
 
@@ -1437,7 +1445,7 @@ QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
     features_dict["hashtag_201"] = len(re.findall(r"#\w+", sentence))
 ```
 
-- Accuracy:
+- Accuracy: F-score of 1.00
 
 ## Reddit-internal links: link_202
 
@@ -1494,7 +1502,7 @@ QUAN = ["each", "all", "every", "many", "much", "few", "several", "some", "any"]
             features_dict["vimperative_205"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.64
 
 ## Strategic lengthening within words: lengthening_206
 
@@ -1525,7 +1533,7 @@ def lengthening(word):
             features_dict["lengthening_206"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.93
 
 ## Emoticons: emoticons_207
 
@@ -1537,7 +1545,7 @@ def lengthening(word):
         features_dict["emoticons_207"] += sentence.count(emoticon)
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.89
 
 ## Qeustion sentences: question_208
 
@@ -1549,7 +1557,7 @@ def lengthening(word):
         features_dict["question_208"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 1.00
 
 ## Exclamation sentences: exclamation_209
 
@@ -1561,7 +1569,7 @@ def lengthening(word):
         features_dict["exclamation_209"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 1.00
 
 ## Sentence length in characters: lenchar_210
 
@@ -1571,7 +1579,7 @@ def lengthening(word):
     features_dict["lenchar_210"] = len(sentence) 
 ```
 
-- Accuracy:
+- Accuracy: this was not manually coded and therefore also not checked for accuracy.
 
 ## Sentence length in words: lenword_211
 
@@ -1581,7 +1589,7 @@ def lengthening(word):
     features_dict["lenword_211"] = len(sentence.split(" ")) 
 ```
 
-- Accuracy:
+- Accuracy: this was not manually coded and therefore also not checked for accuracy.
 
 ## Synthetic comparatives: comparatives_syn_212
 
@@ -1593,7 +1601,7 @@ def lengthening(word):
         features_dict["comparatives_syn_212"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.69
 
 ## Synthetic superlatives: superlatives_syn_213
 
@@ -1605,7 +1613,7 @@ def lengthening(word):
         features_dict["superlatives_syn_213"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.77
 
 ## Analytic comparatives: comparatives_ana_214
 
@@ -1617,7 +1625,7 @@ def lengthening(word):
         features_dict["comparatives_ana_214"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.75
 
 ## Analytic superlatives: superlatives_ana_215
 
@@ -1629,7 +1637,7 @@ def lengthening(word):
         features_dict["superlatives_ana_215"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.80
 
 ## Community-specific abbreviations or words: reddit_vocab_216
 
@@ -1644,7 +1652,7 @@ def lengthening(word):
             features_dict["reddit_vocab_216"] += 1 
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.84
 
 ## verbs in the progressive aspect: vprogressive_217
 
@@ -1668,7 +1676,7 @@ def lengthening(word):
             features_dict["vsplitaux_063"] += 1
 ```
 
-- Accuracy:
+- Accuracy: F-score of 0.80
 
 ## Emojis: emojis_218
 
@@ -1678,7 +1686,8 @@ def lengthening(word):
     features_dict["emojis_218"] = adv.extract_emoji(sentence)["overview"]["num_emoji"]
 ```
 
-- Accuracy: not coded manually
+- Accuracy: this was not coded manually and therefore also not checked for accuracy.
+
 
 
 # Features that were discarded
@@ -1833,6 +1842,7 @@ notgerundlist = ["nothing", "everything", "something", "anything", "thing", "thi
 ```
 
 - Accuracy: F-score of 0.555
+
 
 
 
