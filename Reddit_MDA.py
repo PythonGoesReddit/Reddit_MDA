@@ -290,7 +290,7 @@ conjunctsmultilist = ["on the contrary", "on the other hand", "for example", "fo
                       "in comparison", "in contrast", "in particular", "in addition", "in conclusion", "in consequence", "in sum",
                       "in summary", "in any event", "in any case", "in other words", "as a result", "as a consequence"]
 punct_final = [".", "!", "?", ":", ";"] # here, Biber also includes the long dash -- , but I am unsure how this would be rendered
-belist = ["be", "am", "are", "is", "was", "were", "been", "being", "'m", "'re",] # I have added the contracted forms of am and are (AB)
+belist = ["be", "am", "are", "is", "was", "were", "been", "being", "'m", "'re"] # I have added the contracted forms of am and are (AB)
 havelist = ["have", "has", "had", "having"]
 dolist = ["do", "does", "doing", "did", "done"]
 subjpro = ["i", "we", "he", "she", "they"]

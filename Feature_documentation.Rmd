@@ -16,16 +16,16 @@ Note that the Python code included here is not meant to be run on its own. It is
 
 *What still needs to be done:*
 - add missing accuracy scores after next round of testing
-- we often have the condition "if tagged_sentence[index-1][0] in ALLP" to catch sentence-initial structures. Should this not be " elif tagged_sentence[index+1][0] == "X"" ?? (same for sentence-final positions) -> if we decide to change this: update accuracy scores afterwards!
+- we often have the condition "if tagged_sentence[index-1][0] in ALLP" to catch sentence-initial structures. Should this not be " elif tagged_sentence[index-1][0] == "X"" ?? (same for sentence-final positions) -> if we decide to change this: update accuracy scores afterwards!
 - add code for ttratio_043 to main script and in here.
 - decide what to do with the features that had 0 hits in our sample data - keep them in the code without reporting an accuracy score? Or remove?
-- decide what to do with whquest_013 and caps_204
-- add justifications for whquest_013, passagentl_017, passby_018, vsplitaux_063, caps_204
-  - thatresub_029: are we missing the condition item == "that" ?
-  - wordlength_044: what are we replacing here and why?
-  - whresub_031: do we have a hierarchy problem here? Condition that the noun needs to precede holds? Combine this and whreobj_032?
+- decide what to do with whquest_013 and caps_204 (did not reach required accuracy level)
+- complete the description for caps_204 (after Axel modified it)
+- thatresub_029: are we missing the condition: item == "that" ?
+- wordlength_044: what are we replacing here and why?
+- whresub_031: do we have a hierarchy problem here? Condition that the noun needs to precede holds? Combine this and whreobj_032?
     - I think this is why this feature does so badly in the accuracy test.
-  - whreobj_032: do we have a hierarchy problem here? Condition that the noun needs to precede holds?
+- whreobj_032: do we have a hierarchy problem here? Condition that the noun needs to precede holds?
     - I think this is why this feature does so badly in the accuracy test.
 
 
@@ -283,15 +283,11 @@ dolist = ["do", "does", "doing", "did", "done"]
 ## WH-questions: whquest_013
 
 - Definition from Biber: "CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)" (1988: 227)
-- Example from Reddit: *WHAT* THE FUCK BARRY 
-- Our search strategy: *Within the function analyze_wh_word we are ... We decided to ...*
+- Example from Reddit: If Redskins get Williams...*where* is he playing?
+- Our search strategy: Within the function analyze_wh_word we first select all items that have the tag "WRB" (wh-adverbs) and that occur in sentence-initial position or after punctuation. We count all structures that have a modal verb following ("Where will he go?"). We also count structure that have a form of 'be', 'have', or 'do' following ("When are you leaving?"). Out of all remaining structures we also count those that have "who" as wh-word, that have "what about", or that include the insertion "the hell" or "the fuck".
+  We decided to use the tag "WRB" instead of Biber's condition (part of "WHO") because it consistently identifies interrogative particles, including "who" if and only if it is an interrogative particle. We also decided that we want to look not only for sentence-initial uses, but for anything following clause-level punctuation (we use the tag "SYM" for that).
 ```{python}
         if word_tuple[1] == "WRB":
-            #AB: we initially checked for surface membership in WHO, following Biber (line below). I explain why that's problematic
-            #AB: 13. direct WH-questions CL-P/Tif + WHO + AUX (where AUX is not part of a contracted form)
-            #AB: The comment above is Biber's definition. It leaves a couple of issues, mainly that "who" as interrogative particle is excluded.
-            #AB: We can instead use the tag "WRB" which consistently identifies interrogative particles, including "who" if and only if it is an interrogative particle.
-            #AB: We also want to look not only for sentence-initial uses, but for anything following clause-level punctuation. The "SYM" tag should be appropriate.
             if tagged_sentence[index-1][1] in ["X", "SYM"]:  
                 if tagged_sentence[index+1][1] == "MD":
                     features_dict["whquest_013"] += 1
@@ -345,8 +341,12 @@ dolist = ["do", "does", "doing", "did", "done"]
   "(a) BE + (ADV) + (ADV) + VBN 
   (b) BE + N/PRO + VBN  (question form)" (1988: 228)
 - Example from Reddit: Your submission *has been* automatically *removed* because you haven't registered with our steam bot to receive flair.
-- Our search strategy: Our search strategy here might look rather complex. We are within the function analyze_verb. We first ...
+- Our search strategy: Our search strategy here might look rather complex. We are within the function analyze_verb and we implement two different checks. 
+  - Check 1: We first check whether the item itself is a form of "be". The item needs to be either in sentence-initial position or following a wh-adverb ("WRB") in sentence-initial position (to include wh-questions such as "How was the parcel delivered?"). We then count all instances as agentless passives that have a past participle verb ("VBN") within the next five words and no trace of a by-phrase.
+  - Check 2: We first check whether the item itself is a form of "be") and eliminate uses as a main verb. Within all remaining structures we count everything that has a past participle following without a by-phrase in the next position.
 ```{python}
+belist = ["be", "am", "are", "is", "was", "were", "been", "being", "'m", "'re"]
+
     elif word_tuple[0] in belist and (index == 3 or (index == 4 and tagged_sentence[index-1][1] == "WRB")): # Questions with BE; the index positions take the three ("x", "x") tuples at the beginning of a sentence into account
          add_index = 0
          while add_index < 5 and (index + add_index) < (len(tagged_sentence)-1):
@@ -413,7 +413,10 @@ dolist = ["do", "does", "doing", "did", "done"]
   "(a) BE + (ADV) + (ADV) + VBN + by 
   (b) BE + N/PRO + VBN + by (question form)" (1988: 228)
 - Example from Reddit: [...] the joke that the latest Bin Laden "message" *has been manufactured* by Mediaset in Milan [...] 
-- Our search strategy: 
+- Our search strategy: Our search strategy here might look rather complex. We are within the function analyze_verb and we implement two different checks. 
+  - Check 1: We first check whether the item itself is a form of "be". The item needs to be either in sentence-initial position or following a wh-adverb ("WRB") in sentence-initial position (to include wh-questions such as "When was the food delivered by the driever?"). We then count all instances as by-passives that have a past participle verb ("VBN") within the next five words and a by-phrase following immediately afterwards.
+  - Check 2: We first check whether the item itself is a form of "be") and eliminate uses as a main verb. Within all remaining structures we count everything that has a past participle following and a by-phrase in the next position. We also allow for a prepositional phrase intervening between the verb and the by-phrase ("The food was delivered at lunchtime by the driever"). 
+  We therefore include more structures than Biber does.
 ```{python}
     elif word_tuple[0] in belist and (index == 3 or (index == 4 and tagged_sentence[index-1][1] == "WRB")): # Questions with BE; the index positions take the three ("x", "x") tuples at the beginning of a sentence into account
          add_index = 0
@@ -1306,7 +1309,15 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
 
 - Definition from Biber: "AUX + ADV + (ADV) + VB" (1988: 244)
 - Example from Reddit: A horse would notice stepping on someone and it *would probably move*.
-- Our search strategy: Within the function analyze_verb 
+- Our search strategy: We look for this features at several places in our code.
+  Within the function analyze_verb:
+  - split present participles: we select all verbs with the tag "VBG" (Verb, gerund or present participle). After sorting out all non-finite clauses, we count all structures in which the item one to the left is an adverb and the item two to the left is a form of 'be' ("I was hardly paying attention")
+  - split past perfect: we select all verbs with the surface form "had" or "'d". If there is a word with the tag VBN (Verb, past participle) following, and an unspecified number of adverbs in between, we count it as a split auxiliary.
+  - split present perfect: we select all verbs with the surface form "have", "'ve" or "has" (we are not including 's because of its multifunctionality). If there is a word with the tag VBN (Verb, past participle) following, and an unspecified number of adverbs in between, we count it as a split auxiliary.
+  - split passives: we first select all items that are form of 'be'. We exclude uses as main verbs. If there is a word with the tag VBN (Verb, past participle) following, and an unspecified number of adverbs in between, we count it as a split auxiliary.
+  - split do-support: we select all verbs that are a form of "do". If there is a word a verbal tag (starting with V) following, and an unspecified number of adverbs in between, we count it as a split auxiliary.
+  Within the function analyze_modal: 
+  - split modal verbs: we count all modals that have a verb (tag starts with V) following after an unspecified number of adverbs.
 ```{python}
 ## within the function analyze_verb
 
@@ -1340,8 +1351,6 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
                 insert_adv = True
             elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"):
                 move_on = True 
-                # HM: as intended by Biber (p. 223) we here also count questions with the word order HAD + NOUN/PRONOUN + VBN
-                # HM: this does, however, not catch all questions using the past perfect (e.g. does not count "had many people been to the store?" due to inserted adjective)
             else: 
                 move_on =  False 
 
@@ -1359,8 +1368,6 @@ suasivelist = ["agree", "agrees", "agreed", "agreeing", "arrange", "arranges", "
             elif tagged_sentence[x][1].startswith("R") and tagged_sentence[x][0] not in ["n't", "not"]:
                 insert_adv = True
             elif tagged_sentence[x][1].startswith("N") or tagged_sentence[x][1].startswith("P"): 
-                # HM: as intended by Biber (p. 223) we here also count questions with the word order HAVE + NOUN/PRONOUN + VBN
-                # HM: this does, however, not catch all questions using the present perfect (e.g. does not count "have many people been to the store?" due to inserted adjective)
                 move_on = True
             else: 
                 move_on = False
