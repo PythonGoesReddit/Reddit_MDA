@@ -170,7 +170,8 @@ def analyze_sentence(sent, features_dict):
         
     sum_wordlen = 0
     for word in words:
-        word = re.sub(r'[^\w\s]','', word)
+        word = word.strip(string.punctuation)
+        ## The above used to be: word = re.sub(r'[^\w\s]','', word) - But we don't see how this is better than word.strip(string.punctuation)
         wordlen = len(word)
         sum_wordlen = sum_wordlen + wordlen
     features_dict["wordlength_044"] = (sum_wordlen/len(words)) 
