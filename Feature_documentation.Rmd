@@ -16,17 +16,23 @@ Note that the Python code included here is not meant to be run on its own. It is
 
 *What still needs to be done:*
 - add missing accuracy scores after next round of testing
-- we often have the condition "if tagged_sentence[index-1][0] in ALLP" to catch sentence-initial structures. Should this not be " elif tagged_sentence[index-1][0] == "X"" ?? (same for sentence-final positions) -> if we decide to change this: update accuracy scores afterwards!
-- add code for ttratio_043 to main script and in here.
 - decide what to do with the features that had 0 hits in our sample data - keep them in the code without reporting an accuracy score? Or remove?
 - decide what to do with whquest_013 and caps_204 (did not reach required accuracy level)
 - complete the description for caps_204 (after Axel modified it)
-- thatresub_029: are we missing the condition: item == "that" ?
+
+- 033 pied piping can be dropped
+- we often have the condition "if tagged_sentence[index-1][0] in ALLP" to catch sentence-initial structures. Should this not be " elif tagged_sentence[index-1][0] == "X"" ?? (same for sentence-final positions) -> if we decide to change this: update accuracy scores afterwards!
+  - someone needs to change this. Update the code in this file as well.
 - wordlength_044: what are we replacing here and why?
+  - regex is fishy, replace in the main code with strip-string-punctuation
 - whresub_031: do we have a hierarchy problem here? Condition that the noun needs to precede holds? Combine this and whreobj_032?
     - I think this is why this feature does so badly in the accuracy test.
 - whreobj_032: do we have a hierarchy problem here? Condition that the noun needs to precede holds?
     - I think this is why this feature does so badly in the accuracy test.
+- thatresub_029: are we missing the condition: item == "that" ?
+  - yes, we need to add a condition beforehand. Or restructure code for 029 and 031
+- add code for ttratio_043 to main script and in here.
+  - we decided to not do this feature because of short text lenght. Delete it from the dictionary!
 
 
 ## Verbs in the past tense: vpast_001
@@ -953,7 +959,7 @@ otheradvsublist = ["since", "while", "whilst", "whereupon", "whereas", "whereby"
 ## Word length: wordlength_044
 
 - Definition from Biber: "mean length of the words in a text, in orthographic letters" (1988: 239)
-- Our search strategy: Within the function analyze_sentence we count the length of all words in characters and divide it by the number of words in the sentence. *We deviate from Biber in that we replace ... with ... beforehand.*
+- Our search strategy: Within the function analyze_sentence we count the length of all words in characters and divide it by the number of words in the sentence. *We deviate from Biber in that we delete everything that is not ... beforehand.*
 ```{python}
     words = sent.split()
 
