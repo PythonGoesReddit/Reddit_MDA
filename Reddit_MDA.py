@@ -688,7 +688,7 @@ def analyze_preposition(index, tagged_sentence, features_dict):
     #21 that verb complements (e.g., / said that he went)  
     if tagged_sentence[index][0] == "that":
     # (a) and\nor\but\or\aho\ALL-P + that + DET/PRO/there/plural noun/proper noun/TITLE (these are i/za£-clauses in clause-initial positions)
-        if tagged_sentence[index-1][0] in ALLP or tagged_sentence[index-1][0] in ["and", "nor", "but", "or", "who"]:
+        if tagged_sentence[index-1][0] in ALLP or tagged_sentence[index-1][0] in ["and", "nor", "but", "or", "who"]: # this used to be "if tagged_sentence[index-1][0] in ALLP" in case it breaks
             if tagged_sentence[index+1][1] in ["DT", "PRP", "NNS", "NNP"] or tagged_sentence[index+1][0] in titlelist or tagged_sentence[index+1][0] == "there":
                 features_dict["thatvcom_021"] += 1
     # (b) PUB/PRV/SUA/SEEM/APPEAR + that + xxx (where xxx is NOT: V/AUX/CL-P/and)
